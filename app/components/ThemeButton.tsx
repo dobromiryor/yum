@@ -27,7 +27,7 @@ export const ThemeSwitch = () => {
 			>
 				<div
 					aria-hidden
-					className={clsx("absolute m-2 w-4 h-4 rounded-full bg-gray-200")}
+					className={clsx("absolute m-2 w-4 h-4 rounded-full bg-light")}
 				/>
 				<div
 					aria-hidden
