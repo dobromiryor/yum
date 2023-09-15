@@ -15,9 +15,5 @@ export default function IndexRoute() {
 	const { t } = useTranslation();
 	const { isAuthenticated, isAdmin } = useLoaderData<typeof loader>();
 
-	return (
-		<div className="flex flex-col h-[1024px]">
-			<div>{t("nav.home")}</div>
-		</div>
-	);
+	return <div>{t("nav.home")}</div>;
 }

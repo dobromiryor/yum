@@ -22,6 +22,7 @@ import { Header } from "./components/Header";
 import { PARSED_ENV } from "./consts/parsed-env.const";
 import i18next, { detectLanguage } from "./i18next.server";
 
+import { Layout } from "./components/Layout";
 import tailwind from "./styles/tailwind.css";
 import { auth } from "./utils/auth.server";
 import { ThemeHead, ThemeProvider, useTheme } from "./utils/theme-provider";
@@ -76,7 +77,9 @@ function App() {
 			</head>
 			<body>
 				<Header />
-				<Outlet />
+				<Layout>
+					<Outlet />
+				</Layout>
 				<ScrollRestoration />
 				<Scripts />
 				{process.env.NODE_ENV === "development" ? <LiveReload /> : null}

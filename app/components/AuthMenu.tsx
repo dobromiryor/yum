@@ -8,7 +8,7 @@ export const AuthMenu = () => {
 	const { t } = useTranslation();
 
 	return (
-		<Menu isButtonRounded button={<Avatar />}>
+		<Menu isButtonRounded button={<Avatar />} position="right">
 			<NavigationLink to="/settings">
 				{t("nav.authMenu.settings")}
 			</NavigationLink>
