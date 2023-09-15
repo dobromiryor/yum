@@ -16,9 +16,9 @@
         },
         "home": "Home",
         "language": {
-            "bg": "БГ",
+            "bg": "Български",
             "bgLabel": "Български език",
-            "en": "EN",
+            "en": "English",
             "enLabel": "English language",
             "label": "Language"
         },

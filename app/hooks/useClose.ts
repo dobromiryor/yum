@@ -23,7 +23,13 @@ export const useClose = (
 	ref: RefObject<HTMLElement>,
 	isOpen: boolean,
 	setIsOpen: Dispatch<SetStateAction<boolean>>,
-	{ click, key }: { click?: boolean; key?: boolean } = {
+	{
+		click,
+		key,
+	}: {
+		click?: boolean;
+		key?: boolean;
+	} = {
 		click: true,
 		key: true,
 	}

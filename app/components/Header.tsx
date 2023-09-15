@@ -1,4 +1,4 @@
-import { NavLink, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
@@ -6,7 +6,8 @@ import { type loader } from "~/root";
 import { useAuth } from "~/utils/auth";
 
 import { AuthMenu } from "./AuthMenu";
-import { LanguageSwitch } from "./LanguageSwitch";
+import { LanguageMenu } from "./LanguageMenu";
+import { NavigationLink } from "./NavigationLink";
 import { ThemeSwitch } from "./ThemeButton";
 
 export const Header = () => {
@@ -23,31 +24,33 @@ export const Header = () => {
 		>
 			<nav className={clsx("flex justify-between items-center", "px-5 h-16")}>
 				<div className="flex gap-2 items-center">
-					<NavLink to={"/"}>
+					<NavigationLink to={"/"}>
 						<span aria-hidden>{appName}</span>
 						<span className="sr-only">{appName}</span>
-					</NavLink>
-					<NavLink to={"/recipes"}>{t("nav.recipes")}</NavLink>
+					</NavigationLink>
+					<NavigationLink to={"/recipes"}>{t("nav.recipes")}</NavigationLink>
 					{isAuthenticated && (
-						<NavLink to={`/recipes/${user?.id}`}>{t("nav.myRecipes")}</NavLink>
+						<NavigationLink to={`/recipes/${user?.id}`}>
+							{t("nav.myRecipes")}
+						</NavigationLink>
 					)}
 				</div>
 
 				<div className="flex gap-2 items-center">
-					<LanguageSwitch />
 					<ThemeSwitch />
+					<LanguageMenu />
 
 					{user ? (
 						<AuthMenu />
 					) : (
-						<NavLink to={"/login"}>{t("nav.login")}</NavLink>
+						<NavigationLink to={"/login"}>{t("nav.login")}</NavigationLink>
 					)}
 				</div>
 			</nav>
 			{/* MOBILE */}
 			{/* <div>
 				<div>
-					<NavLink to={"/"}>{appName}</NavLink>
+					<NavigationLink to={"/"}>{appName}</NavigationLink>
 				</div>
 			</div> */}
 		</header>
