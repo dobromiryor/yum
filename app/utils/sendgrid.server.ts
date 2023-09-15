@@ -36,9 +36,9 @@ export const sendAuthEmail: SendEmailFunction<User> = async (options) => {
 
 	const dynamicTemplateData: z.infer<typeof DynamicTemplateSchema> = {
 		appName: PARSED_ENV.APP_NAME,
-		subject: user ? "Welcome!" : "Welcome back!",
+		subject: user?.isVerified ? "Welcome!" : "Welcome back!",
 		preheader: `Confirm that you want to sign in to ${PARSED_ENV.APP_NAME}`,
-		contentTitle: user ? "Welcome!" : "Welcome back!",
+		contentTitle: user?.isVerified ? "Welcome!" : "Welcome back!",
 		contentParagraph: `Please use the button below to confirm you want to sign in to ${PARSED_ENV.APP_NAME}.`,
 		contentCTA: `Go to ${PARSED_ENV.APP_NAME}`,
 		buttonURL: magicLink,
@@ -51,7 +51,7 @@ export const sendAuthEmail: SendEmailFunction<User> = async (options) => {
 			name: PARSED_ENV.SENDGRID_FROM_NAME,
 		},
 		dynamicTemplateData,
-		templateId: user
+		templateId: user?.isVerified
 			? PARSED_ENV.SENDGRID_MAGIC_LINK_LOGIN_TEMPLATE
 			: PARSED_ENV.SENDGRID_MAGIC_LINK_REGISTER_TEMPLATE,
 	});
@@ -69,7 +69,7 @@ export const sendChangeEmail = async (
 		contentTitle: "Change email address",
 		contentParagraph:
 			"Please use the button below to change your email address.",
-		contentCTA: `Go to ${PARSED_ENV.APP_NAME}`,
+		contentCTA: `Continue to ${PARSED_ENV.APP_NAME}`,
 		buttonURL: url,
 		unsubscribeURL: new URL("unsubscribe", PARSED_ENV.DOMAIN_URL).href,
 		unsubscribePreferencesURL: new URL(
