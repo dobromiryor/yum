@@ -20,7 +20,7 @@ export const AuthMenu = () => {
 	useClose(buttonRef, menuRef, isOpen, setIsOpen);
 
 	const itemClass =
-		"px-2 py-1 bg-light dark:bg-dark hover:bg-secondary dark:hover:bg-primary transition-colors rounded";
+		"px-2 py-1 text-sm bg-light dark:bg-dark hover:bg-secondary dark:hover:bg-primary transition-colors rounded";
 
 	return (
 		<div className="relative">
