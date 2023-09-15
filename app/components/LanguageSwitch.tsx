@@ -14,7 +14,7 @@ export const LanguageSwitch = () => {
 					key={`Language__Button__${lang}`}
 					aria-current={i18n.resolvedLanguage === lang}
 					aria-label={t(`nav.language.${lang}Label` as const)}
-					className={clsx(i18n.resolvedLanguage === lang && "font-bold")}
+					className={clsx(i18n.resolvedLanguage === lang && "font-medium")}
 					onClick={() => i18n.changeLanguage(lang)}
 				>
 					{t(`nav.language.${lang}` as const)}

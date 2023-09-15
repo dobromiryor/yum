@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -14,21 +14,14 @@
 
 @layer base {
 	html {
-		--text-color: #352f44;
-		--background-color: #faf0e6;
-
-		background-color: var(--background-color);
-		color: var(--text-color);
+		@apply bg-light text-dark;
 
 		transition:
 			color 500ms,
 			background-color 500ms;
-
-		font-family:;
 	}
 
 	html.dark {
-		--text-color: #ccc;
-		--background-color: #352f44;
+		@apply bg-dark text-light;
 	}
 }

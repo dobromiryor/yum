@@ -80,7 +80,7 @@ export const Avatar = () => {
 		>
 			<span
 				aria-hidden
-				className={clsx("font-medium", getAvatarColors(user).text)}
+				className={clsx("text-sm font-medium", getAvatarColors(user).text)}
 			>
 				{getInitials(user)}
 			</span>
