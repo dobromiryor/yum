@@ -30,7 +30,21 @@ module.exports = {
 		"template-curly-spacing": "error",
 		"rest-spread-spacing": ["error", "never"],
 		"no-debugger": "error",
-		"prettier/prettier": "error",
+		"prettier/prettier": [
+			"error",
+			{
+				arrowParens: "always",
+				bracketSameLine: false,
+				bracketSpacing: true,
+				endOfLine: "auto",
+				printWidth: 80,
+				semi: true,
+				singleQuote: false,
+				tabWidth: 2,
+				trailingComma: "es5",
+				useTabs: true,
+			},
+		],
 		"no-console": ["error", { allow: ["info", "warn", "error"] }],
 		"@typescript-eslint/no-unused-vars": ["warn", { ignoreRestSiblings: true }],
 		"@typescript-eslint/no-use-before-define": "off",
@@ -39,7 +53,12 @@ module.exports = {
 		"@typescript-eslint/ban-types": "off",
 		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/no-explicit-any": "error",
-		"import/no-duplicates": "error",
+		"import/no-duplicates": [
+			"error",
+			{
+				"prefer-inline": true,
+			},
+		],
 		"import/no-unresolved": "error",
 		"import/no-named-as-default-member": "off",
 		"import/first": "warn",
@@ -128,7 +147,13 @@ module.exports = {
 			},
 		],
 		"react/react-in-jsx-scope": "off",
-		"@typescript-eslint/consistent-type-imports": ["error"],
+		"@typescript-eslint/consistent-type-imports": [
+			"error",
+			{
+				prefer: "type-imports",
+				fixStyle: "inline-type-imports",
+			},
+		],
 	},
 	ignorePatterns: [
 		"node_modules/",

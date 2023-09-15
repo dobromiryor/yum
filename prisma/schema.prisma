@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  email       String       @unique
+  firstName   String?
+  lastName    String?
+  username    String?      @unique
+  photo       String?
+  isVerified  Boolean      @default(false)
+  role        Role         @default(USER)
+  ingredients Ingredient[]
+  steps       Step[]
+  comment     Comment[]
+}
+
+model Recipe {
+  id            String          @id @default(cuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  authorId      String
+  slug          String?         @unique
+  name          String
+  description   String
+  difficulty    Difficulty
+  prepTime      Int             @db.SmallInt
+  cookTime      Int             @db.SmallInt
+  bakeTime      Int             @db.SmallInt
+  servings      Int             @db.SmallInt
+  categories    String[]
+  tags          String[]
+  steps         Step[]
+  ingredients   Ingredient[]
+  commentThread CommentThread[]
+}
+
+model Ingredient {
+  id          String   @id @default(uuid())
+  updatedAt   DateTime @updatedAt
+  recipe      Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId    String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  name        String
+  note        String
+  quantity    Int      @db.SmallInt
+  unit        Unit     @default(METRIC)
+  isAvailable Boolean  @default(false)
+  isUsed      Boolean  @default(false)
+  step        Step?    @relation(fields: [stepId], references: [id])
+  stepId      String?
+}
+
+model Step {
+  id               String           @id @default(uuid())
+  updatedAt        DateTime         @updatedAt
+  recipe           Recipe           @relation(fields: [recipeId], references: [id])
+  recipeId         String
+  user             User             @relation(fields: [userId], references: [id])
+  userId           String
+  ingredients      Ingredient[]
+  content          String
+  temperature      Int              @db.SmallInt
+  temperatureScale TemperatureScale @default(C)
+}
+
+model CommentThread {
+  id        String    @id @default(uuid())
+  updatedAt DateTime  @updatedAt
+  content   String
+  recipe    Recipe    @relation(fields: [recipeId], references: [id])
+  recipeId  String
+  comments  Comment[]
+}
+
+model Comment {
+  id              String        @id @default(uuid())
+  creaetedAt      DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id])
+  userId          String
+  commentThread   CommentThread @relation(fields: [commentThreadId], references: [id])
+  commentThreadId String
+  content         String
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Unit {
+  METRIC
+  IMPERIAL
+}
+
+enum TemperatureScale {
+  C
+  F
+}

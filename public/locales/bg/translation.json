@@ -1,3 +1,34 @@
 {
-	"greetings": "Здравей"
+    "common": {
+        "labels": {
+            "avatar": "Аватар",
+            "email": "Имейл",
+            "firstName": "Име",
+            "lastName": "Фамилия",
+            "submit": "Изпращане",
+            "username": "Потребителско име"
+        }
+    },
+    "nav": {
+        "authMenu": {
+            "logout": "Изход",
+            "settings": "Настройки"
+        },
+        "home": "Начало",
+        "language": {
+            "bg": "БГ",
+            "bgLabel": "Български език",
+            "en": "EN",
+            "enLabel": "English language",
+            "label": "Език"
+        },
+        "login": "Вход",
+        "myRecipes": "Моите рецепти",
+        "recipes": "Рецепти",
+        "theme": {
+            "dark": "Тъмна тема",
+            "label": "Тема",
+            "light": "Светла тема"
+        }
+    }
 }
