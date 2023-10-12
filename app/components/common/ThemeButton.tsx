@@ -21,7 +21,7 @@ export const ThemeSwitch = () => {
 				aria-details={t(isLight ? "nav.theme.light" : "nav.theme.dark")}
 				aria-label={t("nav.theme.label")}
 				className={clsx(
-					"relative flex justify-center item-center brightness-105 w-8 h-8 rounded-full shadow-md"
+					"relative flex justify-center item-center bg-light dark:bg-dark w-8 h-8 rounded-full shadow-md transition-colors duration-500"
 				)}
 				onClick={toggleTheme}
 			>
@@ -35,7 +35,7 @@ export const ThemeSwitch = () => {
 						"absolute m-2 w-4 h-4 rounded-full transition-all duration-500",
 						isLight
 							? "bg-amber-300 translate-x-0 translate-y-0"
-							: "bg-dark brightness-105 -translate-x-1 -translate-y-1"
+							: "bg-dark -translate-x-1 -translate-y-1"
 					)}
 				/>
 			</button>

@@ -70,7 +70,7 @@ export const Menu = ({
 							),
 							tabIndex: isOpen ? 0 : -1,
 							onClick: () => {
-								child.props.onClick();
+								child.props.onClick && child.props.onClick();
 								setIsOpen(false);
 							},
 						});

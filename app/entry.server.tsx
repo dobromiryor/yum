@@ -1,14 +1,17 @@
-import { Response, type EntryContext } from "@remix-run/node";
+import {
+	createReadableStreamFromReadable,
+	type EntryContext,
+} from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { createInstance } from "i18next";
 import Backend from "i18next-fs-backend";
 import isbot from "isbot";
-
+import { StrictMode } from "react";
 import { renderToPipeableStream } from "react-dom/server";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 
-import i18n from "./i18n";
-import i18next, { detectLanguage } from "./i18next.server";
+import i18n from "~/i18n";
+import i18next, { detectLanguage } from "~/i18next.server";
 
 import { resolve } from "node:path";
 import { PassThrough } from "stream";
@@ -49,17 +52,20 @@ export default async function handleRequest(
 		let didError = false;
 
 		const { pipe, abort } = renderToPipeableStream(
-			<I18nextProvider i18n={instance}>
-				<RemixServer context={remixContext} url={request.url} />
-			</I18nextProvider>,
+			<StrictMode>
+				<I18nextProvider i18n={instance}>
+					<RemixServer context={remixContext} url={request.url} />
+				</I18nextProvider>
+			</StrictMode>,
 			{
 				[callbackName]: () => {
 					const body = new PassThrough();
+					const stream = createReadableStreamFromReadable(body);
 
 					responseHeaders.set("Content-Type", "text/html");
 
 					resolve(
-						new Response(body, {
+						new Response(stream, {
 							headers: responseHeaders,
 							status: didError ? 500 : responseStatusCode,
 						})

@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 
-import { Avatar } from "./Avatar";
-import { Menu } from "./Menu";
-import { NavigationLink } from "./NavigationLink";
+import { Avatar } from "~/components/common/Avatar";
+import { Menu } from "~/components/common/Menu/Menu";
+import { NavigationLink } from "~/components/common/NavigationLink";
 
 export const AuthMenu = () => {
 	const { t } = useTranslation();

@@ -2,9 +2,8 @@ import { createCookie } from "@remix-run/node";
 import Backend from "i18next-fs-backend";
 import { RemixI18Next } from "remix-i18next";
 
+import { type Language } from "~/enums/language.enum";
 import i18n from "~/i18n";
-
-import { type Language } from "./enums/language.enum";
 
 import { resolve } from "node:path";
 

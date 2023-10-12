@@ -1,14 +1,14 @@
 import { type User } from "@prisma/client";
-import { json, type LoaderArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
 import { AvatarColor, AvatarShade } from "~/enums/avatar.enum";
-import { useAuth } from "~/utils/auth";
+import { useAuth } from "~/hooks/useAuth";
 import { auth } from "~/utils/auth.server";
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request);
 
 	return json({ authData });
@@ -72,7 +72,7 @@ export const Avatar = () => {
 	return (
 		// TODO: Tooltip?
 		<div
-			aria-label={t("common.labels.avatar")}
+			aria-label={t("user.fields.avatar")}
 			className={clsx(
 				"flex justify-center items-center w-8 h-8 rounded-full shadow-md select-none",
 				getAvatarColors(user).background
@@ -80,7 +80,7 @@ export const Avatar = () => {
 		>
 			<span
 				aria-hidden
-				className={clsx("text-sm font-medium", getAvatarColors(user).text)}
+				className={clsx("text-sm font-bold", getAvatarColors(user).text)}
 			>
 				{getInitials(user)}
 			</span>

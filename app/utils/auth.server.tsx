@@ -3,10 +3,9 @@ import { Authenticator } from "remix-auth";
 import { EmailLinkStrategy } from "remix-auth-email-link";
 
 import { PARSED_ENV } from "~/consts/parsed-env.const";
-
-import { prisma } from "./prisma.server";
-import { sendAuthEmail } from "./sendgrid.server";
-import { sessionStorage } from "./session.server";
+import { prisma } from "~/utils/prisma.server";
+import { sendAuthEmail } from "~/utils/sendgrid.server";
+import { sessionStorage } from "~/utils/session.server";
 
 export const auth = new Authenticator<User>(sessionStorage);
 

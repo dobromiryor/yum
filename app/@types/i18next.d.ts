@@ -1,4 +1,4 @@
-import resources from "./resources";
+import resources from "~/@types/resources";
 
 declare module "i18next" {
 	interface CustomTypeOptions {

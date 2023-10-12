@@ -1,48 +1,36 @@
 import {
-	json,
-	type LinksFunction,
-	type LoaderArgs,
-	type V2_MetaFunction,
+    json,
+    type LinksFunction,
+    type LoaderFunctionArgs,
+    type MetaFunction,
 } from "@remix-run/node";
 import {
-	Links,
-	LiveReload,
-	Meta,
-	Outlet,
-	Scripts,
-	ScrollRestoration,
-	useLoaderData,
+    Links,
+    LiveReload,
+    Meta,
+    Outlet,
+    Scripts,
+    ScrollRestoration,
+    useLoaderData,
 } from "@remix-run/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-
 import { useChangeLanguage } from "remix-i18next";
 
-import { Header } from "./components/Header";
-import { PARSED_ENV } from "./consts/parsed-env.const";
-import i18next, { detectLanguage } from "./i18next.server";
-
-import { Layout } from "./components/Layout";
-import tailwind from "./styles/tailwind.css";
-import { auth } from "./utils/auth.server";
-import { ThemeHead, ThemeProvider, useTheme } from "./utils/theme-provider";
-import { getThemeSession } from "./utils/theme.server";
+import { Header } from "~/components/common/Header";
+import { Layout } from "~/components/common/Layout";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18next, { detectLanguage } from "~/i18next.server";
+import tailwind from "~/styles/tailwind.css";
+import { auth } from "~/utils/auth.server";
+import { ThemeHead, ThemeProvider, useTheme } from "~/utils/theme-provider";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const links: LinksFunction = () => {
 	return [{ rel: "stylesheet", href: tailwind }];
 };
 
-export const meta: V2_MetaFunction = ({ data }) => {
-	const { appName } = data;
-
-	return [
-		{ title: appName },
-		{ charset: "utf-8" },
-		{ viewport: "width=device-width,initial-scale=1" },
-	];
-};
-
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const locale = detectLanguage(request) ?? (await i18next.getLocale(request));
 	const themeSession = await getThemeSession(request);
 
@@ -56,15 +44,23 @@ export async function loader({ request }: LoaderArgs) {
 	});
 }
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return [
+		{ title: data?.appName },
+		{ charset: "utf-8" },
+		{ name: "viewport", content: "width=device-width, initial-scale=1" },
+	];
+};
+
 export const handle = {
 	i18n: "translation",
 };
 
 function App() {
 	const { locale, theme: loaderTheme } = useLoaderData<typeof loader>();
+	const [theme] = useTheme();
 
 	const { i18n } = useTranslation();
-	const [theme] = useTheme();
 
 	useChangeLanguage(locale);
 

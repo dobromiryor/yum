@@ -1,13 +1,25 @@
 {
     "common": {
-        "labels": {
-            "avatar": "Avatar",
-            "email": "Email",
-            "firstName": "First name",
-            "lastName": "Last name",
-            "submit": "Submit",
-            "username": "Username"
-        }
+        "add": "Add",
+        "back": "Back",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "create": "Create",
+        "delete": "Delete",
+        "edit": "Edit",
+        "noOptionsAvailable": "No options available",
+        "reorder": "Reorder",
+        "save": "Save",
+        "submit": "Submit"
+    },
+    "error": {
+        "dataMissing": "Translation data missing. Please try again.",
+        "regex": "Doesn't match regex",
+        "somethingWentWrong": "Something went wrong. Please try again later.",
+        "translationMissing": "Translation missing."
+    },
+    "login": {
+        "success": "Successfully sent to {{email}}"
     },
     "nav": {
         "authMenu": {
@@ -16,19 +28,137 @@
         },
         "home": "Home",
         "language": {
-            "bg": "Български",
-            "bgLabel": "Български език",
+            "bg": "Bulgarian",
+            "bgLabel": "Bulgarian language",
             "en": "English",
             "enLabel": "English language",
             "label": "Language"
         },
         "login": "Log in",
         "myRecipes": "My recipes",
+        "newRecipe": "Add new recipe",
         "recipes": "Recipes",
         "theme": {
             "dark": "Dark theme",
             "label": "Theme",
             "light": "Light theme"
+        }
+    },
+    "recipe": {
+        "card": {
+            "emptyIngredients": "No ingredients added yet",
+            "emptySteps": "No steps added yet",
+            "emptySubRecipes": "No sub recipes added yet"
+        },
+        "difficulty": {
+            "EASY": "Easy",
+            "HARD": "Hard",
+            "MEDIUM": "Medium"
+        },
+        "errors": {
+            "emptyQuantity": "This field is required if a unit is selected",
+            "invalidQuantity": "Invalid input. Only accepts decimal numeral or fractions (e.g. 0.5, 1, 1/2).",
+            "temperature": "If the temperature field is filled you also need to choose a temperature scale.",
+            "temperatureScale": "If a temperature scale is chosen you also need to fill the temperature field.",
+            "unit": "You can't use this unit if the quantity field is filled."
+        },
+        "field": {
+            "bakeTime": "Bake time",
+            "categories": "Categories",
+            "cookTime": "Cook time",
+            "description": "Description",
+            "difficulty": "Difficulty",
+            "enableLang": "Enable {{lang}} translation",
+            "hideTranslation": "Hide translation",
+            "hours_one": "{{count}} hour",
+            "hours_other": "{{count}} hours",
+            "ingredients": "Ingredients",
+            "minutes_one": "{{count}} minute",
+            "minutes_other": "{{count}} minutes",
+            "name": "Name",
+            "note": "Note",
+            "prepTime": "Prep time",
+            "published": "Published",
+            "quantity": "Quantity",
+            "servings": "Servings",
+            "subRecipe": "Sub recipe",
+            "tags": "Tags",
+            "temperature": "Temperature",
+            "temperatureScale": "Temperature scale",
+            "unit": "Unit",
+            "viewTranslation": "View translation",
+            "withMinutes": "{{field}} (minutes)"
+        },
+        "heading": {
+            "edit": "Edit recipe ({{lang}})",
+            "new": "Create recipe ({{lang}})"
+        },
+        "modal": {
+            "create": {
+                "ingredient": {
+                    "title": "Create ingredient"
+                },
+                "step": {
+                    "title": "Create step"
+                },
+                "subRecipe": {
+                    "title": "Create sub recipe"
+                }
+            },
+            "delete": {
+                "ingredient": {
+                    "content": "This ingredient will be permanently deleted.",
+                    "contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.ingredient.content)",
+                    "title": "Delete ingredient"
+                },
+                "recipe": {
+                    "content": "This recipe will be permanently deleted.",
+                    "contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.recipe.content)",
+                    "title": "Delete recipe"
+                },
+                "step": {
+                    "content": "This step will be permanently deleted.",
+                    "contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.step.content)",
+                    "title": "Delete step"
+                },
+                "subRecipe": {
+                    "content": "This sub recipe will be permanently deleted.",
+                    "contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.subRecipe.content)",
+                    "title": "Delete sub recipe"
+                }
+            },
+            "update": {
+                "details": {
+                    "title": "Update details"
+                },
+                "ingredient": {
+                    "title": "Update ingredient"
+                },
+                "step": {
+                    "title": "Update step"
+                },
+                "subRecipe": {
+                    "title": "Update sub recipe"
+                }
+            }
+        },
+        "note": {
+            "translationMessage": "You can translate the recipe after it's created."
+        },
+        "section": {
+            "details": "Details",
+            "ingredients": "Ingredients",
+            "steps": "Steps",
+            "subRecipes": "Sub recipes"
+        }
+    },
+    "user": {
+        "fields": {
+            "avatar": "Avatar",
+            "email": "Email",
+            "firstName": "First name",
+            "lastName": "Last name",
+            "username": "Username"
         }
     }
 }

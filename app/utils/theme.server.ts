@@ -1,8 +1,7 @@
 import { createCookieSessionStorage } from "@remix-run/node";
 
 import { PARSED_ENV } from "~/consts/parsed-env.const";
-
-import { isTheme, type Theme } from "./theme-provider";
+import { isTheme, type Theme } from "~/utils/theme-provider";
 
 const themeStorage = createCookieSessionStorage({
 	cookie: {

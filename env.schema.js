@@ -9,6 +9,7 @@ export const ENVIRONMENT_VARIABLES_SCHEMA = z.object({
 	THEME_SECRET: z.string().min(1),
 	SESSION_SECRET: z.string().min(1),
 	MAGIC_LINK_SECRET: z.string().min(1),
+	SESSION_DATA_SECRET: z.string().min(1),
 
 	/* SENDGRID */
 	SENDGRID_API_KEY: z.string().min(1),

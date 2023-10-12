@@ -1,28 +1,46 @@
-import { json, type ActionArgs, type LoaderArgs } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+	json,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+} from "@remix-run/node";
+import {
+	Form,
+	useLoaderData,
+	useNavigation,
+	useSubmit,
+} from "@remix-run/react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { RemixFormProvider, useRemixForm } from "remix-hook-form";
+import { type z } from "zod";
 
-import { Button } from "~/components/Button";
-
-import { Input } from "~/components/Input";
-
+import { Button } from "~/components/common/UI/Button";
+import { Input } from "~/components/common/UI/Input";
+import { LoginSchema } from "~/schemas/login.schema";
 import { auth } from "~/utils/auth.server";
 import { sessionStorage } from "~/utils/session.server";
 
-export const loader = async ({ request }: LoaderArgs) => {
-	await auth.isAuthenticated(request, { successRedirect: "/settings" });
+type FormData = z.infer<typeof LoginSchema>;
+const resolver = zodResolver(LoginSchema);
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+	await auth.isAuthenticated(request, {
+		successRedirect: "/settings",
+	});
 
 	const session = await sessionStorage.getSession(
 		request.headers.get("Cookie")
 	);
 
 	return json({
+		authError: session.get("auth:error"),
 		magicLinkSent: session.has("auth:magiclink"),
 		magicLinkEmail: session.get("auth:email"),
 	});
 };
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
 	await auth.authenticate("email-link", request, {
 		successRedirect: "/login",
 		failureRedirect: "/login",
@@ -30,24 +48,59 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export default function LoginRoute() {
-	const { magicLinkSent, magicLinkEmail } = useLoaderData<typeof loader>();
+	const { authError, magicLinkSent, magicLinkEmail } =
+		useLoaderData<typeof loader>();
+
 	const { t } = useTranslation();
+	const navigation = useNavigation();
+	const submit = useSubmit();
+
+	const { state, formData } = navigation;
+	const isSubmitting = state === "submitting";
+
+	const form = useRemixForm<FormData>({
+		resolver,
+		submitHandlers: {
+			onValid: (data) => submit(data, { method: "post" }),
+		},
+	});
+
+	const {
+		handleSubmit,
+		formState: { isDirty },
+	} = form;
 
 	return (
 		<div>
-			{magicLinkSent ? (
-				<p>{`Successfully sent to ${magicLinkEmail}`}</p>
+			{magicLinkSent || isSubmitting ? (
+				<p className={clsx(isSubmitting && "animate-pulse")}>
+					{t("login.success", {
+						email: isSubmitting ? formData?.get("email") : magicLinkEmail,
+					})}
+				</p>
 			) : (
-				<Form action="/login" method="post">
-					<Input
-						required
-						label={t("common.labels.email")}
-						name="email"
-						type="email"
-					/>
+				<RemixFormProvider {...form}>
+					<Form
+						preventScrollReset
+						className="flex flex-col gap-2"
+						method="post"
+						onSubmit={handleSubmit}
+					>
+						<Input
+							isRequired
+							autoComplete="email"
+							label={t("user.fields.email")}
+							name="email"
+							type="email"
+						/>
 
-					<Button>{t("common.labels.submit")}</Button>
-				</Form>
+						{authError && <p>{authError.message}</p>}
+
+						<Button isDisabled={isSubmitting || !isDirty} type="submit">
+							{t("common.submit")}
+						</Button>
+					</Form>
+				</RemixFormProvider>
 			)}
 		</div>
 	);

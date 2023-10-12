@@ -76,13 +76,12 @@ module.exports = {
 						position: "after",
 					},
 					{
-						pattern: "@",
+						pattern: "~",
 						group: "internal",
 						position: "before",
 					},
 				],
-				"newlines-between": "always-and-inside-groups",
-				pathGroupsExcludedImportTypes: ["external"],
+				"newlines-between": "always",
 				groups: [
 					"external",
 					"unknown",

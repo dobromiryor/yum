@@ -1,4 +1,4 @@
-import translation from "../../public/locales/en/translation.json";
+import translation from "~/../public/locales/en/translation.json";
 
 const resources = {
 	translation,

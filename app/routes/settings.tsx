@@ -1,12 +1,11 @@
-import { json, type LoaderArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
-import { useAuth } from "~/utils/auth";
-
+import { useAuth } from "~/hooks/useAuth";
 import { auth } from "~/utils/auth.server";
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request, {
 		failureRedirect: "/login",
 	});

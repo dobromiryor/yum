@@ -10,7 +10,7 @@ import {
  * Hook that can be used to detect when the user clicks outside of a component or presses the Escape key.
  *
  * @param buttonRef Reference to the DOM element that opens the menu.
- * @param menuRef Reference to the DOM element that should be used to detect user interaction.
+ * @param ref Reference to the DOM element that should be used to detect user interaction.
  * @param isOpen State value.
  * @param setIsOpen Update state function.
  * @param options Options object used to enable/disable event types. Both enabled by default.

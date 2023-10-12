@@ -1,13 +1,25 @@
 {
     "common": {
-        "labels": {
-            "avatar": "Аватар",
-            "email": "Имейл",
-            "firstName": "Име",
-            "lastName": "Фамилия",
-            "submit": "Изпращане",
-            "username": "Потребителско име"
-        }
+        "add": "Добави",
+        "back": "Назад",
+        "cancel": "Отказ",
+        "confirm": "Потвърди",
+        "create": "Създай",
+        "delete": "Премахни",
+        "edit": "Промени",
+        "noOptionsAvailable": "Няма налични опции",
+        "reorder": "Пренареди",
+        "save": "Съхрани",
+        "submit": "Изпрати"
+    },
+    "error": {
+        "dataMissing": "Данните за превод липсват. Моля опитайте отново.",
+        "regex": "Не съответства на регулярния израз",
+        "somethingWentWrong": "Нещо се обърка. Моля опитайте по-късно.",
+        "translationMissing": "Липсва превод."
+    },
+    "login": {
+        "success": "Успешно изпратен на {{email}}"
     },
     "nav": {
         "authMenu": {
@@ -16,19 +28,137 @@
         },
         "home": "Начало",
         "language": {
-            "bg": "Български",
+            "bg": "български",
             "bgLabel": "Български език",
-            "en": "English",
-            "enLabel": "English language",
+            "en": "английски",
+            "enLabel": "Английски език",
             "label": "Език"
         },
         "login": "Вход",
         "myRecipes": "Моите рецепти",
+        "newRecipe": "Добави нова рецепта",
         "recipes": "Рецепти",
         "theme": {
             "dark": "Тъмна тема",
             "label": "Тема",
             "light": "Светла тема"
+        }
+    },
+    "recipe": {
+        "card": {
+            "emptyIngredients": "Все още няма добавени съставки",
+            "emptySteps": "Все още няма добавени стъпки",
+            "emptySubRecipes": "Все още няма добавени подрецепти"
+        },
+        "difficulty": {
+            "EASY": "Лесна",
+            "HARD": "Трудна",
+            "MEDIUM": "Средна"
+        },
+        "errors": {
+            "emptyQuantity": "Това поле е задължително, ако е избрана мерна единица",
+            "invalidQuantity": "Невалидна стойност. Приема само десетични числа или дроби (напр. 0,5, 1, 1/2).",
+            "temperature": "Ако сте попълнили полето за температура, трябва да изберете и температурна скала.",
+            "temperatureScale": "Ако сте избрали температурна скала, трябва да попълните и полето за температура.",
+            "unit": "Не можете да ползвате тази мерна единица, ако полето за количество е попълнено."
+        },
+        "field": {
+            "bakeTime": "Време за печене",
+            "categories": "Категории",
+            "cookTime": "Време за готвене",
+            "description": "Описание",
+            "difficulty": "Трудност",
+            "enableLang": "Активирай {{lang}} превод",
+            "hideTranslation": "Скрий превод",
+            "hours_one": "{{count}} час",
+            "hours_other": "{{count}} часа",
+            "ingredients": "Съставки",
+            "minutes_one": "{{count}} минута",
+            "minutes_other": "{{count}} минути",
+            "name": "Име",
+            "note": "Бележка",
+            "prepTime": "Време за подготовка",
+            "published": "Публикувано",
+            "quantity": "Количество",
+            "servings": "Порции",
+            "subRecipe": "Подрецепта",
+            "tags": "Етикети",
+            "temperature": "Температура",
+            "temperatureScale": "Температурна скала",
+            "unit": "Мерна единица",
+            "viewTranslation": "Виж превод",
+            "withMinutes": "{{field}} (минути)"
+        },
+        "heading": {
+            "edit": "Редактиране на рецепта ({{lang}})",
+            "new": "Създаване на рецепта ({{lang}})"
+        },
+        "modal": {
+            "create": {
+                "ingredient": {
+                    "title": "Добави нова съставка"
+                },
+                "step": {
+                    "title": "Добави нова стъпка"
+                },
+                "subRecipe": {
+                    "title": "Добави нова подрецепта"
+                }
+            },
+            "delete": {
+                "ingredient": {
+                    "content": "Тази съставка ще бъде перманентно премахната.",
+                    "contentWithName": "Сигурни ли сте, че искате да изтриете \"{{name}}\"? $t(recipe.modal.delete.ingredient.content)",
+                    "title": "Премахни съставка"
+                },
+                "recipe": {
+                    "content": "Тази рецепта ще бъде перманентно премахната",
+                    "contentWithName": "Сигурни ли сте, че искате да изтриете \"{{name}}\"? $t(recipe.modal.delete.recipe.content)",
+                    "title": "Премахни рецепта"
+                },
+                "step": {
+                    "content": "Тази стъпка ще бъде перманентно премахната.",
+                    "contentWithName": "Сигурни ли сте, че искате да изтриете \"{{name}}\"? $t(recipe.modal.delete.step.content)",
+                    "title": "Премахни стъпка"
+                },
+                "subRecipe": {
+                    "content": "Тази подрецепта ще бъде перманентно премахната.",
+                    "contentWithName": "Сигурни ли сте, че искате да изтриете \"{{name}}\"? $t(recipe.modal.delete.subRecipe.content)",
+                    "title": "Премахни подрецепта"
+                }
+            },
+            "update": {
+                "details": {
+                    "title": "Редактирай детайли"
+                },
+                "ingredient": {
+                    "title": "Редактирай съставка"
+                },
+                "step": {
+                    "title": "Редактирай стъпка"
+                },
+                "subRecipe": {
+                    "title": "Редактирай подрецепта"
+                }
+            }
+        },
+        "note": {
+            "translationMessage": "Можете да преведете рецептата, след като бъде създадена."
+        },
+        "section": {
+            "details": "Детайли",
+            "ingredients": "Съставки",
+            "steps": "Стъпки",
+            "subRecipes": "Подрецепта"
+        }
+    },
+    "user": {
+        "fields": {
+            "avatar": "Аватар",
+            "email": "Имейл",
+            "firstName": "Име",
+            "lastName": "Фамилия",
+            "username": "Потребителско име"
         }
     }
 }

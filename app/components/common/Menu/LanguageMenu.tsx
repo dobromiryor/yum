@@ -1,9 +1,8 @@
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
+import { Menu } from "~/components/common/Menu/Menu";
 import i18next from "~/i18n";
-
-import { Menu } from "./Menu";
 
 export const LanguageMenu = () => {
 	const { t, i18n } = useTranslation();
@@ -12,7 +11,7 @@ export const LanguageMenu = () => {
 	const renderButton = () => (
 		<div
 			className={clsx(
-				"flex justify-center items-center w-8 h-8 rounded-full shadow-md select-none"
+				"flex justify-center items-center w-8 h-8 bg-light dark:bg-dark rounded-full shadow-md select-none transition-colors duration-500"
 			)}
 		>
 			<svg
@@ -32,14 +31,14 @@ export const LanguageMenu = () => {
 				<button
 					key={`Language__Button__${lang}`}
 					aria-current={i18n.resolvedLanguage === lang}
-					aria-label={t(`nav.language.${lang}Label` as const)}
+					aria-label={t(`nav.language.${lang}Label`)}
 					className={clsx(
 						i18n.resolvedLanguage === lang &&
 							"bg-secondary/50 dark:bg-primary/50"
 					)}
 					onClick={() => i18n.changeLanguage(lang)}
 				>
-					{t(`nav.language.${lang}` as const)}
+					{t(`nav.language.${lang}`)}
 				</button>
 			))}
 		</Menu>
