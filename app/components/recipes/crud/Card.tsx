@@ -24,7 +24,7 @@ export const Card = ({
 	return (
 		<BasicCard>
 			<div className="flex justify-between items-center">
-				<p className="text-lg font-semibold truncate">
+				<p className="text-lg typography-semibold truncate">
 					{typeof index === "number" && <span>{`${index + 1}. `}</span>}
 					<span>{title}</span>
 				</p>

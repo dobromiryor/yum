@@ -25,7 +25,7 @@ export const Figure = ({
 	return (
 		<figure {...props}>
 			<figcaption
-				className={clsx("font-medium", isInline && "inline", className)}
+				className={clsx("typography-medium", isInline && "inline", className)}
 				{...rest}
 			>
 				{`${label}: `}

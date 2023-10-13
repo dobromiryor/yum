@@ -21,3 +21,7 @@ export const EditRecipeIngredientParamsSchema = EditRecipeParamsSchema.extend({
 export const EditRecipeStepParamsSchema = EditRecipeParamsSchema.extend({
 	stepId: NonEmptyStringSchema,
 });
+
+export const UserRecipesParamsSchema = z.object({
+	userId: NonEmptyStringSchema,
+});

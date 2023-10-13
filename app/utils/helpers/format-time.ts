@@ -19,7 +19,8 @@ export const formatTime = (
 		return t("recipe.field.hours", { count: h });
 	}
 
-	return `${t("recipe.field.hours", { count: h })} ${t("recipe.field.minutes", {
-		count: m,
-	})}`;
+	return `${t("recipe.field.hours", { count: h })} ${t("common.and")} ${t(
+		"recipe.field.minutes",
+		{ count: m }
+	)}`;
 };

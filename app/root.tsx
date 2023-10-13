@@ -1,17 +1,17 @@
 import {
-    json,
-    type LinksFunction,
-    type LoaderFunctionArgs,
-    type MetaFunction,
+	json,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
-    Links,
-    LiveReload,
-    Meta,
-    Outlet,
-    Scripts,
-    ScrollRestoration,
-    useLoaderData,
+	Links,
+	LiveReload,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+	useLoaderData,
 } from "@remix-run/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -27,7 +27,16 @@ import { ThemeHead, ThemeProvider, useTheme } from "~/utils/theme-provider";
 import { getThemeSession } from "~/utils/theme.server";
 
 export const links: LinksFunction = () => {
-	return [{ rel: "stylesheet", href: tailwind }];
+	return [
+		{
+			rel: "stylesheet",
+			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,300,0,-25",
+		},
+		{
+			rel: "stylesheet",
+			href: tailwind,
+		},
+	];
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {

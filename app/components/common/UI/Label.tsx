@@ -12,9 +12,11 @@ export const Label = (props: LabelProps) => {
 	}
 
 	return (
-		<label className="font-semibold" htmlFor={name}>
+		<label className="typography-medium" htmlFor={name}>
 			{label}
-			{isRequired && <span className="font-normal text-red-500">{" *"}</span>}
+			{isRequired && (
+				<span className="typography-normal text-red-500">{" *"}</span>
+			)}
 		</label>
 	);
 };

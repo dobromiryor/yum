@@ -29,7 +29,7 @@ export const Section = ({
 			{...rest}
 		>
 			<div className="flex justify-between items-center">
-				<p className="flex items-center gap-2 text-xl font-bold">
+				<p className="flex items-center gap-2 text-2xl typography-bold">
 					<ErrorCount errorCount={errorCount} />
 					{title}
 				</p>

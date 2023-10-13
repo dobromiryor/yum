@@ -29,7 +29,7 @@ export const Header = () => {
 							{t("nav.recipes")}
 						</NavigationLink>
 						{isAuthenticated && (
-							<NavigationLink to={`/recipes/${user?.id}`}>
+							<NavigationLink to={`/users/${user?.id}`}>
 								{t("nav.myRecipes")}
 							</NavigationLink>
 						)}

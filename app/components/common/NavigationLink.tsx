@@ -17,7 +17,7 @@ export const NavigationLink = ({
 		<NavLink {...rest}>
 			{({ isActive, isPending }) => (
 				<Button
-					className={clsx("font-medium", isPending && "animate-pulse")}
+					className={clsx("typography-medium", isPending && "animate-pulse")}
 					tabIndex={-1}
 					variant={isActive ? "primary" : "text"}
 				>

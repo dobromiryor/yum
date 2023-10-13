@@ -1,3 +1,5 @@
+import plugin from "tailwindcss/plugin";
+
 import tailwindColors from "./node_modules/tailwindcss/colors";
 
 import type { Config } from "tailwindcss";
@@ -37,7 +39,7 @@ export default {
 	safelist: colorSafeList,
 	theme: {
 		fontFamily: {
-			sans: ["Roboto Flex", "sans-serif"],
+			sans: ["Rubik", "sans-serif"],
 		},
 		extend: {
 			colors: {
@@ -103,6 +105,32 @@ export default {
 			flexBasis: ({ theme }) => ({ ...theme("screens") }),
 		},
 	},
-	plugins: [],
+	plugins: [
+		plugin(({ addComponents }) => {
+			addComponents({
+				".typography-light": {
+					"@apply font-light": "",
+				},
+				".typography-normal": {
+					"@apply font-normal": "",
+				},
+				".typography-medium": {
+					"@apply font-medium": "",
+				},
+				".typography-semibold": {
+					"@apply font-semibold": "",
+				},
+				".typography-bold": {
+					"@apply font-bold tracking-wide": "",
+				},
+				".typography-extrabold": {
+					"@apply font-extrabold tracking-wider": "",
+				},
+				".typography-black": {
+					"@apply font-black tracking-widest": "",
+				},
+			});
+		}),
+	],
 	darkMode: "class",
 } satisfies Config;

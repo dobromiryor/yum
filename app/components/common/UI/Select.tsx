@@ -168,7 +168,7 @@ export const Select = ({
 									highlightedIndex === index
 										? "bg-secondary dark:bg-primary"
 										: "bg-light dark:bg-dark",
-									selectedItem === item && "font-medium",
+									selectedItem === item && "typography-medium",
 									"py-2 px-3 flex flex-col"
 								)}
 								{...getItemProps({ item, index })}

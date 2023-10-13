@@ -1,6 +1,7 @@
 {
     "common": {
         "add": "Добави",
+        "and": "и",
         "back": "Назад",
         "cancel": "Отказ",
         "confirm": "Потвърди",
@@ -47,6 +48,7 @@
     "recipe": {
         "card": {
             "emptyIngredients": "Все още няма добавени съставки",
+            "emptyRecipes": "Все още няма добавени рецепти",
             "emptySteps": "Все още няма добавени стъпки",
             "emptySubRecipes": "Все още няма добавени подрецепти"
         },
@@ -66,6 +68,8 @@
             "bakeTime": "Време за печене",
             "categories": "Категории",
             "cookTime": "Време за готвене",
+            "countServings_one": "{{count}} порция",
+            "countServings_other": "{{count}} порции",
             "description": "Описание",
             "difficulty": "Трудност",
             "enableLang": "Активирай {{lang}} превод",
@@ -86,10 +90,12 @@
             "temperature": "Температура",
             "temperatureScale": "Температурна скала",
             "unit": "Мерна единица",
+            "unpublished": "Непубликувано",
             "viewTranslation": "Виж превод",
             "withMinutes": "{{field}} (минути)"
         },
         "heading": {
+            "allRecipes": "Всички рецепти",
             "edit": "Редактиране на рецепта ({{lang}})",
             "new": "Създаване на рецепта ({{lang}})"
         },
@@ -153,6 +159,11 @@
         }
     },
     "user": {
+        "'profile": {
+            "heading": {
+                "userRecipes": "Рецептите на {{user}}"
+            }
+        },
         "fields": {
             "avatar": "Аватар",
             "email": "Имейл",

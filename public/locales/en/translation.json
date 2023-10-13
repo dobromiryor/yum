@@ -1,6 +1,7 @@
 {
     "common": {
         "add": "Add",
+        "and": "and",
         "back": "Back",
         "cancel": "Cancel",
         "confirm": "Confirm",
@@ -47,6 +48,7 @@
     "recipe": {
         "card": {
             "emptyIngredients": "No ingredients added yet",
+            "emptyRecipes": "No recipes added yet",
             "emptySteps": "No steps added yet",
             "emptySubRecipes": "No sub recipes added yet"
         },
@@ -66,6 +68,8 @@
             "bakeTime": "Bake time",
             "categories": "Categories",
             "cookTime": "Cook time",
+            "countServings_one": "{{count}} serving",
+            "countServings_other": "{{count}} servings",
             "description": "Description",
             "difficulty": "Difficulty",
             "enableLang": "Enable {{lang}} translation",
@@ -86,10 +90,12 @@
             "temperature": "Temperature",
             "temperatureScale": "Temperature scale",
             "unit": "Unit",
+            "unpublished": "Unpublished",
             "viewTranslation": "View translation",
             "withMinutes": "{{field}} (minutes)"
         },
         "heading": {
+            "allRecipes": "All recipes",
             "edit": "Edit recipe ({{lang}})",
             "new": "Create recipe ({{lang}})"
         },
@@ -159,6 +165,11 @@
             "firstName": "First name",
             "lastName": "Last name",
             "username": "Username"
+        },
+        "profile": {
+            "heading": {
+                "userRecipes": "{{user}}'s recipes"
+            }
         }
     }
 }

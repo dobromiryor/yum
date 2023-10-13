@@ -103,7 +103,7 @@ export const Modal = ({
 								return false;
 							}}
 						>
-							<h1 className="text-xl font-bold">{title}</h1>
+							<h1 className="text-2xl typography-semibold">{title}</h1>
 
 							<div className="overflow-y-auto scroll-p-1">{children}</div>
 
