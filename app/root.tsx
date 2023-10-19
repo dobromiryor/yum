@@ -30,7 +30,11 @@ export const links: LinksFunction = () => {
 	return [
 		{
 			rel: "stylesheet",
-			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,300,0,-25",
+			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=swap", // TODO: Optimize font
+		},
+		{
+			rel: "stylesheet",
+			href: "https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap",
 		},
 		{
 			rel: "stylesheet",
@@ -59,10 +63,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ charset: "utf-8" },
 		{ name: "viewport", content: "width=device-width, initial-scale=1" },
 	];
-};
-
-export const handle = {
-	i18n: "translation",
 };
 
 function App() {

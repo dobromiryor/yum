@@ -11,23 +11,35 @@ datasource db {
 }
 
 model User {
-  id                      String           @id @default(cuid())
-  createdAt               DateTime         @default(now())
-  updatedAt               DateTime         @updatedAt
-  email                   String           @unique
+  id                      String             @id @default(cuid())
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  email                   String             @unique
   firstName               String?
   lastName                String?
-  username                String?          @unique
+  username                String?            @unique
   photo                   String?
-  isVerified              Boolean          @default(false)
-  role                    Role             @default(USER)
-  prefersUnitSystem       UnitSystem       @default(METRIC)
-  prefersTemperatureScale TemperatureScale @default(C)
+  isVerified              Boolean            @default(false)
+  role                    Role               @default(USER)
+  prefersUnitSystem       UnitSystem         @default(METRIC)
+  prefersTemperatureScale TemperatureScale   @default(C)
+  prefersDisplayName      DisplayName        @default(email)
   ingredients             Ingredient[]
   steps                   Step[]
   comments                Comment[]
   recipes                 Recipe[]
   subRecipes              SubRecipe[]
+  emailChangeTokes        EmailChangeToken[]
+}
+
+model EmailChangeToken {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  oldEmail  String
+  newEmail  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
 }
 
 model Recipe {
@@ -175,4 +187,10 @@ enum TemperatureScale {
 enum Status {
   PUBLISHED
   UNPUBLISHED
+}
+
+enum DisplayName {
+  email
+  username
+  names
 }

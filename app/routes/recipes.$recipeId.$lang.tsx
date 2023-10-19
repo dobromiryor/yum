@@ -419,7 +419,7 @@ export default function EditRecipeRoute() {
 							labelPosition="hidden"
 							name="publishedStatus"
 							value={foundRecipe.status === "PUBLISHED"}
-							onChange={debounce(handlePublishedStatusChange, 500)}
+							onChange={debounce(handlePublishedStatusChange, 300)}
 						/>
 					}
 					title={t("recipe.field.published")}
@@ -429,19 +429,17 @@ export default function EditRecipeRoute() {
 						<>
 							<ErrorCount errorCount={validation[lang]?.count} />
 							<Switch
-								className={clsx(
-									!isIdle && intent === "languages" && "animate-pulse"
-								)}
 								isDisabled={
 									validation[lang] && validation[lang]!.count > 0 ? true : false
 								}
+								isLoading={!isIdle && intent === "languages"}
 								label={t("recipe.field.enableLang", {
 									lang: t(`nav.language.${lang}`),
 								})}
 								labelPosition="hidden"
 								name="languages"
 								value={enableSwitchValue}
-								onChange={debounce(handleToggleLanguage, 500)}
+								onChange={debounce(handleToggleLanguage, 300)}
 							/>
 						</>
 					}
@@ -452,13 +450,13 @@ export default function EditRecipeRoute() {
 				<Card
 					buttons={
 						<>
-							<Link to="details">
+							<Link preventScrollReset to="details">
 								<Button className="flex items-center gap-1" tabIndex={-1}>
 									<ErrorCount errorCount={validation[lang]?.recipe?.count} />
 									<span>{t("common.edit")}</span>
 								</Button>
 							</Link>
-							<Link to="delete">
+							<Link preventScrollReset to="delete">
 								<Button tabIndex={-1}>{t("common.delete")}</Button>
 							</Link>
 						</>

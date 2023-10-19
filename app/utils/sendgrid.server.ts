@@ -4,6 +4,7 @@ import { type z } from "zod";
 
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { Message } from "~/enums/message.enum";
+import i18next from "~/i18next.server";
 import { type DynamicTemplateSchema } from "~/schemas/dynamic-template.schema";
 
 type SendEmailOptions<User> = {
@@ -34,13 +35,21 @@ export const sendEmail = async (mail: SendGrid.MailDataRequired) => {
 export const sendAuthEmail: SendEmailFunction<User> = async (options) => {
 	const { user, magicLink, emailAddress } = options;
 
+	const t = await i18next.getFixedT("en"); // TODO: get locale
+
 	const dynamicTemplateData: z.infer<typeof DynamicTemplateSchema> = {
 		appName: PARSED_ENV.APP_NAME,
-		subject: user?.isVerified ? "Welcome!" : "Welcome back!",
-		preheader: `Confirm that you want to sign in to ${PARSED_ENV.APP_NAME}`,
-		contentTitle: user?.isVerified ? "Welcome!" : "Welcome back!",
-		contentParagraph: `Please use the button below to confirm you want to sign in to ${PARSED_ENV.APP_NAME}.`,
-		contentCTA: `Go to ${PARSED_ENV.APP_NAME}`,
+		subject: user?.isVerified
+			? t("email.magic.subject.login")
+			: t("email.magic.subject.register"),
+		preheader: t("email.magic.preheader", { appName: PARSED_ENV.APP_NAME }),
+		contentTitle: user?.isVerified
+			? t("email.magic.subject.login")
+			: t("email.magic.subject.register"),
+		contentParagraph: t("email.magic.content.paragraph", {
+			appName: PARSED_ENV.APP_NAME,
+		}),
+		contentCTA: t("email.magic.content.CTA", { appName: PARSED_ENV.APP_NAME }),
 		buttonURL: magicLink,
 	};
 
@@ -58,19 +67,23 @@ export const sendAuthEmail: SendEmailFunction<User> = async (options) => {
 };
 
 export const sendChangeEmail = async (
-	// user: User,
-	url: string,
+	request: Request,
+	token: string,
 	email: string
 ) => {
+	const t = await i18next.getFixedT(request.clone() ?? "en");
+
 	const dynamicTemplateData: z.infer<typeof DynamicTemplateSchema> = {
 		appName: PARSED_ENV.APP_NAME,
-		subject: "Change email address",
-		preheader: "A change email request has been made.",
-		contentTitle: "Change email address",
-		contentParagraph:
-			"Please use the button below to change your email address.",
-		contentCTA: `Continue to ${PARSED_ENV.APP_NAME}`,
-		buttonURL: url,
+		subject: t("email.changeEmail.subject"),
+		preheader: t("email.changeEmail.preheader"),
+		contentTitle: t("email.changeEmail.subject"),
+		contentParagraph: t("email.changeEmail.content.paragraph"),
+		contentCTA: t("email.changeEmail.content.CTA", {
+			appName: PARSED_ENV.APP_NAME,
+		}),
+		buttonURL: new URL(`/change-email?token=${token}`, PARSED_ENV.DOMAIN_URL)
+			.href,
 		unsubscribeURL: new URL("unsubscribe", PARSED_ENV.DOMAIN_URL).href,
 		unsubscribePreferencesURL: new URL(
 			"unsubscribe-preferences",

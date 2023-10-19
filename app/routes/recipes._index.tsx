@@ -44,7 +44,7 @@ export default function RecipesRoute() {
 	}, [lang, locale, revalidator]);
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="flex flex-col gap-6">
 			<h1 className="text-2xl typography-bold">
 				{t("recipe.heading.allRecipes")}
 			</h1>

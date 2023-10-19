@@ -1,25 +1,34 @@
 import { type User } from "@prisma/client";
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { type SerializeFrom } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
 import { AvatarColor, AvatarShade } from "~/enums/avatar.enum";
 import { useAuth } from "~/hooks/useAuth";
-import { auth } from "~/utils/auth.server";
+import { type loader } from "~/root";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request);
+interface AvatarProps {
+	size?: "fixed" | "fill";
+	variant?: "square" | "circle";
+}
 
-	return json({ authData });
-};
-
-export const Avatar = () => {
+export const Avatar = ({ size = "fixed", variant = "circle" }: AvatarProps) => {
 	const { authData } = useLoaderData<typeof loader>();
 	const { user } = useAuth(authData);
 	const { t } = useTranslation();
 
-	const getInitials = (user: User | null) => {
+	const sizeStyles = {
+		fixed: "w-8 h-8 text-sm",
+		fill: "w-full h-full text-4xl aspect-square",
+	};
+
+	const variantStyles = {
+		square: "rounded-none",
+		circle: "rounded-full",
+	};
+
+	const getInitials = (user: SerializeFrom<User> | null) => {
 		if (!user) {
 			return "?";
 		}
@@ -37,7 +46,7 @@ export const Avatar = () => {
 		return email.split("@")[0][0].toUpperCase();
 	};
 
-	const getAvatarColors = (user: User | null) => {
+	const getAvatarColors = (user: SerializeFrom<User> | null) => {
 		if (!user) {
 			return {
 				background: "bg-neutral-500",
@@ -45,7 +54,8 @@ export const Avatar = () => {
 			};
 		}
 
-		const { createdAt } = user;
+		const { createdAt: created } = user;
+		const createdAt = new Date(created);
 
 		const colorValues = Object.values(AvatarColor);
 		const weekDay = createdAt.getDay() + 1;
@@ -72,15 +82,17 @@ export const Avatar = () => {
 	return (
 		// TODO: Tooltip?
 		<div
-			aria-label={t("user.fields.avatar")}
+			aria-label={t("settings.field.avatar")}
 			className={clsx(
-				"flex justify-center items-center w-8 h-8 rounded-full shadow-md select-none",
+				"flex justify-center items-center shadow-md select-none",
+				sizeStyles[size],
+				variantStyles[variant],
 				getAvatarColors(user).background
 			)}
 		>
 			<span
 				aria-hidden
-				className={clsx("text-sm typography-bold", getAvatarColors(user).text)}
+				className={clsx("typography-bold", getAvatarColors(user).text)}
 			>
 				{getInitials(user)}
 			</span>

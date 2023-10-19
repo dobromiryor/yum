@@ -3,7 +3,7 @@ import { type SerializeFrom } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
-import { CardPill } from "~/components/recipes/overview/CardPill";
+import { Pill } from "~/components/common/Pill";
 import { Language } from "~/enums/language.enum";
 import { OptionalTranslatedContentSchema } from "~/schemas/common";
 import { formatTime } from "~/utils/helpers/format-time";
@@ -41,7 +41,7 @@ export const OverviewCard = ({
 		return null;
 	}
 
-	const src = null;
+	const src = null; // TODO: Recipe photo
 
 	return (
 		<Link
@@ -55,7 +55,7 @@ export const OverviewCard = ({
 				key={`Recipe__${recipe.id}`}
 				className="flex flex-col items-stretch gap-3 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg hover:scale-[1.01] hover:shadow-xl transition-all"
 			>
-				<div className="bg-light dark:bg-dark aspect-square rounded-xl">
+				<div className="bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden">
 					{src && <img alt="" className="aspect-square rounded-xl" src={src} />}
 				</div>
 				<span className="text-xl typography-medium">
@@ -63,15 +63,15 @@ export const OverviewCard = ({
 				</span>
 				<div className="flex gap-2 flex-wrap">
 					{minutes > 0 && (
-						<CardPill icon="timer" label={String(formatTime(minutes))} />
+						<Pill icon="timer" label={String(formatTime(minutes))} />
 					)}
 					{servings && (
-						<CardPill
+						<Pill
 							icon="group"
 							label={t("recipe.field.countServings", { count: servings })}
 						/>
 					)}
-					<CardPill
+					<Pill
 						icon="readiness_score"
 						label={t(`recipe.difficulty.${difficulty}`)}
 					/>

@@ -1,0 +1,22 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { json } from "@remix-run/node";
+
+import i18next from "~/i18next.server";
+
+export const errorCatcher = async (request: Request, error: unknown) => {
+	const t = await i18next.getFixedT(request.clone());
+
+	if (error instanceof PrismaClientKnownRequestError) {
+		return json({ success: false, formError: error.message }, { status: 400 });
+	} else {
+		console.error(error);
+
+		return json(
+			{
+				success: false,
+				formError: t("error.somethingWentWrong"),
+			},
+			{ status: 500 }
+		);
+	}
+};

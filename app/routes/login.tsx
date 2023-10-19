@@ -89,7 +89,7 @@ export default function LoginRoute() {
 						<Input
 							isRequired
 							autoComplete="email"
-							label={t("user.fields.email")}
+							label={t("settings.field.email")}
 							name="email"
 							type="email"
 						/>

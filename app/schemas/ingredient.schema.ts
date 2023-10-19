@@ -2,7 +2,7 @@ import { Unit } from "@prisma/client";
 import { t } from "i18next";
 import { z } from "zod";
 
-import { QUANTITY_REGEX } from "~/consts/quantity-regex.const";
+import { QUANTITY_REGEX } from "~/consts/regex.const";
 import {
 	NonEmptyStringSchema,
 	OptionalStringSchema,

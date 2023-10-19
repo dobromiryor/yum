@@ -1,6 +1,6 @@
 import { t } from "i18next";
 
-import { QUANTITY_REGEX } from "~/consts/quantity-regex.const";
+import { QUANTITY_REGEX } from "~/consts/regex.const";
 
 export const parseQuantity = (string: string): number => {
 	const matches = QUANTITY_REGEX.test(string);
