@@ -15,6 +15,7 @@
         "reorder": "Reorder",
         "save": "Save",
         "submit": "Submit",
+        "tryAgain": "Try again",
         "units": {
             "IMPERIAL": "Imperial",
             "METRIC": "Metric"
@@ -48,7 +49,9 @@
         "translationMissing": "Translation missing."
     },
     "login": {
-        "success": "Successfully sent to {{email}}"
+        "heading": "Log in",
+        "message": "Enter an email address where we can send you a magic link 🪄",
+        "success": "Successfully sent to {{email}} ✨"
     },
     "nav": {
         "authMenu": {

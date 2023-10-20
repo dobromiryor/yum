@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-import { Theme, useTheme } from "~/utils/theme-provider";
+import { Theme, useTheme } from "~/utils/providers/theme-provider";
 
 export const ThemeSwitch = () => {
 	const [theme, setTheme] = useTheme();

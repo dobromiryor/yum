@@ -9,7 +9,6 @@ import {
 	Link,
 	Outlet,
 	useLoaderData,
-	useNavigation,
 	useSearchParams,
 	useSubmit,
 } from "@remix-run/react";
@@ -90,7 +89,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function SettingsRoute() {
 	const { foundUser } = useLoaderData<typeof loader>();
-	const { state, formAction } = useNavigation();
 	const [searchParams] = useSearchParams();
 	const [isLoading] = useIsLoading();
 	const { t } = useTranslation();

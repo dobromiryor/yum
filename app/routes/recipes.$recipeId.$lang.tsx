@@ -42,11 +42,11 @@ import {
 	SessionDataStorageSchema,
 	TranslatedContentSchema,
 } from "~/schemas/common";
+import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import {
 	EditRecipeIntentDTOSchema,
 	EditRecipeIntentSchema,
-} from "~/schemas/intent.schema";
-import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+} from "~/schemas/recipe.schema";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { debounce } from "~/utils/helpers/debounce";

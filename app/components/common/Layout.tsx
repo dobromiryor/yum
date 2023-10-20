@@ -1,3 +1,5 @@
+import { useMatches } from "@remix-run/react";
+import clsx from "clsx";
 import { type ReactNode } from "react";
 
 interface LayoutProps {
@@ -5,9 +7,18 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
+	const matches = useMatches();
+
+	const isLogin = matches.some((item) => item.pathname === "/login");
+
 	return (
-		<main className="flex justify-center pb-16">
-			<div className="flex flex-col gap-6 basis-lg min-w-0 max-w-5xl m-4 ">
+		<main className={clsx("flex-1 flex justify-center pb-16")}>
+			<div
+				className={clsx(
+					"flex flex-col gap-6 basis-lg min-w-0 max-w-5xl m-4",
+					isLogin && "justify-center"
+				)}
+			>
 				{children}
 			</div>
 		</main>

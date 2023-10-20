@@ -27,7 +27,11 @@ import i18n from "~/modules/i18n";
 import i18next, { i18nCookie } from "~/modules/i18next.server";
 import tailwind from "~/styles/tailwind.css";
 import { auth } from "~/utils/auth.server";
-import { ThemeHead, ThemeProvider, useTheme } from "~/utils/theme-provider";
+import {
+	ThemeHead,
+	ThemeProvider,
+	useTheme,
+} from "~/utils/providers/theme-provider";
 import { getThemeSession } from "~/utils/theme.server";
 
 export const handle = NAMESPACES;
@@ -94,7 +98,7 @@ function App() {
 				<Links />
 				<ThemeHead ssrTheme={Boolean(loaderTheme)} />
 			</head>
-			<body>
+			<body className="flex flex-col h-0 min-h-screen">
 				<Header />
 				<Layout>
 					<Outlet />

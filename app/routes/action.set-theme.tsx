@@ -1,6 +1,6 @@
 import { json, redirect, type ActionFunctionArgs } from "@remix-run/node";
 
-import { isTheme } from "~/utils/theme-provider";
+import { isTheme } from "~/utils/providers/theme-provider";
 import { getThemeSession } from "~/utils/theme.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
