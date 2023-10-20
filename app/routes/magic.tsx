@@ -10,18 +10,26 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		failureRedirect: "/login",
 	});
 
-	const updatedUser = await prisma.user.update({
-		data: { isVerified: true },
-		where: { id: authData.id },
-	});
-
 	const session = await sessionStorage.getSession(
 		request.clone().headers.get("Cookie")
 	);
 
-	session.set(auth.sessionKey, updatedUser);
+	if (authData.isVerified === false) {
+		const updatedUser = await prisma.user.update({
+			data: { isVerified: true },
+			where: { id: authData.id },
+		});
 
-	return redirect(`/settings?success=true&message=${Message.USER_VERIFIED}`, {
+		session.set(auth.sessionKey, updatedUser);
+
+		return redirect(`/settings?success=true&message=${Message.USER_VERIFIED}`, {
+			headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
+		});
+	}
+
+	session.set(auth.sessionKey, authData);
+
+	return redirect(`/settings`, {
 		headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
 	});
 };
