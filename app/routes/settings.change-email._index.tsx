@@ -20,15 +20,14 @@ import {
 	getValidatedFormData,
 	useRemixForm,
 } from "remix-hook-form";
-import { setErrorMap, type z } from "zod";
-import { makeZodI18nMap } from "zod-i18n-map";
+import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { NAMESPACES } from "~/consts/namespaces.const";
 import { Message } from "~/enums/message.enum";
-import i18next from "~/i18next.server";
+import i18next from "~/modules/i18next.server";
 import { EmailSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
@@ -73,8 +72,6 @@ const EditUsernameModal = () => {
 
 	const { pathname } = useLocation();
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
-
-	setErrorMap(makeZodI18nMap({ t }));
 
 	const { email } = foundUser;
 
@@ -153,7 +150,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	if (existingUser) {
 		return json({
 			success: false,
-			/* TODO: Translation not working. Also check other instances of BE translations */
 			formError: t("settings.errors.emailExists"),
 		});
 	}

@@ -37,9 +37,9 @@ export const Note = ({
 					transition={{ duration: 0.3 }}
 				>
 					<Icon
-						className="flex-grow self-start text-4xl leading-9 material-symbols-rounded"
-						icon={icon}
-						size="custom"
+						className="flex-grow self-start material-symbols-rounded"
+						name={icon}
+						size="36"
 					/>
 					<p className="flex-grow self-center">{message}</p>
 					{isClearable && (
@@ -48,7 +48,7 @@ export const Note = ({
 							rounded="full"
 							onClick={() => setSearchParams()}
 						>
-							<Icon icon="close" />
+							<Icon name="close" size="16" />
 						</Button>
 					)}
 				</motion.div>

@@ -6,14 +6,12 @@ import { useTranslation } from "react-i18next";
 
 import { NoRecipes, OverviewCard } from "~/components/recipes/overview/Card";
 import { OverviewContainer } from "~/components/recipes/overview/Container";
-import i18next, { detectLanguage } from "~/i18next.server";
+import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
 import { prisma } from "~/utils/prisma.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const locale = LanguageSchema.parse(
-		detectLanguage(request) ?? (await i18next.getLocale(request))
-	);
+	const locale = LanguageSchema.parse(await i18next.getLocale(request));
 
 	const foundRecipes = await prisma.recipe.findMany({
 		where: {

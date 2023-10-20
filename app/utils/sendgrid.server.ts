@@ -4,7 +4,7 @@ import { type z } from "zod";
 
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { Message } from "~/enums/message.enum";
-import i18next from "~/i18next.server";
+import i18next from "~/modules/i18next.server";
 import { type DynamicTemplateSchema } from "~/schemas/dynamic-template.schema";
 
 type SendEmailOptions<User> = {

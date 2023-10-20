@@ -35,7 +35,8 @@ import { ReorderCard } from "~/components/recipes/crud/ReorderCard";
 import { Section } from "~/components/recipes/crud/Section";
 import { TemperatureString } from "~/components/recipes/crud/Temperature";
 import { Language } from "~/enums/language.enum";
-import i18next from "~/i18next.server";
+import { useIsLoading } from "~/hooks/useIsLoading";
+import i18next from "~/modules/i18next.server";
 import {
 	OptionalTranslatedContentSchema,
 	SessionDataStorageSchema,
@@ -301,6 +302,19 @@ export default function EditRecipeRoute() {
 
 	const actionData = useActionData<typeof action>();
 
+	const [isLoadingLanguages] = useIsLoading({
+		additionalCondition: intent === "languages",
+	});
+	const [isLoadingPublishedStatus] = useIsLoading({
+		additionalCondition: intent === "publishedStatus",
+	});
+	const [isLoadingIngredientOrder] = useIsLoading({
+		additionalCondition: intent === "ingredientOrder",
+	});
+	const [isLoadingStepOrder] = useIsLoading({
+		additionalCondition: intent === "stepOrder",
+	});
+
 	const [isReorderingIngredients, setIsReorderingIngredients] =
 		useState<boolean>(false);
 	const [isReorderingSteps, setIsReorderingSteps] = useState<boolean>(false);
@@ -399,8 +413,8 @@ export default function EditRecipeRoute() {
 		<>
 			<Section
 				buttons={
-					<Link to={`/recipes/${id}/${invertedLang}`}>
-						<Button className="flex items-center gap-1" tabIndex={-1}>
+					<Link tabIndex={-1} to={`/recipes/${id}/${invertedLang}`}>
+						<Button className="flex items-center gap-1">
 							<ErrorCount errorCount={validation[invertedLang]?.count} />
 							<span>{t(`nav.language.${invertedLang}`)}</span>
 						</Button>
@@ -411,9 +425,7 @@ export default function EditRecipeRoute() {
 				<Card
 					buttons={
 						<Switch
-							className={clsx(
-								!isIdle && intent === "publishedStatus" && "animate-pulse"
-							)}
+							className={clsx(isLoadingPublishedStatus && "animate-pulse")}
 							isDisabled={!foundRecipe.languages.length}
 							label={t("recipe.field.published")}
 							labelPosition="hidden"
@@ -432,7 +444,7 @@ export default function EditRecipeRoute() {
 								isDisabled={
 									validation[lang] && validation[lang]!.count > 0 ? true : false
 								}
-								isLoading={!isIdle && intent === "languages"}
+								isLoading={isLoadingLanguages}
 								label={t("recipe.field.enableLang", {
 									lang: t(`nav.language.${lang}`),
 								})}
@@ -450,14 +462,14 @@ export default function EditRecipeRoute() {
 				<Card
 					buttons={
 						<>
-							<Link preventScrollReset to="details">
-								<Button className="flex items-center gap-1" tabIndex={-1}>
+							<Link preventScrollReset tabIndex={-1} to="details">
+								<Button className="flex items-center gap-1">
 									<ErrorCount errorCount={validation[lang]?.recipe?.count} />
 									<span>{t("common.edit")}</span>
 								</Button>
 							</Link>
-							<Link preventScrollReset to="delete">
-								<Button tabIndex={-1}>{t("common.delete")}</Button>
+							<Link preventScrollReset tabIndex={-1} to="delete">
+								<Button>{t("common.delete")}</Button>
 							</Link>
 						</>
 					}
@@ -493,8 +505,8 @@ export default function EditRecipeRoute() {
 			</Section>
 			<Section
 				buttons={
-					<Link preventScrollReset to="sub-recipe">
-						<Button tabIndex={-1}>{t("common.add")}</Button>
+					<Link preventScrollReset tabIndex={-1} to="sub-recipe">
+						<Button>{t("common.add")}</Button>
 					</Link>
 				}
 				errorCount={validation[lang]?.subRecipeErrorCount}
@@ -509,16 +521,24 @@ export default function EditRecipeRoute() {
 								key={`Sub__Recipe__${id}`}
 								buttons={
 									<>
-										<Link preventScrollReset to={`sub-recipe/${id}/edit`}>
-											<Button className="flex items-center gap-1" tabIndex={-1}>
+										<Link
+											preventScrollReset
+											tabIndex={-1}
+											to={`sub-recipe/${id}/edit`}
+										>
+											<Button className="flex items-center gap-1">
 												<ErrorCount
 													errorCount={validation[lang]?.subRecipes[index].count}
 												/>
 												<span>{t("common.edit")}</span>
 											</Button>
 										</Link>
-										<Link preventScrollReset to={`sub-recipe/${id}/delete`}>
-											<Button tabIndex={-1}>{t("common.delete")}</Button>
+										<Link
+											preventScrollReset
+											tabIndex={-1}
+											to={`sub-recipe/${id}/delete`}
+										>
+											<Button>{t("common.delete")}</Button>
 										</Link>
 									</>
 								}
@@ -536,7 +556,7 @@ export default function EditRecipeRoute() {
 						{ingredientsOrder.length > 1 && isReorderingIngredients ? (
 							<>
 								<Button
-									isDisabled={!isIdle && intent === "ingredientOrder"}
+									isLoading={isLoadingIngredientOrder}
 									variant="success"
 									onClick={() => handleReorder("ingredients")}
 								>
@@ -550,22 +570,20 @@ export default function EditRecipeRoute() {
 							<>
 								{ingredientsOrder.length > 1 && (
 									<Button
-										isDisabled={!isIdle && intent === "ingredientOrder"}
+										isLoading={isLoadingIngredientOrder}
 										onClick={() => handleReorder("ingredients")}
 									>
 										{t("common.reorder")}
 									</Button>
 								)}
-								<Link preventScrollReset to="ingredient">
-									<Button tabIndex={-1}>{t("common.add")}</Button>
+								<Link preventScrollReset tabIndex={-1} to="ingredient">
+									<Button>{t("common.add")}</Button>
 								</Link>
 							</>
 						)}
 					</>
 				}
-				className={clsx(
-					!isIdle && intent === "ingredientOrder" && "animate-pulse"
-				)}
+				className={clsx(isLoadingIngredientOrder && "animate-pulse")}
 				errorCount={validation[lang]?.ingredientErrorCount}
 				title={t("recipe.section.ingredients")}
 			>
@@ -592,12 +610,10 @@ export default function EditRecipeRoute() {
 										<>
 											<Link
 												preventScrollReset
+												tabIndex={-1}
 												to={`ingredient/${item.id}/edit`}
 											>
-												<Button
-													className="flex items-center gap-1"
-													tabIndex={-1}
-												>
+												<Button className="flex items-center gap-1">
 													<ErrorCount
 														errorCount={
 															validation?.[lang]?.ingredients?.[index]?.count
@@ -608,9 +624,10 @@ export default function EditRecipeRoute() {
 											</Link>
 											<Link
 												preventScrollReset
+												tabIndex={-1}
 												to={`ingredient/${item.id}/delete`}
 											>
-												<Button tabIndex={-1}>{t("common.delete")}</Button>
+												<Button>{t("common.delete")}</Button>
 											</Link>
 										</>
 									}
@@ -652,7 +669,7 @@ export default function EditRecipeRoute() {
 						{stepsOrder.length > 1 && isReorderingSteps ? (
 							<>
 								<Button
-									isDisabled={!isIdle && intent === "stepOrder"}
+									isLoading={isLoadingStepOrder}
 									variant="success"
 									onClick={() => handleReorder("steps")}
 								>
@@ -666,20 +683,20 @@ export default function EditRecipeRoute() {
 							<>
 								{stepsOrder.length > 1 && (
 									<Button
-										isDisabled={!isIdle && intent === "stepOrder"}
+										isLoading={isLoadingStepOrder}
 										onClick={() => handleReorder("steps")}
 									>
 										{t("common.reorder")}
 									</Button>
 								)}
-								<Link preventScrollReset to="step">
-									<Button tabIndex={-1}>{t("common.add")}</Button>
+								<Link preventScrollReset tabIndex={-1} to="step">
+									<Button>{t("common.add")}</Button>
 								</Link>
 							</>
 						)}
 					</>
 				}
-				className={clsx(!isIdle && intent === "stepOrder" && "animate-pulse")}
+				className={clsx(isLoadingStepOrder && "animate-pulse")}
 				errorCount={validation[lang]?.stepErrorCount}
 				title={t("recipe.section.steps")}
 			>
@@ -699,19 +716,24 @@ export default function EditRecipeRoute() {
 									key={`Step__${item.id}`}
 									buttons={
 										<>
-											<Link preventScrollReset to={`step/${item.id}/edit`}>
-												<Button
-													className="flex items-center gap-1"
-													tabIndex={-1}
-												>
+											<Link
+												preventScrollReset
+												tabIndex={-1}
+												to={`step/${item.id}/edit`}
+											>
+												<Button className="flex items-center gap-1">
 													<ErrorCount
 														errorCount={validation[lang]?.steps[index].count}
 													/>
 													<span>{t("common.edit")}</span>
 												</Button>
 											</Link>
-											<Link preventScrollReset to={`step/${item.id}/delete`}>
-												<Button tabIndex={-1}>{t("common.delete")}</Button>
+											<Link
+												preventScrollReset
+												tabIndex={-1}
+												to={`step/${item.id}/delete`}
+											>
+												<Button>{t("common.delete")}</Button>
 											</Link>
 										</>
 									}

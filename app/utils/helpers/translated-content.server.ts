@@ -1,7 +1,7 @@
 import { type z } from "zod";
 
 import { type Language } from "~/enums/language.enum";
-import i18next from "~/i18next.server";
+import i18next from "~/modules/i18next.server";
 import { SessionDataStorageSchema } from "~/schemas/common";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { parseWithMessage } from "~/utils/helpers/parse-with-message.server";

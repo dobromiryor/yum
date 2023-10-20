@@ -6,8 +6,7 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { Form, Link, useNavigation, useParams } from "@remix-run/react";
-import clsx from "clsx";
+import { Form, Link, useParams } from "@remix-run/react";
 import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -24,10 +23,11 @@ import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { Section } from "~/components/recipes/crud/Section";
 import { Language } from "~/enums/language.enum";
-import i18next, { detectLanguage } from "~/i18next.server";
+import { useIsLoading } from "~/hooks/useIsLoading";
 import { DifficultySchema, LanguageSchema } from "~/schemas/common";
 import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
+import { CreateRecipeSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { prisma } from "~/utils/prisma.server";
 
@@ -44,7 +44,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 const NewRecipeRoute = () => {
 	const { t } = useTranslation();
-	const { state } = useNavigation();
+	const [isLoading] = useIsLoading();
 	const params = useParams();
 	const lang = LanguageSchema.parse(params.lang);
 	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
@@ -86,11 +86,8 @@ const NewRecipeRoute = () => {
 				<Form
 					preventScrollReset
 					autoComplete="off"
-					className={clsx(
-						"flex flex-col gap-2",
-						state === "submitting" && "animate-pulse"
-					)}
-					onSubmit={handleSubmit}
+					className="flex flex-col gap-2"
+					onSubmit={(e) => (isLoading ? e.preventDefault() : handleSubmit(e))}
 				>
 					<Input isRequired label={t("recipe.field.name")} name="name" />
 					<Textarea
@@ -133,7 +130,9 @@ const NewRecipeRoute = () => {
 						type="number"
 					/>
 					<div className="flex justify-end pt-4">
-						<Button type="submit">{t("common.create")}</Button>
+						<Button isLoading={isLoading} type="submit">
+							{t("common.create")}
+						</Button>
 					</div>
 				</Form>
 			</RemixFormProvider>
@@ -141,17 +140,15 @@ const NewRecipeRoute = () => {
 	);
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/login",
 	});
 
-	const lang = detectLanguage(request.clone());
-
-	const t = await i18next.getFixedT(request.clone());
+	const { lang } = CreateRecipeSchema.parse(p);
 
 	const { errors, data } = await getValidatedFormData<FormData>(
-		request,
+		request.clone(),
 		resolver
 	);
 
@@ -159,24 +156,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		return json({ ok: false, errors });
 	}
 
-	let newRecipe;
+	const createdRecipe = await prisma.recipe.create({
+		data: {
+			...data,
+			name: {
+				[lang]: data.name,
+			},
+			description: {
+				[lang]: data.description,
+			},
+			userId: authData.id,
+		},
+	});
 
-	if (data) {
-		try {
-			newRecipe = await prisma.recipe.create({
-				data: {
-					...data,
-					name: { [String(lang)]: data.name },
-					description: { [String(lang)]: data.description },
-					userId: authData.id,
-				},
-			});
-		} catch (e) {
-			throw new Error(t("error.somethingWentWrong", errors));
-		}
+	if (createdRecipe) {
+		return redirect(`/recipes/${createdRecipe.id}/${lang}`);
 	}
 
-	return redirect(`/recipes/${newRecipe?.id}/${lang}`);
+	return json({ success: false });
 };
 
 export default NewRecipeRoute;

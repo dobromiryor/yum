@@ -20,8 +20,7 @@ import {
 	getValidatedFormData,
 	useRemixForm,
 } from "remix-hook-form";
-import { setErrorMap, type z } from "zod";
-import { makeZodI18nMap } from "zod-i18n-map";
+import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
@@ -66,8 +65,6 @@ const EditUserNamesModal = () => {
 
 	const { pathname } = useLocation();
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
-
-	setErrorMap(makeZodI18nMap({ t }));
 
 	const { firstName, lastName, prefersDisplayName } = foundUser;
 

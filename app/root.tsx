@@ -16,21 +16,27 @@ import {
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useChangeLanguage } from "remix-i18next";
+import { setErrorMap } from "zod";
+import { makeZodI18nMap } from "zod-i18n-map";
 
 import { Header } from "~/components/common/Header";
 import { Layout } from "~/components/common/Layout";
+import { NAMESPACES } from "~/consts/namespaces.const";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
-import i18next, { detectLanguage } from "~/i18next.server";
+import i18n from "~/modules/i18n";
+import i18next, { i18nCookie } from "~/modules/i18next.server";
 import tailwind from "~/styles/tailwind.css";
 import { auth } from "~/utils/auth.server";
 import { ThemeHead, ThemeProvider, useTheme } from "~/utils/theme-provider";
 import { getThemeSession } from "~/utils/theme.server";
 
+export const handle = NAMESPACES;
+
 export const links: LinksFunction = () => {
 	return [
 		{
 			rel: "stylesheet",
-			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=swap", // TODO: Optimize font
+			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0",
 		},
 		{
 			rel: "stylesheet",
@@ -44,17 +50,24 @@ export const links: LinksFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	const locale = detectLanguage(request) ?? (await i18next.getLocale(request));
+	const locale = (await i18next.getLocale(request)) ?? i18n.fallbackLng;
 	const themeSession = await getThemeSession(request);
 
 	const authData = await auth.isAuthenticated(request);
 
-	return json({
-		authData,
-		locale,
-		theme: themeSession.getTheme(),
-		appName: PARSED_ENV.APP_NAME,
-	});
+	return json(
+		{
+			authData,
+			locale,
+			theme: themeSession.getTheme(),
+			appName: PARSED_ENV.APP_NAME,
+		} as const,
+		{
+			headers: {
+				"set-cookie": await i18nCookie.serialize(locale),
+			},
+		}
+	);
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -69,12 +82,13 @@ function App() {
 	const { locale, theme: loaderTheme } = useLoaderData<typeof loader>();
 	const [theme] = useTheme();
 
-	const { i18n } = useTranslation();
+	const { t, i18n } = useTranslation();
 
 	useChangeLanguage(locale);
+	setErrorMap(makeZodI18nMap({ t }));
 
 	return (
-		<html className={clsx(theme)} dir={i18n.dir()} lang={i18n.language}>
+		<html className={clsx(theme)} dir={i18n.dir()} lang={locale}>
 			<head>
 				<Meta />
 				<Links />

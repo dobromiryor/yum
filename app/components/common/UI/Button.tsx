@@ -24,6 +24,7 @@ interface ButtonProps
 	size?: ButtonSize;
 	rounded?: ButtonRounded;
 	isDisabled?: boolean;
+	isLoading?: boolean;
 }
 
 export const Button = (props: ButtonProps) => {
@@ -35,6 +36,7 @@ export const Button = (props: ButtonProps) => {
 		type = "button",
 		rounded = "default",
 		isDisabled = false,
+		isLoading = false,
 		...rest
 	} = props;
 
@@ -74,9 +76,10 @@ export const Button = (props: ButtonProps) => {
 				isDisabled
 					? "opacity-50 pointer-events-none"
 					: "opacity-100  pointer-events-auto",
+				isLoading && "animate-pulse",
 				className
 			)}
-			disabled={isDisabled}
+			disabled={isLoading || isDisabled}
 			type={type}
 			{...rest}
 		>

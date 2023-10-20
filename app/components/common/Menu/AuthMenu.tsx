@@ -9,10 +9,12 @@ export const AuthMenu = () => {
 
 	return (
 		<Menu isButtonRounded button={<Avatar />} position="right">
-			<NavigationLink to="/settings">
+			<NavigationLink buttonClassName="flex-1" to="/settings">
 				{t("nav.authMenu.settings")}
 			</NavigationLink>
-			<NavigationLink to="/logout">{t("nav.authMenu.logout")}</NavigationLink>
+			<NavigationLink buttonClassName="flex-1" to="/logout" variant="danger">
+				{t("nav.authMenu.logout")}
+			</NavigationLink>
 		</Menu>
 	);
 };

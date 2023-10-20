@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { NoRecipes, OverviewCard } from "~/components/recipes/overview/Card";
 import { OverviewContainer } from "~/components/recipes/overview/Container";
-import i18next, { detectLanguage } from "~/i18next.server";
+import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
 import { UserRecipesParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
@@ -18,9 +18,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const { userId } = UserRecipesParamsSchema.parse(p);
 
-	const locale = LanguageSchema.parse(
-		detectLanguage(request) ?? (await i18next.getLocale(request))
-	);
+	const locale = LanguageSchema.parse(await i18next.getLocale(request));
 
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 

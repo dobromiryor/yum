@@ -28,7 +28,7 @@ import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { Language } from "~/enums/language.enum";
-import i18next from "~/i18next.server";
+import i18next from "~/modules/i18next.server";
 import {
 	OptionalTranslatedContentSchema,
 	TranslatedContentSchema,

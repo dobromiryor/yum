@@ -1,7 +1,7 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { json } from "@remix-run/node";
 
-import i18next from "~/i18next.server";
+import i18next from "~/modules/i18next.server";
 
 export const errorCatcher = async (request: Request, error: unknown) => {
 	const t = await i18next.getFixedT(request.clone());

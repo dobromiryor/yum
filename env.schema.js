@@ -8,6 +8,7 @@ export const ENVIRONMENT_VARIABLES_SCHEMA = z.object({
 	/* AUTH */
 	THEME_SECRET: z.string().min(1),
 	SESSION_SECRET: z.string().min(1),
+	I18NEXT_SECRET: z.string().min(1),
 	MAGIC_LINK_SECRET: z.string().min(1),
 	SESSION_DATA_SECRET: z.string().min(1),
 

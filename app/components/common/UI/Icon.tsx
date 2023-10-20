@@ -1,31 +1,20 @@
 import clsx from "clsx";
 
-type IconSize = "small" | "medium" | "large" | "custom";
-type IconGrade = "-25" | "0" | "200";
-type IconWeight = "400" | "500" | "600";
+type IconSize = "14" | "16" | "20" | "36";
 
 interface IconProps {
-	icon: string;
+	name: string;
 	label?: string;
 	className?: string;
 	size?: IconSize;
-	grade?: IconGrade;
-	weight?: IconWeight;
 }
 
-export const Icon = ({
-	icon,
-	label,
-	className,
-	size = "medium",
-	grade = "-25",
-	weight = "400",
-}: IconProps) => {
+export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 	const sizeStyles = {
-		small: "text-sm leading-[14px]",
-		medium: "text-base leading-4",
-		large: "text-lg leading-[18px]",
-		custom: "",
+		"14": "text-sm leading-[14px]",
+		"16": "text-base leading-4",
+		"20": "text-xl leading-5",
+		"36": "text-4xl leading-9",
 	};
 
 	return (
@@ -41,11 +30,8 @@ export const Icon = ({
 					"material-symbols-rounded select-none",
 					className
 				)}
-				style={{
-					fontVariationSettings: `'FILL' 0,'wght' ${weight},'GRAD' ${grade},'opsz' 48`,
-				}}
 			>
-				{icon}
+				{name}
 			</span>
 		</div>
 	);

@@ -23,10 +23,11 @@ import { Button } from "~/components/common/UI/Button";
 import { Icon } from "~/components/common/UI/Icon";
 import { Switch } from "~/components/common/UI/Switch";
 import { Message } from "~/enums/message.enum";
-import { useAuth } from "~/hooks/useAuth";
+import { useIsLoading } from "~/hooks/useIsLoading";
 import { SettingsSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
 import { debounce } from "~/utils/helpers/debounce";
+import { getDisplayName } from "~/utils/helpers/get-display-name";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
 
@@ -57,7 +58,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	}
 
 	return json({
-		authData,
 		foundUser: updatedUser ?? foundUser,
 	});
 };
@@ -89,41 +89,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function SettingsRoute() {
-	const { authData, foundUser } = useLoaderData<typeof loader>();
-	const { user } = useAuth(authData);
-	const { state } = useNavigation();
+	const { foundUser } = useLoaderData<typeof loader>();
+	const { state, formAction } = useNavigation();
+	const [searchParams] = useSearchParams();
+	const [isLoading] = useIsLoading();
 	const { t } = useTranslation();
 	const submit = useSubmit();
-	const [searchParams] = useSearchParams();
 
 	const {
 		firstName,
 		lastName,
 		username,
-		email,
 		prefersDisplayName,
 		prefersTemperatureScale,
 		prefersUnitSystem,
 	} = foundUser;
-
-	const renderHeader = () => {
-		if (
-			prefersDisplayName !== DisplayName.email &&
-			(username || (firstName && lastName))
-		) {
-			if (prefersDisplayName === DisplayName.username && username) {
-				return username;
-			}
-
-			if (prefersDisplayName === DisplayName.names && firstName && lastName) {
-				return `${firstName} ${lastName}`;
-			}
-
-			return email.split("@")[0];
-		}
-
-		return email.split("@")[0];
-	};
 
 	const src = null; // TODO: Avatar
 
@@ -185,7 +165,7 @@ export default function SettingsRoute() {
 						{src ? (
 							<img alt="" className="aspect-square rounded-xl" src={src} />
 						) : (
-							<Avatar size="fill" variant="square" />
+							<Avatar size="fill" user={foundUser} variant="square" />
 						)}
 					</div>
 					<div className="flex-grow flex flex-col sm:flex-row gap-3 justify-between">
@@ -193,24 +173,21 @@ export default function SettingsRoute() {
 							<div className="flex flex-col gap-1">
 								<div className="flex gap-2 items-center flex-wrap">
 									<h2 className="text-xl typography-semibold">
-										{renderHeader()}
+										{getDisplayName(foundUser)}
 									</h2>
 									{foundUser.role === Role.ADMIN && (
 										<Pill icon="shield_person" label={t("common.admin")} />
 									)}
 								</div>
 								<div className="flex items-center gap-2">
-									<p>{user?.email}</p>
+									<p>{foundUser.email}</p>
 									<Link preventScrollReset tabIndex={-1} to="change-email">
 										<Button rounded="full" size="smallSquare" variant="normal">
 											<Icon
-												grade="200"
-												icon="edit"
 												label={t("common.editSomething", {
 													something: t("settings.field.email").toLowerCase(),
 												})}
-												size="small"
-												weight="600"
+												name="edit"
 											/>
 										</Button>
 									</Link>
@@ -222,7 +199,7 @@ export default function SettingsRoute() {
 									firstName &&
 									lastName && (
 										<Switch
-											isLoading={state !== "idle"}
+											isLoading={isLoading}
 											label={`${t("settings.field.publicName")}: `}
 											labelPosition="left"
 											labelWeight="normal"
@@ -250,15 +227,12 @@ export default function SettingsRoute() {
 									>
 										<Button rounded="full" size="smallSquare" variant="normal">
 											<Icon
-												grade="200"
-												icon="edit"
 												label={t("common.editSomething", {
 													something: t(
 														"settings.field.preferences"
 													).toLowerCase(),
 												})}
-												size="small"
-												weight="600"
+												name="edit"
 											/>
 										</Button>
 									</Link>

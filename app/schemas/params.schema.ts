@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { LanguageSchema, NonEmptyStringSchema } from "~/schemas/common";
 
+export const CreateRecipeSchema = z.object({
+	lang: LanguageSchema,
+});
+
 export const RecipeParamsSchema = z.object({
 	recipeId: NonEmptyStringSchema,
 });

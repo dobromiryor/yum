@@ -5,17 +5,20 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
 import { AvatarColor, AvatarShade } from "~/enums/avatar.enum";
-import { useAuth } from "~/hooks/useAuth";
 import { type loader } from "~/root";
 
 interface AvatarProps {
 	size?: "fixed" | "fill";
 	variant?: "square" | "circle";
+	user?: SerializeFrom<User>;
 }
 
-export const Avatar = ({ size = "fixed", variant = "circle" }: AvatarProps) => {
+export const Avatar = ({
+	size = "fixed",
+	variant = "circle",
+	user,
+}: AvatarProps) => {
 	const { authData } = useLoaderData<typeof loader>();
-	const { user } = useAuth(authData);
 	const { t } = useTranslation();
 
 	const sizeStyles = {
@@ -87,14 +90,17 @@ export const Avatar = ({ size = "fixed", variant = "circle" }: AvatarProps) => {
 				"flex justify-center items-center shadow-md select-none",
 				sizeStyles[size],
 				variantStyles[variant],
-				getAvatarColors(user).background
+				getAvatarColors(user ?? authData).background
 			)}
 		>
 			<span
 				aria-hidden
-				className={clsx("typography-bold", getAvatarColors(user).text)}
+				className={clsx(
+					"typography-bold",
+					getAvatarColors(user ?? authData).text
+				)}
 			>
-				{getInitials(user)}
+				{getInitials(user ?? authData)}
 			</span>
 		</div>
 	);

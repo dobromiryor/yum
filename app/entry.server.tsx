@@ -10,8 +10,8 @@ import { StrictMode } from "react";
 import { renderToPipeableStream } from "react-dom/server";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 
-import i18n from "~/i18n";
-import i18next, { detectLanguage } from "~/i18next.server";
+import i18n from "~/modules/i18n";
+import i18next from "~/modules/i18next.server";
 
 import { resolve } from "node:path";
 import { PassThrough } from "stream";
@@ -29,7 +29,7 @@ export default async function handleRequest(
 		: "onShellReady";
 
 	const instance = createInstance();
-	const lng = detectLanguage(request) ?? (await i18next.getLocale(request));
+	const lng = await i18next.getLocale(request);
 	const ns = i18next.getRouteNamespaces(remixContext);
 
 	await instance
@@ -45,6 +45,9 @@ export default async function handleRequest(
 					cache:
 						process.env.NODE_ENV === "development" ? "no-cache" : "default",
 				},
+			},
+			detection: {
+				lookupCookie: "__i18n__",
 			},
 		});
 

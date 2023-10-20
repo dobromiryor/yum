@@ -59,15 +59,6 @@ export const Menu = ({
 				{Children.map(children, (child) => {
 					if (isValidElement(child)) {
 						return cloneElement(child as ReactElement, {
-							className: clsx(
-								"px-2 py-1 bg-light dark:bg-dark hover:bg-secondary dark:hover:bg-primary transition-colors rounded text-",
-								position === "left"
-									? "text-left"
-									: position === "center"
-									? "text-center"
-									: "text-right",
-								child.props.className
-							),
 							tabIndex: isOpen ? 0 : -1,
 							onClick: () => {
 								child.props.onClick && child.props.onClick();
