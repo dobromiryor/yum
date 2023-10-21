@@ -528,7 +528,9 @@ export default function EditRecipeRoute() {
 										>
 											<Button className="flex items-center gap-1">
 												<ErrorCount
-													errorCount={validation[lang]?.subRecipes[index].count}
+													errorCount={
+														validation[lang]?.subRecipes[index]?.count
+													}
 												/>
 												<span>{t("common.edit")}</span>
 											</Button>
@@ -723,7 +725,7 @@ export default function EditRecipeRoute() {
 											>
 												<Button className="flex items-center gap-1">
 													<ErrorCount
-														errorCount={validation[lang]?.steps[index].count}
+														errorCount={validation[lang]?.steps[index]?.count}
 													/>
 													<span>{t("common.edit")}</span>
 												</Button>
