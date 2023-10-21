@@ -769,24 +769,24 @@ export default function EditRecipeRoute() {
 													{item.ingredients.map(
 														({ id, name, quantity, unit }) => (
 															<li key={`Step__Ingredient__${id}`}>
-																{IngredientString({
-																	name: TranslatedContentSchema.parse(name),
-																	quantity,
-																	unit,
-																})}
+																<IngredientString
+																	name={TranslatedContentSchema.parse(name)}
+																	quantity={quantity}
+																	unit={unit}
+																/>
 															</li>
 														)
 													)}
 												</ul>
 											) : (
 												<span>
-													{IngredientString({
-														name: TranslatedContentSchema.parse(
+													<IngredientString
+														name={TranslatedContentSchema.parse(
 															item.ingredients[0].name
-														),
-														quantity: item.ingredients[0].quantity,
-														unit: item.ingredients[0].unit,
-													})}
+														)}
+														quantity={item.ingredients[0].quantity}
+														unit={item.ingredients[0].unit}
+													/>
 												</span>
 											)}
 										</Figure>
