@@ -39,7 +39,7 @@ export const Textarea = ({
 			</TranslationHelper>
 			<textarea
 				className={clsx(
-					"bg-light dark:bg-dark text-dark dark:text-light border px-2 py-1 rounded transition-colors duration-500 w-full min-h-9 max-h-32 outline-offset-[-1px]",
+					"bg-light dark:bg-dark text-dark dark:text-light border px-2 py-1 rounded transition-colors w-full min-h-9 max-h-32 outline-offset-[-1px]",
 					errors[name]?.message || translationValidation === false
 						? "border-red-700"
 						: "border-secondary dark:border-primary",

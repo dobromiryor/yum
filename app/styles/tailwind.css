@@ -11,9 +11,7 @@
 
 @layer base {
 	html {
-		transition:
-			color 500ms,
-			background-color 500ms;
+		@apply transition-colors;
 	}
 
 	html.light {

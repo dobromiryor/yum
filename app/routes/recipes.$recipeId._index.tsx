@@ -86,7 +86,7 @@ const RecipeDetailRoute = () => {
 					"p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors"
 				)}
 			>
-				<div className="bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden">
+				<div className="bg-light dark:bg-dark transition-colors aspect-square rounded-xl overflow-hidden">
 					{src && <img alt="" className="aspect-square rounded-xl" src={src} />}
 				</div>
 			</section>
