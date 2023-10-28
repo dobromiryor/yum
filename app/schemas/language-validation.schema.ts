@@ -25,6 +25,13 @@ export const LanguageValidationSchema = z.record(
 			})
 			.array(),
 		stepErrorCount: z.number(),
+		equipment: z
+			.object({
+				name: z.boolean(),
+				count: z.number(),
+			})
+			.array(),
+		equipmentErrorCount: z.number(),
 		subRecipes: z
 			.object({
 				name: z.boolean(),
@@ -56,6 +63,13 @@ export const IngredientLanguageValidation = z.record(
 	z.object({
 		name: z.boolean(),
 		note: z.boolean(),
+	})
+);
+
+export const EquipmentLanguageValidation = z.record(
+	LanguageSchema,
+	z.object({
+		name: z.boolean(),
 	})
 );
 

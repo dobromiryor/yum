@@ -14,6 +14,20 @@ export const OptionalNumberCoercionSchema = z.preprocess(
 	z.coerce.number().optional()
 );
 
+export const NullishNumber = z
+	.preprocess(
+		(value) =>
+			value === "" || Number.isNaN(value)
+				? null
+				: value === 0
+				? 0
+				: value
+				? value
+				: undefined,
+		z.number().nullish()
+	)
+	.nullish();
+
 export const TranslatedContentSchema = z.record(
 	z.nativeEnum(Language),
 	z.string().nullable()

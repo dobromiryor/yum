@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TemperatureScale } from "@prisma/client";
+import { SubRecipeAction, TemperatureScale } from "@prisma/client";
 import {
 	json,
 	type ActionFunctionArgs,
@@ -19,7 +19,7 @@ import {
 	getValidatedFormData,
 	useRemixForm,
 } from "remix-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
@@ -30,6 +30,7 @@ import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { StepDTOSchema } from "~/schemas/step.schema";
 import { auth } from "~/utils/auth.server";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { translatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
 
@@ -50,26 +51,31 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const { recipeId, lang } = EditRecipeParamsSchema.parse(p);
 
-	const ingredients = await prisma.ingredient.findMany({
+	const foundIngredients = await prisma.ingredient.findMany({
+		where: { recipeId },
+		orderBy: { position: "asc" },
+	});
+	const foundSubRecipes = await prisma.subRecipe.findMany({
+		where: { recipeId },
+		orderBy: { position: "asc" },
+	});
+	const foundEquipment = await prisma.equipment.findMany({
 		where: { recipeId },
 		orderBy: { position: "asc" },
 	});
 
-	return json({ authData, ingredients, lang });
+	return json({
+		authData,
+		foundEquipment,
+		foundIngredients,
+		foundSubRecipes,
+		lang,
+	});
 };
 
 export const CreateStepModal = () => {
-	const { ingredients, lang } = useLoaderData<typeof loader>();
-	const ingredientOptions = useMemo(
-		() =>
-			ingredients.map((item) => {
-				return {
-					label: item.name?.[lang as keyof typeof item.name] ?? "",
-					value: item.id,
-				};
-			}),
-		[ingredients, lang]
-	);
+	const { foundEquipment, foundIngredients, foundSubRecipes, lang } =
+		useLoaderData<typeof loader>();
 
 	const actionData = useActionData<typeof action>();
 
@@ -86,6 +92,60 @@ export const CreateStepModal = () => {
 		},
 	});
 	const { reset, handleSubmit, control } = form;
+
+	const invertedLang = getInvertedLang(lang);
+
+	const subRecipeActionOptions = useMemo(
+		() =>
+			Object.keys(SubRecipeAction).map((item) => {
+				const action = z.nativeEnum(SubRecipeAction).parse(item);
+
+				return {
+					label: t(`recipe.subRecipeAction.${action}`),
+					value: item,
+				};
+			}),
+		[t]
+	);
+	const ingredientOptions = useMemo(
+		() =>
+			foundIngredients.map((item) => {
+				return {
+					label:
+						item.name?.[lang as keyof typeof item.name] ??
+						item.name?.[invertedLang as keyof typeof item.name] ??
+						t("error.translationMissing"),
+					value: item.id,
+				};
+			}),
+		[foundIngredients, invertedLang, lang, t]
+	);
+	const subRecipeOptions = useMemo(
+		() =>
+			foundSubRecipes.map((item) => {
+				return {
+					label:
+						item.name?.[lang as keyof typeof item.name] ??
+						item.name?.[invertedLang as keyof typeof item.name] ??
+						t("error.translationMissing"),
+					value: item.id,
+				};
+			}),
+		[foundSubRecipes, invertedLang, lang, t]
+	);
+	const equipmentOptions = useMemo(
+		() =>
+			foundEquipment.map((item) => {
+				return {
+					label:
+						item.name?.[lang as keyof typeof item.name] ??
+						item.name?.[invertedLang as keyof typeof item.name] ??
+						t("error.translationMissing"),
+					value: item.id,
+				};
+			}),
+		[foundEquipment, invertedLang, lang, t]
+	);
 
 	return (
 		<Modal
@@ -109,6 +169,28 @@ export const CreateStepModal = () => {
 						label={t("recipe.field.description")}
 						name="content"
 					/>
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+						<Input
+							label={t("recipe.field.prepTime")}
+							name="prepTime"
+							type="number"
+						/>
+						<Input
+							label={t("recipe.field.cookTime")}
+							name="cookTime"
+							type="number"
+						/>
+						<Input
+							label={t("recipe.field.bakeTime")}
+							name="bakeTime"
+							type="number"
+						/>
+						<Input
+							label={t("recipe.field.restTime")}
+							name="restTime"
+							type="number"
+						/>
+					</div>
 					<Input
 						label={t("recipe.field.temperature")}
 						name="temperature"
@@ -129,12 +211,52 @@ export const CreateStepModal = () => {
 					/>
 					<Controller
 						control={control}
+						name="subRecipeAction"
+						render={({ field: { onChange, value, name } }) => (
+							<Select
+								isRequired
+								label={t("recipe.field.subRecipeAction")}
+								name={name}
+								options={subRecipeActionOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
+						name="subRecipes"
+						render={({ field: { onChange, value, name } }) => (
+							<Multiselect
+								label={t("recipe.field.subRecipes")}
+								name={name}
+								options={subRecipeOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
 						name="ingredients"
 						render={({ field: { onChange, value, name } }) => (
 							<Multiselect
 								label={t("recipe.field.ingredients")}
 								name={name}
 								options={ingredientOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
+						name="equipment"
+						render={({ field: { onChange, value, name } }) => (
+							<Multiselect
+								label={t("recipe.field.equipment")}
+								name={name}
+								options={equipmentOptions}
 								selected={value}
 								onChange={onChange}
 							/>
@@ -163,8 +285,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	}
 
 	try {
-		const { ingredients, ...rest } = data;
-		const createdStep = await prisma.step.create({
+		const { ingredients, equipment, subRecipes, subRecipeAction, ...rest } =
+			data;
+
+		await prisma.step.create({
 			data: {
 				...rest,
 				...(await translatedContent({
@@ -173,21 +297,32 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					lang,
 					value: rest.content,
 				})),
+				subRecipeAction: subRecipeAction ?? SubRecipeAction.MAKE,
+				...(ingredients && {
+					ingredients: {
+						connect: ingredients.map((item) => ({
+							id: item,
+						})),
+					},
+				}),
+				...(subRecipes && {
+					subRecipes: {
+						connect: subRecipes.map((item) => ({
+							id: item,
+						})),
+					},
+				}),
+				...(equipment && {
+					equipment: {
+						connect: equipment.map((item) => ({
+							id: item,
+						})),
+					},
+				}),
 				recipeId,
 				userId,
 			},
 		});
-
-		if (ingredients) {
-			await prisma.$transaction(
-				ingredients.map((item) =>
-					prisma.ingredient.update({
-						data: { stepId: createdStep.id },
-						where: { id: item },
-					})
-				)
-			);
-		}
 	} catch (error) {
 		console.error(error);
 

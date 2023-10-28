@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TemperatureScale, UnitSystem } from "@prisma/client";
+import { DisplayName, TemperatureScale, UnitSystem } from "@prisma/client";
 import {
 	json,
 	redirect,
@@ -25,6 +25,7 @@ import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { Select } from "~/components/common/UI/Select";
+import { Switch } from "~/components/common/UI/Switch";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { PreferencesSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
@@ -68,13 +69,26 @@ const EditUserPreferencesModal = () => {
 	const { pathname } = useLocation();
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
 
-	const { prefersTemperatureScale, prefersUnitSystem } = foundUser;
+	const {
+		username,
+		firstName,
+		lastName,
+		prefersTemperatureScale,
+		prefersUnitSystem,
+		autoConvert,
+		prefersDisplayName,
+	} = foundUser;
 
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
 			prefersTemperatureScale,
 			prefersUnitSystem,
+			autoConvert,
+			displayNameToggle:
+				prefersDisplayName !== DisplayName.email
+					? prefersDisplayName === DisplayName.names
+					: undefined,
 		},
 		submitConfig: {
 			method: "patch",
@@ -121,6 +135,39 @@ const EditUserPreferencesModal = () => {
 					className="flex flex-col gap-2"
 					onSubmit={handleSubmit}
 				>
+					{prefersDisplayName !== DisplayName.email &&
+						username &&
+						firstName &&
+						lastName && (
+							<Controller
+								control={control}
+								name="displayNameToggle"
+								render={({ field: { onChange, value, name } }) => (
+									<Switch
+										label={`${t("settings.field.publicName")}: `}
+										labelPosition="left"
+										name={name}
+										offLabel={t("settings.field.username")}
+										value={value}
+										onChange={onChange}
+										onLabel={t("settings.field.names")}
+									/>
+								)}
+							/>
+						)}
+					<Controller
+						control={control}
+						name="autoConvert"
+						render={({ field: { onChange, value, name } }) => (
+							<Switch
+								label={t("settings.field.autoConvert")}
+								labelPosition="left"
+								name={name}
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
 					<Controller
 						control={control}
 						name="prefersUnitSystem"
@@ -175,9 +222,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		return json({ success: false, errors });
 	}
 
+	const { displayNameToggle, ...rest } = data;
+
 	const updatedUser = await prisma.user
 		.update({
-			data,
+			data: {
+				prefersDisplayName: displayNameToggle
+					? DisplayName.names
+					: DisplayName.username,
+				...rest,
+			},
 			where: {
 				id: authData.id,
 			},

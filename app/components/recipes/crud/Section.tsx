@@ -29,10 +29,12 @@ export const Section = ({
 			{...rest}
 		>
 			<div className="flex justify-between items-center">
-				<p className="flex items-center gap-2 text-2xl typography-bold">
+				<div className="flex items-center gap-2">
+					<p className="flex items-center gap-2 text-2xl typography-bold">
+						{title}
+					</p>
 					<ErrorCount errorCount={errorCount} />
-					{title}
-				</p>
+				</div>
 				<div className="flex gap-2">{buttons && buttons}</div>
 			</div>
 			{children}

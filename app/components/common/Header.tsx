@@ -6,15 +6,12 @@ import { AuthMenu } from "~/components/common/Menu/AuthMenu";
 import { LanguageMenu } from "~/components/common/Menu/LanguageMenu";
 import { NavigationLink } from "~/components/common/NavigationLink";
 import { ThemeSwitch } from "~/components/common/ThemeButton";
-import { useAuth } from "~/hooks/useAuth";
 import { type loader } from "~/root";
 
 export const Header = () => {
 	const { t } = useTranslation();
 
 	const { appName, authData } = useLoaderData<typeof loader>();
-
-	const { user, isAuthenticated } = useAuth(authData);
 
 	return (
 		<header className="sticky top-0 mx-4 z-50">
@@ -28,12 +25,12 @@ export const Header = () => {
 						<NavigationLink end to={"/recipes"}>
 							{t("nav.recipes")}
 						</NavigationLink>
-						{isAuthenticated && (
-							<NavigationLink to={`/users/${user?.id}`}>
+						{authData?.isVerified && (
+							<NavigationLink to={`/users/${authData?.id}`}>
 								{t("nav.myRecipes")}
 							</NavigationLink>
 						)}
-						{isAuthenticated && (
+						{authData?.isVerified && (
 							<NavigationLink to={`/recipes/new`}>
 								{t("nav.newRecipe")}
 							</NavigationLink>
@@ -44,7 +41,7 @@ export const Header = () => {
 						<ThemeSwitch />
 						<LanguageMenu />
 
-						{user ? (
+						{authData ? (
 							<AuthMenu />
 						) : (
 							<NavigationLink to={"/login"}>{t("nav.login")}</NavigationLink>

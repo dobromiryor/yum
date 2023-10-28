@@ -11,7 +11,6 @@ import {
 } from "~/schemas/common";
 
 export const IngredientSchema = z.object({
-	unit: z.nativeEnum(Unit).nullable(),
 	id: z.string().uuid(),
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
@@ -20,12 +19,10 @@ export const IngredientSchema = z.object({
 	name: TranslatedContentSchema,
 	quantity: z.union([z.number(), z.string()]).nullable(),
 	note: OptionalTranslatedContentSchema.optional(),
-	isAvailable: z.boolean(),
-	isUsed: z.boolean(),
+	unit: z.nativeEnum(Unit).nullable(),
 	recipeId: z.string(),
 	subRecipeId: z.string().nullable(),
 	userId: z.string(),
-	stepId: z.string().nullable(),
 });
 
 export const IngredientDTOSchema = z

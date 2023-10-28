@@ -4,8 +4,8 @@ import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/common/UI/Button";
-import { Language } from "~/enums/language.enum";
 import { LanguageSchema } from "~/schemas/common";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 
 interface TranslationHelperProps {
 	children: ReactNode;
@@ -26,7 +26,7 @@ export const TranslationHelper = ({
 	}
 
 	const lang = LanguageSchema.parse(l);
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
 	return (
 		<div className="flex-col gap-1">

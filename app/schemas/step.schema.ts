@@ -1,8 +1,8 @@
-import { TemperatureScale } from "@prisma/client";
+import { SubRecipeAction, TemperatureScale } from "@prisma/client";
 import { t } from "i18next";
 import { z } from "zod";
 
-import { TranslatedContentSchema } from "~/schemas/common";
+import { NullishNumber, TranslatedContentSchema } from "~/schemas/common";
 
 export const StepSchema = z.object({
 	temperatureScale: z.nativeEnum(TemperatureScale).nullable(),
@@ -37,26 +37,63 @@ export const StepDTOSchema = z
 			.nullable()
 			.transform((value) => (value !== "" ? value : null))
 			.optional(),
-		ingredients: z.string().array().nullish(),
+		prepTime: NullishNumber,
+		cookTime: NullishNumber,
+		bakeTime: NullishNumber,
+		restTime: NullishNumber,
+		ingredients: z.string().uuid().array().nullish(),
+		subRecipes: z.string().uuid().array().nullish(),
+		subRecipeAction: z
+			.union([z.nativeEnum(SubRecipeAction), z.literal("")])
+			.nullish()
+			.transform((value) => (value !== "" ? value : null))
+			.optional(),
+		equipment: z.string().uuid().array().nullish(),
 	})
-	.superRefine(({ temperature, temperatureScale }, refinementContext) => {
-		// only optional if neither of temperature or temperature scale are filled
+	.superRefine(
+		(
+			{ temperature, temperatureScale, subRecipes, subRecipeAction },
+			refinementContext
+		) => {
+			// only optional if neither of temperature or temperature scale are filled
 
-		if (temperature == null && temperatureScale != null) {
-			return refinementContext.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: t("recipe.errors.temperatureScale"),
-				path: ["temperature"],
-			});
-		}
+			if (temperature == null && temperatureScale != null) {
+				return refinementContext.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: t("recipe.errors.temperatureScale"),
+					path: ["temperature"],
+				});
+			}
 
-		if (temperature != null && temperatureScale == null) {
-			return refinementContext.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: t("recipe.errors.temperature"),
-				path: ["temperatureScale"],
-			});
+			if (temperature != null && temperatureScale == null) {
+				return refinementContext.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: t("recipe.errors.temperature"),
+					path: ["temperatureScale"],
+				});
+			}
+
+			// only optional if none of sub recipe fields are selected
+			if (subRecipes && subRecipes.length > 0 && !subRecipeAction) {
+				refinementContext.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: t("recipe.errors.subRecipeActionRequired"),
+					path: ["subRecipeAction"],
+					fatal: true,
+				});
+			}
+
+			if (subRecipeAction && (!subRecipes || subRecipes.length === 0)) {
+				refinementContext.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: t("recipe.errors.subRecipesRequired"),
+					path: ["subRecipes"],
+					fatal: true,
+				});
+			}
 		}
-	});
+	);
+
+export const StepDirtyFields = z.record(z.string(), z.boolean());
 
 export const StepsSchema = z.array(StepDTOSchema);

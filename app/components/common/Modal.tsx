@@ -92,7 +92,7 @@ export const Modal = ({
 						<motion.div
 							animate={{ opacity: 1, translateY: 0 }}
 							aria-modal={true}
-							className="flex flex-col gap-6 basis-[768px] h-fit max-h-screen min-w-80 max-w-3xl bg-light dark:bg-dark rounded-lg p-6 m-4 shadow-xl"
+							className="flex flex-col gap-6 basis-[768px] h-fit max-h-screen min-w-80 max-w-3xl bg-light dark:bg-dark rounded-lg py-6 m-4 shadow-xl"
 							exit={{ opacity: 0, translateY: 20 }}
 							initial={{ opacity: 0, translateY: -20 }}
 							role="dialog"
@@ -103,11 +103,11 @@ export const Modal = ({
 								return false;
 							}}
 						>
-							<h1 className="text-2xl typography-semibold">{title}</h1>
+							<h1 className="text-2xl typography-semibold px-6">{title}</h1>
 
-							<div className="overflow-y-auto scroll-p-1">{children}</div>
+							<div className="overflow-y-auto scroll-p-1 px-6">{children}</div>
 
-							<div className="flex justify-end items-start gap-2">
+							<div className="flex justify-end items-start gap-2 px-6">
 								{CTAFn && (
 									<Button
 										isDisabled={isCTADisabled || isLoading}

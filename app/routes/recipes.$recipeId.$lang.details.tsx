@@ -27,13 +27,13 @@ import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
-import { Language } from "~/enums/language.enum";
 import { DifficultySchema, TranslatedContentSchema } from "~/schemas/common";
 import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { recipeLanguageValidation } from "~/utils/helpers/language-validation.server";
 import { translatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
@@ -102,9 +102,6 @@ export const EditRecipeDetailsModal = () => {
 	const {
 		name,
 		description,
-		bakeTime,
-		prepTime,
-		cookTime,
 		difficulty,
 		servings,
 		// categories, // TODO
@@ -113,7 +110,7 @@ export const EditRecipeDetailsModal = () => {
 
 	const parsedName = TranslatedContentSchema.parse(name);
 	const parsedDescription = TranslatedContentSchema.parse(description);
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
 	const form = useRemixForm<FormData>({
 		resolver,
@@ -121,9 +118,6 @@ export const EditRecipeDetailsModal = () => {
 			name: name?.[lang as keyof typeof name],
 			description: description?.[lang as keyof typeof description],
 			difficulty: difficulty,
-			prepTime: prepTime ?? undefined,
-			bakeTime: bakeTime ?? undefined,
-			cookTime: cookTime ?? undefined,
 			servings: servings ?? undefined,
 		},
 		submitConfig: {
@@ -184,27 +178,6 @@ export const EditRecipeDetailsModal = () => {
 								onChange={onChange}
 							/>
 						)}
-					/>
-					<Input
-						label={t("recipe.field.withMinutes", {
-							field: t("recipe.field.prepTime"),
-						})}
-						name="prepTime"
-						type="number"
-					/>
-					<Input
-						label={t("recipe.field.withMinutes", {
-							field: t("recipe.field.cookTime"),
-						})}
-						name="cookTime"
-						type="number"
-					/>
-					<Input
-						label={t("recipe.field.withMinutes", {
-							field: t("recipe.field.bakeTime"),
-						})}
-						name="bakeTime"
-						type="number"
 					/>
 					<Input
 						label={t("recipe.field.servings")}

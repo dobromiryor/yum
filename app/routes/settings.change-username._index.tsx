@@ -74,7 +74,7 @@ const EditUsernameModal = () => {
 		resolver,
 		defaultValues: {
 			username: username ?? undefined,
-			prefersDisplayName: prefersDisplayName ?? undefined,
+			prefersDisplayName,
 		},
 		submitConfig: {
 			method: "patch",
@@ -163,7 +163,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 					prefersDisplayName === DisplayName.email
 						? DisplayName.username
 						: undefined,
-				isVerified: authData.isVerified ? true : undefined,
 			},
 			where: {
 				id: authData.id,

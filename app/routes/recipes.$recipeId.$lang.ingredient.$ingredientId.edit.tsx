@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Unit } from "@prisma/client";
+import { Prisma, Unit } from "@prisma/client";
 import {
 	json,
 	redirect,
@@ -27,7 +27,6 @@ import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
-import { Language } from "~/enums/language.enum";
 import i18next from "~/modules/i18next.server";
 import {
 	OptionalTranslatedContentSchema,
@@ -38,6 +37,7 @@ import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeIngredientParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { ingredientLanguageValidation } from "~/utils/helpers/language-validation.server";
 import { parseQuantity } from "~/utils/helpers/parse-quantity.server";
 import {
@@ -80,7 +80,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		return redirect("/recipes");
 	}
 
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
 	const foundSubRecipes = await prisma.subRecipe.findMany({
 		where: { recipeId },
@@ -125,7 +125,7 @@ export const EditIngredientModal = () => {
 
 	const parsedName = TranslatedContentSchema.parse(name);
 	const parsedNote = OptionalTranslatedContentSchema.parse(note);
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
 	const form = useRemixForm<FormData>({
 		resolver,
@@ -250,7 +250,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 						? null
 						: quantity === undefined
 						? undefined
-						: parseQuantity(quantity),
+						: new Prisma.Decimal(parseQuantity(quantity)),
 				unit,
 				subRecipeId,
 			},

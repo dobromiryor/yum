@@ -139,7 +139,7 @@ export const Select = ({
 							? {
 									opacity: 1,
 									height: "100%",
-									maxHeight: "calc(40px*2.5)",
+									maxHeight: "calc(40px*3.5)",
 									display: "block",
 									transitionEnd: {
 										overflowY: "auto",

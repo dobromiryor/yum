@@ -1,6 +1,6 @@
 import {
 	Status,
-	type Ingredient,
+	type Ingredient as IngredientType,
 	type Recipe,
 	type Step,
 } from "@prisma/client";
@@ -25,16 +25,25 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/common/UI/Button";
+import { ParagraphMap } from "~/components/common/UI/ParagraphMap";
 import { Switch } from "~/components/common/UI/Switch";
 import { Card } from "~/components/recipes/crud/Card";
 import { EmptyCard } from "~/components/recipes/crud/EmptyCard";
+import {
+	Dimension,
+	EquipmentFigure,
+	Volume,
+} from "~/components/recipes/crud/Equipment";
 import { ErrorCount } from "~/components/recipes/crud/ErrorCount";
 import { Figure } from "~/components/recipes/crud/Figure";
-import { IngredientString } from "~/components/recipes/crud/Ingredient";
+import {
+	Ingredient,
+	IngredientsFigure,
+} from "~/components/recipes/crud/Ingredient";
 import { ReorderCard } from "~/components/recipes/crud/ReorderCard";
 import { Section } from "~/components/recipes/crud/Section";
-import { TemperatureString } from "~/components/recipes/crud/Temperature";
-import { Language } from "~/enums/language.enum";
+import { SubRecipesFigure } from "~/components/recipes/crud/SubRecipe";
+import { TemperatureFigure } from "~/components/recipes/crud/Temperature";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import i18next from "~/modules/i18next.server";
 import {
@@ -51,6 +60,7 @@ import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { debounce } from "~/utils/helpers/debounce";
 import { formatTime } from "~/utils/helpers/format-time";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { languageValidation } from "~/utils/helpers/language-validation.server";
 import { parseWithMessage } from "~/utils/helpers/parse-with-message.server";
 import { prisma } from "~/utils/prisma.server";
@@ -64,6 +74,36 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 
 	const foundRecipe = await prisma.recipe.findFirst({
 		where: { id: params.recipeId },
+		include: {
+			subRecipes: {
+				orderBy: {
+					position: "asc",
+				},
+			},
+			ingredients: {
+				orderBy: {
+					position: "asc",
+				},
+				include: {
+					subRecipe: true,
+				},
+			},
+			equipment: {
+				orderBy: {
+					position: "asc",
+				},
+			},
+			steps: {
+				orderBy: {
+					position: "asc",
+				},
+				include: {
+					ingredients: true,
+					subRecipes: true,
+					equipment: true,
+				},
+			},
+		},
 	});
 
 	if (
@@ -73,35 +113,14 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 		return redirect("/recipes");
 	}
 
-	const foundSubRecipes = await prisma.subRecipe.findMany({
-		where: { recipeId },
-	});
-
-	const foundIngredients = await prisma.ingredient.findMany({
-		where: { recipeId },
-		orderBy: { position: "asc" },
-		include: { subRecipe: true },
-	});
-
-	const foundSteps = await prisma.step.findMany({
-		where: { recipeId },
-		orderBy: { position: "asc" },
-		include: {
-			ingredients: {
-				orderBy: {
-					stepPosition: "asc",
-				},
-			},
-		},
-	});
-
 	const { languages } = foundRecipe;
 	const { setData, commit } = await getDataSession(request);
 
 	setData({ languages });
 
 	const validation = languageValidation({
-		foundIngredients: foundIngredients.map(({ name, note }) => ({
+		foundEquipment: foundRecipe.equipment.map(({ name }) => ({ name })),
+		foundIngredients: foundRecipe.ingredients.map(({ name, note }) => ({
 			name,
 			note,
 		})),
@@ -109,15 +128,15 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 			name: foundRecipe.name,
 			description: foundRecipe.description,
 		},
-		foundSteps: foundSteps.map(({ content }) => ({
+		foundSteps: foundRecipe.steps.map(({ content }) => ({
 			content,
 		})),
-		foundSubRecipes: foundSubRecipes.map(({ name }) => ({
+		foundSubRecipes: foundRecipe.subRecipes.map(({ name }) => ({
 			name,
 		})),
 	});
 
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
 	if (
 		validation &&
@@ -133,13 +152,22 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 		});
 	}
 
+	if (
+		foundRecipe.languages.length === 0 &&
+		foundRecipe.status === Status.PUBLISHED
+	) {
+		await prisma.recipe.update({
+			data: {
+				status: Status.UNPUBLISHED,
+			},
+			where: { id: recipeId },
+		});
+	}
+
 	return json(
 		{
 			authData,
 			foundRecipe,
-			foundIngredients,
-			foundSteps,
-			foundSubRecipes,
 			validation,
 			lang,
 			invertedLang,
@@ -173,7 +201,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		t("error.dataMissing")
 	);
 
-	let updatedIngredients: Ingredient[] | undefined;
+	let updatedIngredients: IngredientType[] | undefined;
 	let updatedSteps: Step[] | undefined;
 	let updatedRecipe: Recipe | undefined;
 
@@ -271,23 +299,13 @@ export default function EditRecipeRoute() {
 	);
 	const isIdle = state === "idle";
 
-	const {
-		foundRecipe,
-		foundSubRecipes,
-		foundIngredients,
-		foundSteps,
-		validation,
-		lang,
-		invertedLang,
-	} = useLoaderData<typeof loader>();
+	const { foundRecipe, validation, lang, invertedLang } =
+		useLoaderData<typeof loader>();
 	const {
 		id,
 		name: n,
 		description: d,
 		difficulty,
-		prepTime,
-		cookTime,
-		bakeTime,
 		servings,
 		languages,
 		status,
@@ -295,7 +313,7 @@ export default function EditRecipeRoute() {
 	const name = TranslatedContentSchema.parse(n);
 	const description = TranslatedContentSchema.parse(d);
 
-	const enableSwitchValue = useMemo(
+	const languagesIncludesLocale = useMemo(
 		() => languages.includes(lang),
 		[lang, languages]
 	);
@@ -318,8 +336,10 @@ export default function EditRecipeRoute() {
 	const [isReorderingIngredients, setIsReorderingIngredients] =
 		useState<boolean>(false);
 	const [isReorderingSteps, setIsReorderingSteps] = useState<boolean>(false);
-	const [ingredientsOrder, setIngredientsOrder] = useState(foundIngredients);
-	const [stepsOrder, setStepsOrder] = useState(foundSteps);
+	const [ingredientsOrder, setIngredientsOrder] = useState(
+		foundRecipe.ingredients
+	);
+	const [stepsOrder, setStepsOrder] = useState(foundRecipe.steps);
 
 	const handleReorder = (target: "ingredients" | "steps") => {
 		switch (target) {
@@ -328,7 +348,7 @@ export default function EditRecipeRoute() {
 					if (
 						!isEqual(
 							ingredientsOrder,
-							actionData?.updatedIngredients ?? foundIngredients
+							actionData?.updatedIngredients ?? foundRecipe.ingredients
 						)
 					) {
 						submit(
@@ -348,7 +368,9 @@ export default function EditRecipeRoute() {
 				break;
 			case "steps":
 				if (isReorderingSteps) {
-					if (!isEqual(stepsOrder, actionData?.updatedSteps ?? foundSteps)) {
+					if (
+						!isEqual(stepsOrder, actionData?.updatedSteps ?? foundRecipe.steps)
+					) {
 						submit(
 							{
 								intent: "stepOrder",
@@ -370,11 +392,11 @@ export default function EditRecipeRoute() {
 	const handleCancelReorder = (target: "ingredients" | "steps") => {
 		switch (target) {
 			case "ingredients":
-				setIngredientsOrder(foundIngredients);
+				setIngredientsOrder(foundRecipe.ingredients);
 				setIsReorderingIngredients(false);
 				break;
 			case "steps":
-				setStepsOrder(foundSteps);
+				setStepsOrder(foundRecipe.steps);
 				setIsReorderingSteps(false);
 				break;
 		}
@@ -404,10 +426,10 @@ export default function EditRecipeRoute() {
 
 	useEffect(() => {
 		if (!intent && isIdle) {
-			setIngredientsOrder(foundIngredients);
-			setStepsOrder(foundSteps);
+			setIngredientsOrder(foundRecipe.ingredients);
+			setStepsOrder(foundRecipe.steps);
 		}
-	}, [foundIngredients, foundSteps, intent, isIdle]);
+	}, [foundRecipe, intent, isIdle]);
 
 	return (
 		<>
@@ -415,8 +437,8 @@ export default function EditRecipeRoute() {
 				buttons={
 					<Link tabIndex={-1} to={`/recipes/${id}/${invertedLang}`}>
 						<Button className="flex items-center gap-1">
-							<ErrorCount errorCount={validation[invertedLang]?.count} />
 							<span>{t(`nav.language.${invertedLang}`)}</span>
+							<ErrorCount errorCount={validation[invertedLang]?.count} />
 						</Button>
 					</Link>
 				}
@@ -438,23 +460,21 @@ export default function EditRecipeRoute() {
 				/>
 				<Card
 					buttons={
-						<>
-							<ErrorCount errorCount={validation[lang]?.count} />
-							<Switch
-								isDisabled={
-									validation[lang] && validation[lang]!.count > 0 ? true : false
-								}
-								isLoading={isLoadingLanguages}
-								label={t("recipe.field.enableLang", {
-									lang: t(`nav.language.${lang}`),
-								})}
-								labelPosition="hidden"
-								name="languages"
-								value={enableSwitchValue}
-								onChange={debounce(handleToggleLanguage, 300)}
-							/>
-						</>
+						<Switch
+							isDisabled={
+								validation[lang] && validation[lang]!.count > 0 ? true : false
+							}
+							isLoading={isLoadingLanguages}
+							label={t("recipe.field.enableLang", {
+								lang: t(`nav.language.${lang}`),
+							})}
+							labelPosition="hidden"
+							name="languages"
+							value={languagesIncludesLocale}
+							onChange={debounce(handleToggleLanguage, 300)}
+						/>
 					}
+					errorCount={validation[lang]?.count}
 					title={t("recipe.field.enableLang", {
 						lang: t(`nav.language.${lang}`),
 					})}
@@ -462,10 +482,17 @@ export default function EditRecipeRoute() {
 				<Card
 					buttons={
 						<>
+							{status === Status.PUBLISHED && languagesIncludesLocale && (
+								<Link preventScrollReset tabIndex={-1} to={`/recipes/${id}`}>
+									<Button className="flex items-center gap-1">
+										<span>{t("common.view")}</span>
+									</Button>
+								</Link>
+							)}
 							<Link preventScrollReset tabIndex={-1} to="details">
 								<Button className="flex items-center gap-1">
-									<ErrorCount errorCount={validation[lang]?.recipe?.count} />
 									<span>{t("common.edit")}</span>
+									<ErrorCount errorCount={validation[lang]?.recipe?.count} />
 								</Button>
 							</Link>
 							<Link preventScrollReset tabIndex={-1} to="delete">
@@ -475,27 +502,16 @@ export default function EditRecipeRoute() {
 					}
 					title={name[lang] ?? t("error.translationMissing")}
 				>
-					<Figure isInline label={t("recipe.field.description")}>
-						<span>{description?.[lang] ?? t("error.translationMissing")}</span>
+					<Figure
+						className="flex flex-col gap-2"
+						label={t("recipe.field.description")}
+					>
+						{<ParagraphMap text={description?.[lang]} /> ??
+							t("error.translationMissing")}
 					</Figure>
 					<Figure isInline label={t("recipe.field.difficulty")}>
 						<span>{t(`recipe.difficulty.${difficulty}`)}</span>
 					</Figure>
-					{prepTime && (
-						<Figure isInline label={t("recipe.field.prepTime")}>
-							<span>{formatTime(prepTime, t)}</span>
-						</Figure>
-					)}
-					{cookTime && (
-						<Figure isInline label={t("recipe.field.cookTime")}>
-							<span>{formatTime(cookTime, t)}</span>
-						</Figure>
-					)}
-					{bakeTime && (
-						<Figure isInline label={t("recipe.field.bakeTime")}>
-							<span>{formatTime(bakeTime, t)}</span>
-						</Figure>
-					)}
 					{servings && (
 						<Figure isInline label={t("recipe.field.servings")}>
 							<span>{servings}</span>
@@ -512,8 +528,8 @@ export default function EditRecipeRoute() {
 				errorCount={validation[lang]?.subRecipeErrorCount}
 				title={t("recipe.section.subRecipes")}
 			>
-				{foundSubRecipes.length ? (
-					foundSubRecipes.map(({ id, name: n }, index) => {
+				{foundRecipe.subRecipes.length ? (
+					foundRecipe.subRecipes.map(({ id, name: n }, index) => {
 						const name = TranslatedContentSchema.parse(n);
 
 						return (
@@ -527,12 +543,12 @@ export default function EditRecipeRoute() {
 											to={`sub-recipe/${id}/edit`}
 										>
 											<Button className="flex items-center gap-1">
+												<span>{t("common.edit")}</span>
 												<ErrorCount
 													errorCount={
 														validation[lang]?.subRecipes[index]?.count
 													}
 												/>
-												<span>{t("common.edit")}</span>
 											</Button>
 										</Link>
 										<Link
@@ -597,9 +613,8 @@ export default function EditRecipeRoute() {
 				>
 					{ingredientsOrder?.length ? (
 						ingredientsOrder?.map((item, index) => {
-							const { name: na, note: no, quantity, unit, subRecipe } = item;
+							const { note: no, subRecipe } = item;
 
-							const name = TranslatedContentSchema.parse(na);
 							const note = OptionalTranslatedContentSchema.parse(no);
 							const subRecipeName = OptionalTranslatedContentSchema.parse(
 								subRecipe?.name
@@ -616,12 +631,12 @@ export default function EditRecipeRoute() {
 												to={`ingredient/${item.id}/edit`}
 											>
 												<Button className="flex items-center gap-1">
+													<span>{t("common.edit")}</span>
 													<ErrorCount
 														errorCount={
 															validation?.[lang]?.ingredients?.[index]?.count
 														}
 													/>
-													<span>{t("common.edit")}</span>
 												</Button>
 											</Link>
 											<Link
@@ -635,13 +650,7 @@ export default function EditRecipeRoute() {
 									}
 									isReordering={isReorderingIngredients}
 									item={item}
-									title={
-										<IngredientString
-											name={name}
-											quantity={quantity}
-											unit={unit}
-										/>
-									}
+									title={<Ingredient as="" ingredient={item} />}
 								>
 									{subRecipe && (
 										<Figure isInline label={t("recipe.field.subRecipe")}>
@@ -664,6 +673,57 @@ export default function EditRecipeRoute() {
 						<EmptyCard>{t("recipe.card.emptyIngredients")}</EmptyCard>
 					)}
 				</Reorder.Group>
+			</Section>
+			<Section
+				buttons={
+					<Link preventScrollReset tabIndex={-1} to="equipment">
+						<Button>{t("common.add")}</Button>
+					</Link>
+				}
+				errorCount={validation[lang]?.equipmentErrorCount}
+				title={t("recipe.section.equipment")}
+			>
+				{foundRecipe.equipment.length ? (
+					foundRecipe.equipment.map((item, index) => {
+						const { id, name: n } = item;
+						const name = TranslatedContentSchema.parse(n);
+
+						return (
+							<Card
+								key={`Equipment__${id}`}
+								buttons={
+									<>
+										<Link
+											preventScrollReset
+											tabIndex={-1}
+											to={`equipment/${id}/edit`}
+										>
+											<Button className="flex items-center gap-1">
+												<span>{t("common.edit")}</span>
+												<ErrorCount
+													errorCount={validation[lang]?.equipment[index]?.count}
+												/>
+											</Button>
+										</Link>
+										<Link
+											preventScrollReset
+											tabIndex={-1}
+											to={`equipment/${id}/delete`}
+										>
+											<Button>{t("common.delete")}</Button>
+										</Link>
+									</>
+								}
+								title={name?.[lang] ?? t("error.translationMissing")}
+							>
+								<Dimension hasLabel equipment={item} />
+								<Volume hasLabel equipment={item} />
+							</Card>
+						);
+					})
+				) : (
+					<EmptyCard>{t("recipe.card.emptyEquipment")}</EmptyCard>
+				)}
 			</Section>
 			<Section
 				buttons={
@@ -710,7 +770,13 @@ export default function EditRecipeRoute() {
 						onReorder={setStepsOrder}
 					>
 						{stepsOrder.map((item, index) => {
-							const { content: c } = item;
+							const {
+								content: c,
+								bakeTime,
+								cookTime,
+								prepTime,
+								restTime,
+							} = item;
 							const content = TranslatedContentSchema.parse(c);
 
 							return (
@@ -724,10 +790,10 @@ export default function EditRecipeRoute() {
 												to={`step/${item.id}/edit`}
 											>
 												<Button className="flex items-center gap-1">
+													<span>{t("common.edit")}</span>
 													<ErrorCount
 														errorCount={validation[lang]?.steps[index]?.count}
 													/>
-													<span>{t("common.edit")}</span>
 												</Button>
 											</Link>
 											<Link
@@ -744,53 +810,30 @@ export default function EditRecipeRoute() {
 									item={item}
 									title={content[lang] ?? t("error.translationMissing")}
 								>
-									{item.temperature && item.temperatureScale && (
-										<Figure isInline label={t("recipe.field.temperature")}>
-											<span>
-												{TemperatureString({
-													temperature: item.temperature,
-													temperatureScale: item.temperatureScale,
-												})}
-											</span>
+									{prepTime && (
+										<Figure isInline label={t("recipe.field.prepTime")}>
+											<span>{formatTime(prepTime, t)}</span>
 										</Figure>
 									)}
-									{!!item.ingredients.length && (
-										<Figure
-											isInline={item.ingredients.length === 1}
-											label={t("recipe.field.ingredients")}
-										>
-											{item.ingredients.length > 1 ? (
-												<ul
-													className={clsx(
-														item.ingredients.length > 1 &&
-															"list-disc list-inside"
-													)}
-												>
-													{item.ingredients.map(
-														({ id, name, quantity, unit }) => (
-															<li key={`Step__Ingredient__${id}`}>
-																<IngredientString
-																	name={TranslatedContentSchema.parse(name)}
-																	quantity={quantity}
-																	unit={unit}
-																/>
-															</li>
-														)
-													)}
-												</ul>
-											) : (
-												<span>
-													<IngredientString
-														name={TranslatedContentSchema.parse(
-															item.ingredients[0].name
-														)}
-														quantity={item.ingredients[0].quantity}
-														unit={item.ingredients[0].unit}
-													/>
-												</span>
-											)}
+									{cookTime && (
+										<Figure isInline label={t("recipe.field.cookTime")}>
+											<span>{formatTime(cookTime, t)}</span>
 										</Figure>
 									)}
+									{bakeTime && (
+										<Figure isInline label={t("recipe.field.bakeTime")}>
+											<span>{formatTime(bakeTime, t)}</span>
+										</Figure>
+									)}
+									{restTime && (
+										<Figure isInline label={t("recipe.field.restTime")}>
+											<span>{formatTime(restTime, t)}</span>
+										</Figure>
+									)}
+									<TemperatureFigure step={item} />
+									<IngredientsFigure step={item} />
+									<SubRecipesFigure step={item} />
+									<EquipmentFigure step={item} />
 								</ReorderCard>
 							);
 						})}

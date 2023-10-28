@@ -98,7 +98,7 @@ function App() {
 				<Links />
 				<ThemeHead ssrTheme={Boolean(loaderTheme)} />
 			</head>
-			<body className="flex flex-col h-0 min-h-screen">
+			<body className="flex flex-col">
 				<Header />
 				<Layout>
 					<Outlet />

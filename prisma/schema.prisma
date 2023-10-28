@@ -21,15 +21,17 @@ model User {
   photo                   String?
   isVerified              Boolean            @default(false)
   role                    Role               @default(USER)
+  autoConvert             Boolean            @default(false)
   prefersUnitSystem       UnitSystem         @default(METRIC)
   prefersTemperatureScale TemperatureScale   @default(C)
   prefersDisplayName      DisplayName        @default(email)
-  ingredients             Ingredient[]
-  steps                   Step[]
   comments                Comment[]
-  recipes                 Recipe[]
-  subRecipes              SubRecipe[]
   emailChangeTokes        EmailChangeToken[]
+  equipment               Equipment[]
+  ingredients             Ingredient[]
+  recipes                 Recipe[]
+  steps                   Step[]
+  subRecipes              SubRecipe[]
 }
 
 model EmailChangeToken {
@@ -52,9 +54,6 @@ model Recipe {
   name           Json // { [lang]: string | null }
   description    Json // { [lang]: string | null }
   difficulty     Difficulty
-  prepTime       Int?            @db.SmallInt
-  cookTime       Int?            @db.SmallInt
-  bakeTime       Int?            @db.SmallInt
   servings       Int?            @db.SmallInt
   categories     String[]
   tags           String[]
@@ -64,6 +63,7 @@ model Recipe {
   ingredients    Ingredient[]
   commentThreads CommentThread[]
   subRecipes     SubRecipe[]
+  equipment      Equipment[]
 }
 
 model Ingredient {
@@ -76,28 +76,50 @@ model Ingredient {
   quantity     Decimal?
   note         Json? // { [lang]: string | null }
   unit         Unit?
-  isAvailable  Boolean    @default(false)
-  isUsed       Boolean    @default(false)
   recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId     String
-  subRecipe    SubRecipe? @relation(fields: [subRecipeId], references: [id], onDelete: Cascade)
+  subRecipe    SubRecipe? @relation(fields: [subRecipeId], references: [id])
   subRecipeId  String?
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-  step         Step?      @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  stepId       String?
+  step         Step[]
 }
 
 model SubRecipe {
-  id          String       @id @default(uuid())
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  name        Json // { [lang]: string | null }
-  ingredients Ingredient[]
-  recipe      Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  recipeId    String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  position     Int          @default(autoincrement())
+  stepPosition Int          @default(autoincrement())
+  name         Json // { [lang]: string | null }
+  ingredients  Ingredient[]
+  recipe       Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId     String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  step         Step[]
+  stepId       String?
+}
+
+model Equipment {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  position      Int      @default(autoincrement())
+  stepPosition  Int      @default(autoincrement())
+  name          Json // { [lang]: string | null }
+  width         Int?     @db.SmallInt
+  height        Int?     @db.SmallInt
+  length        Int?     @db.SmallInt
+  dimensionUnit Length?
+  volume        Int?     @db.SmallInt
+  volumeUnit    Volume?
+  step          Step[]
+  stepId        String?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  recipe        Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId      String
 }
 
 model Step {
@@ -110,9 +132,16 @@ model Step {
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
   content          Json // { [lang]: string | null }
+  prepTime         Int?              @db.SmallInt
+  cookTime         Int?              @db.SmallInt
+  bakeTime         Int?              @db.SmallInt
+  restTime         Int?              @db.SmallInt
   temperature      Int?              @db.SmallInt
   temperatureScale TemperatureScale?
   ingredients      Ingredient[]
+  equipment        Equipment[]
+  subRecipes       SubRecipe[]
+  subRecipeAction  SubRecipeAction?
 }
 
 model CommentThread {
@@ -147,11 +176,36 @@ enum Difficulty {
   HARD
 }
 
+enum Length {
+  // # METRIC
+  mm
+  cm
+  m
+  // # IMPERIAL/US
+  in
+  ft
+  yd
+}
+
+enum Volume {
+  // # METRIC
+  mL
+  L
+  // # IMPERIAL/US
+  tsp
+  tbsp
+  fl_oz
+  cup
+  pt
+  qt
+  gal
+}
+
 enum Unit {
   // ### VOLUME
   // # METRIC
-  ml
-  l
+  mL
+  L
   // # IMPERIAL/US
   tsp
   tbsp
@@ -193,4 +247,9 @@ enum DisplayName {
   email
   username
   names
+}
+
+enum SubRecipeAction {
+  MAKE
+  USE
 }

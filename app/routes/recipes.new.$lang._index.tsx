@@ -22,13 +22,13 @@ import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { Section } from "~/components/recipes/crud/Section";
-import { Language } from "~/enums/language.enum";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { DifficultySchema, LanguageSchema } from "~/schemas/common";
 import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { CreateRecipeSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { prisma } from "~/utils/prisma.server";
 
 type FormData = z.infer<typeof NewRecipeSchema>;
@@ -47,7 +47,7 @@ const NewRecipeRoute = () => {
 	const [isLoading] = useIsLoading();
 	const params = useParams();
 	const lang = LanguageSchema.parse(params.lang);
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
 	const options = useMemo(
 		() =>
@@ -108,21 +108,6 @@ const NewRecipeRoute = () => {
 								onChange={onChange}
 							/>
 						)}
-					/>
-					<Input
-						label={t("recipe.field.prepTime")}
-						name="prepTime"
-						type="number"
-					/>
-					<Input
-						label={t("recipe.field.cookTime")}
-						name="cookTime"
-						type="number"
-					/>
-					<Input
-						label={t("recipe.field.bakeTime")}
-						name="bakeTime"
-						type="number"
 					/>
 					<Input
 						label={t("recipe.field.servings")}

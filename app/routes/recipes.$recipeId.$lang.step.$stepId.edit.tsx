@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TemperatureScale } from "@prisma/client";
+import { SubRecipeAction, TemperatureScale } from "@prisma/client";
 import {
 	json,
 	redirect,
@@ -21,25 +21,25 @@ import {
 	getValidatedFormData,
 	useRemixForm,
 } from "remix-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
 import { Multiselect } from "~/components/common/UI/Multiselect";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
-import { Language } from "~/enums/language.enum";
 import { TranslatedContentSchema } from "~/schemas/common";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeStepParamsSchema } from "~/schemas/params.schema";
 import { StepDTOSchema } from "~/schemas/step.schema";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { stepLanguageValidation } from "~/utils/helpers/language-validation.server";
-import { translatedContent } from "~/utils/helpers/translated-content.server";
+import { nullishTranslatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
 
-type FormData = z.infer<typeof StepDTOSchema>;
+type FormData = Partial<z.infer<typeof StepDTOSchema>>;
 const resolver = zodResolver(StepDTOSchema);
 
 const temperatureScaleOptions = OptionsSchema.parse(
@@ -58,7 +58,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const foundStep = await prisma.step.findFirst({
 		where: { id: stepId },
-		include: { ingredients: { orderBy: { position: "asc" } } },
+		include: {
+			ingredients: { orderBy: { position: "asc" } },
+			equipment: { orderBy: { position: "asc" } },
+			subRecipes: { orderBy: { position: "asc" } },
+		},
 	});
 
 	if (!foundStep) {
@@ -76,13 +80,29 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const validation = stepLanguageValidation({ content });
 
-	const ingredients = await prisma.ingredient.findMany({
+	const foundIngredients = await prisma.ingredient.findMany({
+		where: { recipeId },
+		orderBy: { position: "asc" },
+	});
+	const foundSubRecipes = await prisma.subRecipe.findMany({
+		where: { recipeId },
+		orderBy: { position: "asc" },
+	});
+	const foundEquipment = await prisma.equipment.findMany({
 		where: { recipeId },
 		orderBy: { position: "asc" },
 	});
 
 	return json(
-		{ authData, foundStep, ingredients, lang, validation },
+		{
+			authData,
+			foundStep,
+			foundEquipment,
+			foundIngredients,
+			foundSubRecipes,
+			lang,
+			validation,
+		},
 		{ headers: { "Set-Cookie": await commit() } }
 	);
 };
@@ -90,8 +110,14 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 export const EditStepModal = () => {
 	const [isOpen, setIsOpen] = useState(true);
 
-	const { foundStep, ingredients, lang, validation } =
-		useLoaderData<typeof loader>();
+	const {
+		foundStep,
+		foundEquipment,
+		foundIngredients,
+		foundSubRecipes,
+		lang,
+		validation,
+	} = useLoaderData<typeof loader>();
 
 	const actionData = useActionData<typeof action>();
 
@@ -105,15 +131,34 @@ export const EditStepModal = () => {
 		content,
 		temperature,
 		temperatureScale,
-		ingredients: stepIngredients,
+		ingredients,
+		equipment,
+		subRecipes,
+		subRecipeAction,
+		bakeTime,
+		cookTime,
+		prepTime,
+		restTime,
 	} = foundStep;
 
 	const parsedContent = TranslatedContentSchema.parse(content);
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
+	const subRecipeActionOptions = useMemo(
+		() =>
+			Object.keys(SubRecipeAction).map((item) => {
+				const action = z.nativeEnum(SubRecipeAction).parse(item);
+
+				return {
+					label: t(`recipe.subRecipeAction.${action}`),
+					value: item,
+				};
+			}),
+		[t]
+	);
 	const ingredientOptions = useMemo(
 		() =>
-			ingredients.map((item) => {
+			foundIngredients.map((item) => {
 				return {
 					label:
 						item.name?.[lang as keyof typeof item.name] ??
@@ -122,7 +167,33 @@ export const EditStepModal = () => {
 					value: item.id,
 				};
 			}),
-		[ingredients, invertedLang, lang, t]
+		[foundIngredients, invertedLang, lang, t]
+	);
+	const subRecipeOptions = useMemo(
+		() =>
+			foundSubRecipes.map((item) => {
+				return {
+					label:
+						item.name?.[lang as keyof typeof item.name] ??
+						item.name?.[invertedLang as keyof typeof item.name] ??
+						t("error.translationMissing"),
+					value: item.id,
+				};
+			}),
+		[foundSubRecipes, invertedLang, lang, t]
+	);
+	const equipmentOptions = useMemo(
+		() =>
+			foundEquipment.map((item) => {
+				return {
+					label:
+						item.name?.[lang as keyof typeof item.name] ??
+						item.name?.[invertedLang as keyof typeof item.name] ??
+						t("error.translationMissing"),
+					value: item.id,
+				};
+			}),
+		[foundEquipment, invertedLang, lang, t]
 	);
 
 	const form = useRemixForm<FormData>({
@@ -131,7 +202,14 @@ export const EditStepModal = () => {
 			content: parsedContent?.[lang] ?? undefined,
 			temperature: temperature ?? undefined,
 			temperatureScale: temperatureScale ?? undefined,
-			ingredients: stepIngredients.map((item) => item.id) ?? undefined,
+			subRecipeAction: subRecipeAction ?? undefined,
+			ingredients: ingredients.map((item) => item.id) ?? undefined,
+			subRecipes: subRecipes.map((item) => item.id) ?? undefined,
+			equipment: equipment.map((item) => item.id) ?? undefined,
+			bakeTime: bakeTime ?? undefined,
+			cookTime: cookTime ?? undefined,
+			prepTime: prepTime ?? undefined,
+			restTime: restTime ?? undefined,
 		},
 		submitConfig: {
 			method: "patch",
@@ -171,6 +249,36 @@ export const EditStepModal = () => {
 						translationContent={parsedContent[invertedLang]}
 						translationValidation={validation[lang]?.content}
 					/>
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+						<Input
+							label={t("recipe.field.withMinutes", {
+								field: t("recipe.field.prepTime"),
+							})}
+							name="prepTime"
+							type="number"
+						/>
+						<Input
+							label={t("recipe.field.withMinutes", {
+								field: t("recipe.field.cookTime"),
+							})}
+							name="cookTime"
+							type="number"
+						/>
+						<Input
+							label={t("recipe.field.withMinutes", {
+								field: t("recipe.field.bakeTime"),
+							})}
+							name="bakeTime"
+							type="number"
+						/>
+						<Input
+							label={t("recipe.field.withMinutes", {
+								field: t("recipe.field.restTime"),
+							})}
+							name="restTime"
+							type="number"
+						/>
+					</div>
 					<Input
 						label={t("recipe.field.temperature")}
 						name="temperature"
@@ -191,12 +299,52 @@ export const EditStepModal = () => {
 					/>
 					<Controller
 						control={control}
+						name="subRecipeAction"
+						render={({ field: { onChange, value, name } }) => (
+							<Select
+								isRequired
+								label={t("recipe.field.subRecipeAction")}
+								name={name}
+								options={subRecipeActionOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
+						name="subRecipes"
+						render={({ field: { onChange, value, name } }) => (
+							<Multiselect
+								label={t("recipe.field.subRecipes")}
+								name={name}
+								options={subRecipeOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
 						name="ingredients"
 						render={({ field: { onChange, value, name } }) => (
 							<Multiselect
 								label={t("recipe.field.ingredients")}
 								name={name}
 								options={ingredientOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
+						name="equipment"
+						render={({ field: { onChange, value, name } }) => (
+							<Multiselect
+								label={t("recipe.field.equipment")}
+								name={name}
+								options={equipmentOptions}
 								selected={value}
 								onChange={onChange}
 							/>
@@ -227,36 +375,54 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	}
 
 	try {
-		const { content, ingredients, temperature, temperatureScale } = data;
-		const updatedStep = await prisma.step.update({
+		const {
+			content,
+			equipment,
+			subRecipeAction,
+			subRecipes,
+			ingredients,
+			...rest
+		} = data;
+
+		await prisma.step.update({
 			data: {
-				...(await translatedContent({
+				...rest,
+				...(await nullishTranslatedContent({
 					request,
 					key: "content",
 					lang,
 					value: content,
 				})),
-				temperature,
-				temperatureScale,
+				...(ingredients && {
+					ingredients: {
+						set: [],
+						connect: ingredients.map((item) => ({
+							id: item,
+						})),
+					},
+				}),
+				subRecipeAction,
+				...(subRecipes && {
+					subRecipes: {
+						set: [],
+						connect: subRecipes.map((item) => ({
+							id: item,
+						})),
+					},
+				}),
+				...(equipment && {
+					equipment: {
+						set: [],
+						connect: equipment.map((item) => ({
+							id: item,
+						})),
+					},
+				}),
 			},
 			where: {
 				id: stepId,
 			},
 		});
-
-		if (ingredients) {
-			await prisma.$transaction(
-				ingredients.map((item, index) =>
-					prisma.ingredient.update({
-						data: {
-							stepId: updatedStep.id,
-							stepPosition: index + 1,
-						},
-						where: { id: item },
-					})
-				)
-			);
-		}
 	} catch (error) {
 		console.error(error);
 

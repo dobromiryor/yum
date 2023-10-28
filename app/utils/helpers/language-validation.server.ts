@@ -1,4 +1,5 @@
 import {
+	type Equipment,
 	type Ingredient,
 	type Recipe,
 	type Step,
@@ -7,6 +8,7 @@ import {
 
 import { LANGUAGES } from "~/consts/languages.const";
 import {
+	EquipmentLanguageValidation,
 	IngredientLanguageValidation,
 	LanguageValidationSchema,
 	RecipeLanguageValidation,
@@ -18,7 +20,8 @@ interface LanguageValidationProps {
 	foundIngredients: Pick<Ingredient, "name" | "note">[];
 	foundRecipe: Pick<Recipe, "name" | "description">;
 	foundSteps: Pick<Step, "content">[];
-	foundSubRecipes: Pick<Ingredient, "name">[];
+	foundSubRecipes: Pick<SubRecipe, "name">[];
+	foundEquipment: Pick<Equipment, "name">[];
 }
 
 export const languageValidation = ({
@@ -26,6 +29,7 @@ export const languageValidation = ({
 	foundRecipe,
 	foundSteps,
 	foundSubRecipes,
+	foundEquipment,
 }: LanguageValidationProps) => {
 	const result = {};
 
@@ -79,6 +83,22 @@ export const languageValidation = ({
 			0
 		);
 
+		const equipment = foundEquipment.map((item) => {
+			const result = {
+				name: !!item.name?.[lang as keyof typeof item.name],
+			};
+
+			const count = Object.values(result).filter(
+				(item) => item === false
+			).length;
+
+			return { ...result, count };
+		});
+		const equipmentErrorCount = equipment.reduce(
+			(prev, curr) => prev + curr.count,
+			0
+		);
+
 		const steps = foundSteps.map((step) => {
 			const result = {
 				content: !!step.content?.[lang as keyof typeof step.content],
@@ -96,18 +116,21 @@ export const languageValidation = ({
 			recipe.count +
 			subRecipeErrorCount +
 			ingredientErrorCount +
+			equipmentErrorCount +
 			stepErrorCount;
 
 		Object.assign(result, {
 			[lang]: {
 				recipe,
-				subRecipes,
-				subRecipeErrorCount,
+				count,
+				equipment,
+				equipmentErrorCount,
 				ingredients,
 				ingredientErrorCount,
-				steps,
 				stepErrorCount,
-				count,
+				steps,
+				subRecipeErrorCount,
+				subRecipes,
 			},
 		});
 	});
@@ -141,11 +164,11 @@ export const subRecipeLanguageValidation = (
 	const result = {};
 
 	LANGUAGES.forEach((lang) => {
-		const ingredientValidation = {
+		const subRecipeValidation = {
 			name: !!foundSubRecipe.name?.[lang as keyof typeof foundSubRecipe.name],
 		};
 
-		Object.assign(result, { [lang]: { ...ingredientValidation } });
+		Object.assign(result, { [lang]: { ...subRecipeValidation } });
 	});
 
 	return SubRecipeLanguageValidation.parse(result);
@@ -170,6 +193,22 @@ export const ingredientLanguageValidation = (
 	});
 
 	return IngredientLanguageValidation.parse(result);
+};
+
+export const equipmentLanguageValidation = (
+	foundEquipment: Pick<Equipment, "name">
+) => {
+	const result = {};
+
+	LANGUAGES.forEach((lang) => {
+		const equipmentValidation = {
+			name: !!foundEquipment.name?.[lang as keyof typeof foundEquipment.name],
+		};
+
+		Object.assign(result, { [lang]: { ...equipmentValidation } });
+	});
+
+	return EquipmentLanguageValidation.parse(result);
 };
 
 export const stepLanguageValidation = (foundStep: Pick<Step, "content">) => {

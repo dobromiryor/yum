@@ -4,8 +4,11 @@ import { useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { NoRecipes, OverviewCard } from "~/components/recipes/overview/Card";
-import { OverviewContainer } from "~/components/recipes/overview/Container";
+import {
+	NoRecipes,
+	OverviewCard,
+} from "~/components/recipes/overview/OverviewCard";
+import { OverviewContainer } from "~/components/recipes/overview/OverviewContainer";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
 import { prisma } from "~/utils/prisma.server";

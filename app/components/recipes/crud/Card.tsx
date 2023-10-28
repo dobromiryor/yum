@@ -1,8 +1,10 @@
+import clsx from "clsx";
 import { type DragControls } from "framer-motion";
 import { type ReactNode } from "react";
 
 import { Button } from "~/components/common/UI/Button";
 import { BasicCard } from "~/components/recipes/crud/BasicCard";
+import { ErrorCount } from "~/components/recipes/crud/ErrorCount";
 
 interface CardProps {
 	buttons?: ReactNode;
@@ -11,6 +13,7 @@ interface CardProps {
 	index?: number;
 	isReordering?: boolean;
 	title: ReactNode;
+	errorCount?: number;
 }
 
 export const Card = ({
@@ -20,14 +23,18 @@ export const Card = ({
 	index,
 	isReordering = false,
 	title,
+	errorCount,
 }: CardProps) => {
 	return (
 		<BasicCard>
-			<div className="flex justify-between items-center">
-				<p className="text-lg typography-semibold truncate">
-					{typeof index === "number" && <span>{`${index + 1}. `}</span>}
-					<span>{title}</span>
-				</p>
+			<div className="flex justify-between items-center gap-2">
+				<div className={clsx("flex items-center gap-2", "truncate")}>
+					<p className="text-lg typography-semibold truncate">
+						{typeof index === "number" && <span>{`${index + 1}. `}</span>}
+						<span>{title}</span>
+					</p>
+					<ErrorCount errorCount={errorCount} />
+				</div>
 				<div className="flex gap-2 items-center">
 					{isReordering ? (
 						<Button

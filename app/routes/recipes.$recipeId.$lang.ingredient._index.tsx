@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Unit } from "@prisma/client";
+import { Prisma, Unit } from "@prisma/client";
 import {
 	json,
 	type ActionFunctionArgs,
@@ -26,11 +26,12 @@ import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
-import { Language } from "~/enums/language.enum";
 import { IngredientDTOSchema } from "~/schemas/ingredient.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
+import { parseQuantity } from "~/utils/helpers/parse-quantity.server";
 import {
 	nullishTranslatedContent,
 	translatedContent,
@@ -54,7 +55,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
 
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
+	const invertedLang = getInvertedLang(lang);
 
 	const foundSubRecipes = await prisma.subRecipe.findMany({
 		where: { recipeId },
@@ -165,7 +166,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	}
 
 	try {
-		const { name, note, subRecipeId } = data;
+		const { name, note, subRecipeId, quantity } = data;
 
 		await prisma.ingredient.create({
 			data: {
@@ -182,6 +183,12 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					lang,
 					value: note,
 				})),
+				quantity:
+					quantity === null
+						? null
+						: quantity === undefined
+						? undefined
+						: new Prisma.Decimal(parseQuantity(quantity)),
 				subRecipeId,
 				recipeId,
 				userId,

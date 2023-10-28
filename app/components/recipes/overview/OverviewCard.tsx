@@ -4,9 +4,9 @@ import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { Pill } from "~/components/common/Pill";
-import { Language } from "~/enums/language.enum";
+import { type Language } from "~/enums/language.enum";
 import { OptionalTranslatedContentSchema } from "~/schemas/common";
-import { formatTime } from "~/utils/helpers/format-time";
+import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 
 interface OverviewCardProps {
 	recipe: SerializeFrom<Recipe>;
@@ -23,19 +23,10 @@ export const OverviewCard = ({
 }: OverviewCardProps) => {
 	const { t } = useTranslation();
 
-	const {
-		name: n,
-		bakeTime,
-		prepTime,
-		cookTime,
-		servings,
-		difficulty,
-	} = recipe;
+	const { name: n, servings, difficulty } = recipe;
 
 	const name = OptionalTranslatedContentSchema.parse(n);
-	const invertedLang = lang === Language.EN ? Language.BG : Language.EN;
-
-	const minutes = (bakeTime ?? 0) + (cookTime ?? 0) + (prepTime ?? 0);
+	const invertedLang = getInvertedLang(lang);
 
 	if (!name && !isUnrestricted) {
 		return null;
@@ -62,9 +53,10 @@ export const OverviewCard = ({
 					{name?.[lang] ?? name?.[invertedLang]}
 				</span>
 				<div className="flex gap-2 flex-wrap">
-					{minutes > 0 && (
+					{/* TODO: Replace times */}
+					{/* {minutes > 0 && (
 						<Pill icon="timer" label={String(formatTime(minutes))} />
-					)}
+					)} */}
 					{servings && (
 						<Pill
 							icon="group"

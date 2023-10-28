@@ -1,17 +1,6 @@
 import { DisplayName, Role } from "@prisma/client";
-import {
-	json,
-	redirect,
-	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
-} from "@remix-run/node";
-import {
-	Link,
-	Outlet,
-	useLoaderData,
-	useSearchParams,
-	useSubmit,
-} from "@remix-run/react";
+import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import { Link, Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -20,15 +9,10 @@ import { Note } from "~/components/common/Note";
 import { Pill } from "~/components/common/Pill";
 import { Button } from "~/components/common/UI/Button";
 import { Icon } from "~/components/common/UI/Icon";
-import { Switch } from "~/components/common/UI/Switch";
 import { Message } from "~/enums/message.enum";
-import { useIsLoading } from "~/hooks/useIsLoading";
-import { SettingsSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
-import { debounce } from "~/utils/helpers/debounce";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
 import { prisma } from "~/utils/prisma.server";
-import { sessionStorage } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request, {
@@ -61,61 +45,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/login",
-	});
-
-	const session = await sessionStorage.getSession(
-		request.clone().headers.get("Cookie")
-	);
-
-	const { prefersDisplayName } = SettingsSchema.parse(
-		Object.fromEntries((await request.clone().formData()).entries())
-	);
-
-	const updatedUser = await prisma.user.update({
-		data: { prefersDisplayName },
-		where: { id: authData.id },
-	});
-
-	session.set(auth.sessionKey, updatedUser);
-
-	return json(
-		{ success: true },
-		{ headers: { "Set-Cookie": await sessionStorage.commitSession(session) } }
-	);
-};
-
 export default function SettingsRoute() {
 	const { foundUser } = useLoaderData<typeof loader>();
 	const [searchParams] = useSearchParams();
-	const [isLoading] = useIsLoading();
 	const { t } = useTranslation();
-	const submit = useSubmit();
 
-	const {
-		firstName,
-		lastName,
-		username,
-		prefersDisplayName,
-		prefersTemperatureScale,
-		prefersUnitSystem,
-	} = foundUser;
+	const { prefersTemperatureScale, prefersUnitSystem, autoConvert } = foundUser;
 
 	const src = null; // TODO: Avatar
-
-	const handleDisplayNameChange = () => {
-		submit(
-			{
-				prefersDisplayName:
-					prefersDisplayName === DisplayName.username
-						? DisplayName.names
-						: DisplayName.username,
-			},
-			{ method: "patch" }
-		);
-	};
 
 	const getMessage = () => {
 		const message = z
@@ -192,30 +129,19 @@ export default function SettingsRoute() {
 								</div>
 							</div>
 							<div className="flex flex-col gap-1">
-								{prefersDisplayName !== DisplayName.email &&
-									username &&
-									firstName &&
-									lastName && (
-										<Switch
-											isLoading={isLoading}
-											label={`${t("settings.field.publicName")}: `}
-											labelPosition="left"
-											labelWeight="normal"
-											name="prefersDisplayName"
-											offLabel={t("settings.field.username")}
-											value={prefersDisplayName === DisplayName.names}
-											variant="secondary"
-											onChange={debounce(handleDisplayNameChange, 300)}
-											onLabel={t("settings.field.names")}
+								<div className="flex flex-wrap gap-2">
+									{autoConvert && (
+										<Pill
+											icon="change_circle"
+											label={t("settings.field.autoConvert")}
 										/>
 									)}
-								<div className="flex gap-2">
 									<Pill
 										icon="weight"
 										label={t(`common.units.${prefersUnitSystem}`)}
 									/>
 									<Pill
-										icon="device_thermostat"
+										icon="thermometer"
 										label={`°${prefersTemperatureScale}`}
 									/>
 									<Link

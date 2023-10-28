@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Length, Volume } from "@prisma/client";
 import {
 	json,
 	redirect,
@@ -12,69 +13,71 @@ import {
 	useLocation,
 	useNavigation,
 } from "@remix-run/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
 	getValidatedFormData,
 	useRemixForm,
 } from "remix-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
+import { Select } from "~/components/common/UI/Select";
 import { TranslatedContentSchema } from "~/schemas/common";
-import { EditRecipeSubRecipeParamsSchema } from "~/schemas/params.schema";
-import { SubRecipeDTOSchema } from "~/schemas/sub-recipe.schema";
+import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
+import { EditRecipeEquipmentParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
-import { subRecipeLanguageValidation } from "~/utils/helpers/language-validation.server";
+import { equipmentLanguageValidation } from "~/utils/helpers/language-validation.server";
 import { translatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
 
-type FormData = z.infer<typeof SubRecipeDTOSchema>;
-const resolver = zodResolver(SubRecipeDTOSchema);
+type FormData = z.infer<typeof EquipmentDTOSchema>;
+const resolver = zodResolver(EquipmentDTOSchema);
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/login",
 	});
 
-	const { recipeId, lang, subRecipeId } =
-		EditRecipeSubRecipeParamsSchema.parse(p);
+	const { recipeId, lang, equipmentId } =
+		EditRecipeEquipmentParamsSchema.parse(p);
 
-	const foundSubRecipe = await prisma.subRecipe.findFirst({
-		where: { id: subRecipeId },
+	const foundEquipment = await prisma.equipment.findFirst({
+		where: { id: equipmentId },
 	});
 
-	if (!foundSubRecipe) {
+	if (!foundEquipment) {
 		return redirect(`/recipes/${recipeId}/${lang}`);
 	}
 
-	if (foundSubRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+	if (foundEquipment.userId !== authData.id && authData.role !== "ADMIN") {
 		return redirect("/recipes");
 	}
 
-	const { name } = foundSubRecipe;
+	const { name } = foundEquipment;
 	const { setData, commit } = await getDataSession(request);
 
 	setData({ name });
 
-	const validation = subRecipeLanguageValidation({ name });
+	const validation = equipmentLanguageValidation({ name });
 
 	const invertedLang = getInvertedLang(lang);
 
 	return json(
-		{ authData, foundSubRecipe, lang, invertedLang, validation },
+		{ authData, foundEquipment, lang, invertedLang, validation },
 		{ headers: { "Set-Cookie": await commit() } }
 	);
 };
 
-const EditSubRecipeModal = () => {
+const EditEquipmentModal = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(true);
 
-	const { foundSubRecipe, lang, invertedLang, validation } =
+	const { foundEquipment, lang, invertedLang, validation } =
 		useLoaderData<typeof loader>();
 
 	const actionData = useActionData<typeof action>();
@@ -85,13 +88,27 @@ const EditSubRecipeModal = () => {
 	const { pathname } = useLocation();
 	const prevPath = pathname.split("/").slice(0, -3).join("/");
 
-	const { name: n } = foundSubRecipe;
+	const {
+		name: n,
+		height,
+		volume,
+		volumeUnit,
+		width,
+		length,
+		dimensionUnit,
+	} = foundEquipment;
 	const name = TranslatedContentSchema.parse(n);
 
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
 			name: name?.[lang] ?? undefined,
+			dimensionUnit,
+			length,
+			width,
+			height,
+			volume,
+			volumeUnit,
 		},
 		submitConfig: {
 			method: "patch",
@@ -99,10 +116,40 @@ const EditSubRecipeModal = () => {
 	});
 
 	const {
+		control,
 		reset,
 		handleSubmit,
 		formState: { isDirty },
 	} = form;
+
+	const dimensionUnitOptions = useMemo(
+		() =>
+			Object.keys(Length).map((item) => {
+				const lengthItem = z.nativeEnum(Length).parse(item);
+
+				return {
+					label: t(`recipe.units.${lengthItem}`, {
+						count: 0,
+					}),
+					value: item,
+				};
+			}),
+		[t]
+	);
+	const volumeUnitOptions = useMemo(
+		() =>
+			Object.keys(Volume).map((item) => {
+				const volumeItem = z.nativeEnum(Volume).parse(item);
+
+				return {
+					label: t(`recipe.units.${volumeItem}`, {
+						count: 0,
+					}),
+					value: item,
+				};
+			}),
+		[t]
+	);
 
 	return (
 		<Modal
@@ -114,7 +161,7 @@ const EditSubRecipeModal = () => {
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("recipe.modal.update.subRecipe.title")}
+			title={t("recipe.modal.update.equipment.title")}
 		>
 			<RemixFormProvider {...form}>
 				<Form
@@ -130,6 +177,36 @@ const EditSubRecipeModal = () => {
 						translationContent={name[invertedLang]}
 						translationValidation={validation[lang]?.name}
 					/>
+					<Input label={t("recipe.field.length")} name="length" type="number" />
+					<Input label={t("recipe.field.width")} name="width" type="number" />
+					<Input label={t("recipe.field.height")} name="height" type="number" />
+					<Controller
+						control={control}
+						name="dimensionUnit"
+						render={({ field: { onChange, value, name } }) => (
+							<Select
+								label={t("recipe.field.dimensionUnit")}
+								name={name}
+								options={dimensionUnitOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
+					<Input label={t("recipe.field.volume")} name="volume" type="number" />
+					<Controller
+						control={control}
+						name="volumeUnit"
+						render={({ field: { onChange, value, name } }) => (
+							<Select
+								label={t("recipe.field.volumeUnit")}
+								name={name}
+								options={volumeUnitOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
 				</Form>
 			</RemixFormProvider>
 		</Modal>
@@ -141,7 +218,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		failureRedirect: "/login",
 	});
 
-	const { lang, subRecipeId } = EditRecipeSubRecipeParamsSchema.parse(p);
+	const { lang, equipmentId } = EditRecipeEquipmentParamsSchema.parse(p);
 
 	const { errors, data } = await getValidatedFormData<FormData>(
 		request.clone(),
@@ -155,8 +232,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	}
 
 	try {
-		await prisma.subRecipe.update({
+		await prisma.equipment.update({
 			data: {
+				...data,
 				...(await translatedContent({
 					request,
 					key: "name",
@@ -165,7 +243,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 				})),
 			},
 			where: {
-				id: subRecipeId,
+				id: equipmentId,
 			},
 		});
 	} catch (error) {
@@ -177,4 +255,4 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	return json({ success: true });
 };
 
-export default EditSubRecipeModal;
+export default EditEquipmentModal;
