@@ -12,7 +12,6 @@ export const TooltipWrapper = ({ label, children }: TooltipWrapperProps) => {
 	const [y, setY] = useState<"top" | "bottom">("top");
 	const [isHovered, setIsHovered] = useState(false);
 
-	const ref = useRef<HTMLDivElement>(null);
 	const tooltipRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -52,15 +51,14 @@ export const TooltipWrapper = ({ label, children }: TooltipWrapperProps) => {
 
 	return label ? (
 		<div
-			ref={ref}
 			className="relative"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
 			{children}
-			<AnimatePresence initial={false} presenceAffectsLayout={true}>
+			<AnimatePresence initial={false}>
 				<motion.div
-					key={`Tooltip`}
+					key="Tooltip"
 					ref={tooltipRef}
 					animate={
 						isHovered
@@ -92,7 +90,7 @@ export const TooltipWrapper = ({ label, children }: TooltipWrapperProps) => {
 				</motion.div>
 				<motion.div
 					/* arrow */
-					key={`Tooltip__Arrow`}
+					key="Tooltip__Arrow"
 					animate={
 						isHovered
 							? {

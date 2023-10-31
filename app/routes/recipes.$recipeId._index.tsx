@@ -98,8 +98,8 @@ const RecipeDetailRoute = () => {
 				)}
 			>
 				<div>{/* placeholder */}</div>
-				<div className="flex flex-col items-center gap-3">
-					<h1 className="flex gap-2 text-xl sm:text-2xl sm:text-center typography-extrabold">
+				<div className="flex flex-col sm:items-center gap-3">
+					<h1 className="flex gap-2 text-2xl md:text-3xl lg:text-4xl sm:text-center typography-bold sm:typography-extrabold">
 						{name[locale]}
 					</h1>
 					<Link className="text-sm typography-light" to={`/users/${user.id}`}>

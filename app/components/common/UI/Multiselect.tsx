@@ -119,7 +119,7 @@ export const Multiselect = ({
 				/>
 				<div
 					className={clsx(
-						"flex flex-wrap gap-1 border rounded relative min-h-12 p-1 pr-12 outline-offset-[-1px]",
+						"flex flex-wrap gap-1 border rounded relative min-h-12 p-1 pr-12",
 						"bg-light text-dark border-secondary",
 						"dark:bg-dark dark:text-light dark:border-primary"
 					)}

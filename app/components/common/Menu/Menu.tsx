@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 import {
 	Children,
 	cloneElement,
@@ -15,14 +16,16 @@ interface MenuProps {
 	children: ReactNode;
 	button: ReactNode;
 	isButtonRounded?: boolean;
-	position?: "left" | "center" | "right";
+	positionX?: "left" | "center" | "right";
+	positionY?: "top" | "bottom";
 }
 
 export const Menu = ({
 	button,
 	children,
 	isButtonRounded = false,
-	position = "center",
+	positionX = "center",
+	positionY = "bottom",
 }: MenuProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -30,6 +33,29 @@ export const Menu = ({
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useClose(buttonRef, menuRef, isOpen, setIsOpen);
+
+	const menuXStyles = {
+		left: "left-0",
+		center: "left-1/2 -translate-x-1/2",
+		right: "right-0",
+	};
+
+	const menuYStyles = {
+		top: "bottom-[calc(100%+10px)]",
+		bottom: "top-[calc(100%+10px)]",
+	};
+
+	const arrowXStyles = {
+		left: "left-[calc(50%-8px)]",
+		center: "left-[calc(100%-8px)]",
+		right: "right-[calc(50%-8px)]",
+	};
+
+	const arrowYStyles = {
+		top: "bottom-[calc(100%+2px)] border-t-8 border-t-secondary dark:border-t-primary",
+		bottom:
+			"top-[calc(100%+2px)] border-b-8 border-b-secondary dark:border-b-primary",
+	};
 
 	return (
 		<div className="relative">
@@ -41,35 +67,76 @@ export const Menu = ({
 			>
 				{button}
 			</button>
-			<div
-				ref={menuRef}
-				aria-hidden={!isOpen}
-				className={clsx(
-					"absolute top-10 mt-1 p-1 gap-1 rounded flex flex-col bg-light dark:bg-dark shadow-lg",
-					isOpen ? "flex" : "hidden",
-					// arrow
-					"before:absolute before:w-0 before:h-0 before:border-l-8 before:border-r-8 before:border-b-8 before:border-x-transparent before:border-b-light dark:before:border-b-dark",
-					position === "left"
-						? "left-0 before:-top-2 before:left-2"
-						: position === "center"
-						? "left-1/2 -translate-x-1/2 before:-top-2 before:left-[calc(50%-8px)] -before:translate-x-[calc(50%-8px)]"
-						: "right-0 before:-top-2 before:right-2"
-				)}
-			>
-				{Children.map(children, (child) => {
-					if (isValidElement(child)) {
-						return cloneElement(child as ReactElement, {
-							tabIndex: isOpen ? 0 : -1,
-							onClick: () => {
-								child.props.onClick && child.props.onClick();
-								setIsOpen(false);
-							},
-						});
-					}
 
-					return null;
-				})}
-			</div>
+			<AnimatePresence initial={false}>
+				<motion.div
+					key="MenuList"
+					ref={menuRef}
+					animate={
+						isOpen
+							? {
+									display: "flex",
+									visibility: "visible",
+									opacity: 1,
+									translateY: positionY === "bottom" ? 2 : -2,
+							  }
+							: {
+									opacity: 0.5,
+									translateY: positionY === "bottom" ? 4 : -4,
+									transitionEnd: { display: "none", visibility: "hidden" },
+							  }
+					}
+					className={clsx(
+						"absolute p-1 gap-1 rounded flex flex-col bg-secondary dark:bg-primary shadow-xl",
+						menuXStyles[positionX],
+						menuYStyles[positionY]
+					)}
+					style={{
+						translateX: positionX === "center" ? "-50%" : 0,
+					}}
+					transition={{ duration: 0.1 }}
+				>
+					{Children.map(children, (child) => {
+						if (isValidElement(child)) {
+							return cloneElement(child as ReactElement, {
+								tabIndex: isOpen ? 0 : -1,
+								onClick: () => {
+									child.props.onClick && child.props.onClick();
+									setIsOpen((prev) => !prev);
+								},
+							});
+						}
+
+						return null;
+					})}
+				</motion.div>
+				<motion.div
+					key="Menu__Arrow"
+					animate={
+						isOpen
+							? {
+									display: "flex",
+									visibility: "visible",
+									opacity: 1,
+									translateY: positionY === "bottom" ? 2 : -2,
+							  }
+							: {
+									opacity: 0.5,
+									translateY: positionY === "bottom" ? 4 : -4,
+									transitionEnd: { display: "none", visibility: "hidden" },
+							  }
+					}
+					className={clsx(
+						"absolute w-0 h-0 border-l-8 border-r-8 border-x-transparent",
+						arrowXStyles[positionX],
+						arrowYStyles[positionY]
+					)}
+					style={{
+						translateX: positionX === "center" ? "calc(-50% - 8px)" : 0,
+					}}
+					transition={{ duration: 0.1 }}
+				/>
+			</AnimatePresence>
 		</div>
 	);
 };

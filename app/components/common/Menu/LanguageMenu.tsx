@@ -11,7 +11,11 @@ import i18next from "~/modules/i18n";
 
 const ACTION_URL = "/action/change-language";
 
-export const LanguageMenu = () => {
+interface LanguageMenuProps {
+	isMobile?: boolean;
+}
+
+export const LanguageMenu = ({ isMobile = false }: LanguageMenuProps) => {
 	const submit = useSubmit();
 	const { pathname } = useLocation();
 	const [isLoading] = useIsLoading({ formAction: ACTION_URL });
@@ -39,13 +43,19 @@ export const LanguageMenu = () => {
 	};
 
 	return (
-		<Menu isButtonRounded button={renderButton()}>
+		<Menu
+			isButtonRounded
+			button={renderButton()}
+			positionX={isMobile ? "right" : "center"}
+			positionY={isMobile ? "top" : "bottom"}
+		>
 			{langs.map((lang) => (
 				<Button
 					key={`Language__Button__${lang}`}
 					aria-current={i18n.resolvedLanguage === lang}
 					aria-label={t(`nav.language.${lang}Label`)}
-					variant={i18n.resolvedLanguage === lang ? "primary" : "text"}
+					className="typography-bold"
+					variant={i18n.resolvedLanguage === lang ? "normal" : "text"}
 					onClick={() => handleLanguageChange(lang)}
 				>
 					{t(`nav.language.${lang}`)}

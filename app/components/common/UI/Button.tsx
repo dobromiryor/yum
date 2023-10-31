@@ -70,7 +70,7 @@ export const Button = (props: ButtonProps) => {
 				variantStyles[variant],
 				sizeStyles[size],
 				roundedStyles[rounded],
-				"flex justify-center items-center select-none transition-all outline-offset-[-1px]",
+				"flex justify-center items-center select-none transition-all",
 				"active:brightness-75",
 				"hover:brightness-90",
 				isDisabled

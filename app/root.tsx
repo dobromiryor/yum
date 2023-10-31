@@ -19,8 +19,8 @@ import { useChangeLanguage } from "remix-i18next";
 import { setErrorMap } from "zod";
 import { makeZodI18nMap } from "zod-i18n-map";
 
-import { Header } from "~/components/common/Header";
 import { Layout } from "~/components/common/Layout";
+import { Header } from "~/components/header/Header";
 import { NAMESPACES } from "~/consts/namespaces.const";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18n from "~/modules/i18n";

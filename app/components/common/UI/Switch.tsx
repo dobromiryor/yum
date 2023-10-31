@@ -72,7 +72,7 @@ export const Switch = ({
 				aria-label={labelPosition === "hidden" ? label : undefined}
 				className={clsx(
 					trackVariantStyles[variant],
-					"relative h-6 w-12 rounded-full cursor-pointer outline-offset-[-1px] transition-colors duration-500",
+					"relative h-6 w-12 rounded-full cursor-pointer transition-colors duration-500",
 					isDisabled
 						? "opacity-50 pointer-events-none"
 						: "opacity-100  pointer-events-auto",

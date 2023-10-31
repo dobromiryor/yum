@@ -88,7 +88,7 @@ export const Select = ({
 				/>
 				<div
 					className={clsx(
-						"flex justify-between items-center gap-1 border rounded h-12 p-1 outline-offset-[-1px] z-10",
+						"flex justify-between items-center gap-1 border rounded h-12 p-1 z-10",
 						"bg-light text-dark border-secondary",
 						"dark:bg-dark dark:text-light dark:border-primary",
 						isDisabled || !options.length

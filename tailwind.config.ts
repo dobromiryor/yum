@@ -121,13 +121,13 @@ export default {
 					"@apply font-semibold": "",
 				},
 				".typography-bold": {
-					"@apply font-bold tracking-wide": "",
+					"@apply font-bold": "",
 				},
 				".typography-extrabold": {
-					"@apply font-extrabold tracking-wider": "",
+					"@apply font-extrabold tracking-wide": "",
 				},
 				".typography-black": {
-					"@apply font-black tracking-widest": "",
+					"@apply font-black tracking-wider": "",
 				},
 			});
 		}),
