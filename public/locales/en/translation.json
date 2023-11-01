@@ -313,8 +313,9 @@
 			"EMAIL_UPDATED": "Your email address has been successfully updated.",
 			"TOKEN_NOT_FOUND": "Change email token not found. Please try again.",
 			"USER_NOT_UPDATED": "User update failed. Please try again.",
-			"USER_VERIFIED": "Your account has been verified. Please consider updating your first and last names or username. Until then, we'll use your email address as a username.",
-			"VERIFY_ADDRESS": "A verification email has been sent to your new email address. Please confirm the change by following the link inside the email."
+			"USER_VERIFIED": "Your account has been verified.",
+			"VERIFY_ADDRESS": "Please confirm the change by following the link inside the email sent to your new address.",
+			"USER_NAMES": "Please consider updating your first and last names or username. Until then, we'll use your email address as a username."
 		}
 	},
 	"user": {

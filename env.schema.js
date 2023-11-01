@@ -16,8 +16,7 @@ export const ENVIRONMENT_VARIABLES_SCHEMA = z.object({
 	SENDGRID_API_KEY: z.string().min(1),
 	SENDGRID_FROM_NAME: z.string().min(1),
 	SENDGRID_FROM_EMAIL: z.string().min(1),
-	SENDGRID_MAGIC_LINK_REGISTER_TEMPLATE: z.string().min(1),
-	SENDGRID_MAGIC_LINK_LOGIN_TEMPLATE: z.string().min(1),
+	SENDGRID_MAGIC_LINK_AUTH_TEMPLATE: z.string().min(1),
 	SENDGRID_CHANGE_EMAIL_TEMPLATE: z.string().min(1),
 
 	/* PRISMA/DB */

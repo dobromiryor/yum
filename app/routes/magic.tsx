@@ -10,6 +10,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		failureRedirect: "/login",
 	});
 
+	const url = new URL(request.clone().url);
+	const from = url.searchParams.get("from");
+
 	const session = await sessionStorage.getSession(
 		request.clone().headers.get("Cookie")
 	);
@@ -22,14 +25,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 		session.set(auth.sessionKey, updatedUser);
 
-		return redirect(`/settings?success=true&message=${Message.USER_VERIFIED}`, {
-			headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
-		});
+		return redirect(
+			from ?? `/settings?success=true&message=${Message.USER_VERIFIED}`,
+			{
+				headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
+			}
+		);
 	}
 
 	session.set(auth.sessionKey, authData);
 
-	return redirect(`/settings`, {
+	return redirect(from ?? "/settings", {
 		headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
 	});
 };

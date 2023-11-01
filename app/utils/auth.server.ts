@@ -26,6 +26,5 @@ auth.use(
 
 			return await prisma.user.create({ data: { email } });
 		}
-	),
-	"email-link"
+	)
 );

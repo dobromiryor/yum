@@ -5,6 +5,7 @@ import {
 	type LoaderFunctionArgs,
 } from "@remix-run/node";
 import { Form, useLoaderData, useSubmit } from "@remix-run/react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { RemixFormProvider, useRemixForm } from "remix-hook-form";
 import { type z } from "zod";
@@ -13,6 +14,7 @@ import { Button } from "~/components/common/UI/Button";
 import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { useIsLoading } from "~/hooks/useIsLoading";
+import { LanguageSchema } from "~/schemas/common";
 import { LoginDTOSchema, LoginIntentSchema } from "~/schemas/login.schema";
 import { auth } from "~/utils/auth.server";
 import { sessionStorage } from "~/utils/session.server";
@@ -25,6 +27,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		successRedirect: "/settings",
 	});
 
+	const referer = request.clone().headers.get("Referer");
+	const from = referer && new URL(referer).pathname;
+
 	const session = await sessionStorage.getSession(
 		request.headers.get("Cookie")
 	);
@@ -33,6 +38,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		authError: session.get("auth:error"),
 		magicLinkSent: session.has("auth:magiclink"),
 		magicLinkEmail: session.get("auth:email"),
+		from,
 	});
 };
 
@@ -54,10 +60,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function LoginRoute() {
-	const { authError, magicLinkSent, magicLinkEmail } =
+	const { authError, magicLinkSent, magicLinkEmail, from } =
 		useLoaderData<typeof loader>();
 
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const submit = useSubmit();
 
 	const [isLoginLoading] = useIsLoading();
@@ -71,17 +77,23 @@ export default function LoginRoute() {
 		defaultValues: {
 			email: undefined,
 			intent: "login",
+			from,
 		},
 	});
 
 	const {
 		handleSubmit,
 		formState: { isDirty },
+		setValue,
 	} = form;
 
 	const handleResetSubmit = () => {
 		submit({ intent: "reset" }, { method: "post" });
 	};
+
+	useEffect(() => {
+		setValue("language", LanguageSchema.parse(i18n.language));
+	}, [i18n.language, setValue]);
 
 	return (
 		<div className="self-center flex flex-col gap-6 p-3 bg-secondary dark:bg-primary transition-colors rounded-2xl shadow-lg w-full max-w-lg">

@@ -1,23 +1,14 @@
 import { type User } from "@prisma/client";
 import * as SendGrid from "@sendgrid/mail";
+import { type SendEmailFunction } from "remix-auth-email-link";
 import { type z } from "zod";
 
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { Language } from "~/enums/language.enum";
 import { Message } from "~/enums/message.enum";
 import i18next from "~/modules/i18next.server";
+import { LanguageSchema } from "~/schemas/common";
 import { type DynamicTemplateSchema } from "~/schemas/dynamic-template.schema";
-
-type SendEmailOptions<User> = {
-	emailAddress: string;
-	magicLink: string;
-	user?: User | null;
-	domainUrl: string;
-	form: FormData;
-};
-
-type SendEmailFunction<User> = {
-	(options: SendEmailOptions<User>): Promise<void>;
-};
 
 SendGrid.setApiKey(PARSED_ENV.SENDGRID_API_KEY);
 
@@ -33,9 +24,20 @@ export const sendEmail = async (mail: SendGrid.MailDataRequired) => {
 };
 
 export const sendAuthEmail: SendEmailFunction<User> = async (options) => {
-	const { user, magicLink, emailAddress } = options;
+	const { user, magicLink, emailAddress, form } = options;
 
-	const t = await i18next.getFixedT("en"); // TODO: get locale
+	const buttonURL = new URL(magicLink);
+
+	const from = form.get("from")?.toString();
+
+	if (from && from !== "null") {
+		buttonURL.searchParams.append("from", encodeURI(from));
+	}
+
+	const language =
+		LanguageSchema.parse(form.get("language")?.toString()) ?? Language.EN;
+
+	const t = await i18next.getFixedT(language);
 
 	const dynamicTemplateData: z.infer<typeof DynamicTemplateSchema> = {
 		appName: PARSED_ENV.APP_NAME,
@@ -50,7 +52,7 @@ export const sendAuthEmail: SendEmailFunction<User> = async (options) => {
 			appName: PARSED_ENV.APP_NAME,
 		}),
 		contentCTA: t("email.magic.content.CTA", { appName: PARSED_ENV.APP_NAME }),
-		buttonURL: magicLink,
+		buttonURL: buttonURL.href,
 	};
 
 	await sendEmail({
@@ -60,9 +62,7 @@ export const sendAuthEmail: SendEmailFunction<User> = async (options) => {
 			name: PARSED_ENV.SENDGRID_FROM_NAME,
 		},
 		dynamicTemplateData,
-		templateId: user?.isVerified
-			? PARSED_ENV.SENDGRID_MAGIC_LINK_LOGIN_TEMPLATE
-			: PARSED_ENV.SENDGRID_MAGIC_LINK_REGISTER_TEMPLATE,
+		templateId: PARSED_ENV.SENDGRID_MAGIC_LINK_AUTH_TEMPLATE,
 	});
 };
 

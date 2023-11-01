@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { EmailSchema } from "~/schemas/common";
+import { EmailSchema, LanguageSchema } from "~/schemas/common";
 
 export const LoginIntentSchema = z.union([
 	z.literal("login"),
@@ -11,6 +11,8 @@ export const LoginDTOSchema = z
 	.object({
 		email: EmailSchema.optional(),
 		intent: LoginIntentSchema,
+		language: LanguageSchema,
+		from: z.string().nullable(),
 	})
 	.superRefine(({ email, intent }, ctx) => {
 		if (intent === "login" && (typeof email === "undefined" || email === "")) {
