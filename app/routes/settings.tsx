@@ -94,7 +94,14 @@ export default function SettingsRoute() {
 					}
 					message={getMessage()}
 				/>
-				<Note icon="info" message={t("settings.note.USER_NAMES")} />
+				<Note
+					icon="info"
+					message={
+						foundUser.prefersDisplayName === DisplayName.email
+							? t("settings.note.USER_NAMES")
+							: null
+					}
+				/>
 
 				<div className="flex flex-col sm:flex-row gap-3 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors">
 					<div className="flex-shrink-0 bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden">
