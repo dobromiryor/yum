@@ -92,13 +92,17 @@ function App() {
 	setErrorMap(makeZodI18nMap({ t }));
 
 	return (
-		<html className={clsx(theme)} dir={i18n.dir()} lang={locale}>
+		<html
+			className={clsx(theme, "h-0 min-h-full")}
+			dir={i18n.dir()}
+			lang={locale}
+		>
 			<head>
 				<Meta />
 				<Links />
 				<ThemeHead ssrTheme={Boolean(loaderTheme)} />
 			</head>
-			<body className="flex flex-col">
+			<body className="flex flex-col min-h-full">
 				<Header />
 				<Layout>
 					<Outlet />
