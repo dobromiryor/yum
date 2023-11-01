@@ -36,6 +36,7 @@ export const OverviewCard = ({
 
 	return (
 		<Link
+			className="flex rounded-2xl"
 			to={
 				linkTo === "edit"
 					? `/recipes/${recipe.id}/${lang}`
@@ -44,14 +45,18 @@ export const OverviewCard = ({
 		>
 			<div
 				key={`Recipe__${recipe.id}`}
-				className="flex flex-col items-stretch gap-3 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg hover:scale-[1.01] hover:shadow-xl transition-all"
+				className="flex-1 flex flex-col justify-between gap-3 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg hover:scale-[1.01] hover:shadow-xl transition-all"
 			>
-				<div className="bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden transition-colors">
-					{src && <img alt="" className="aspect-square rounded-xl" src={src} />}
+				<div className="flex flex-col gap-3">
+					<div className="bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden transition-colors">
+						{src && (
+							<img alt="" className="aspect-square rounded-xl" src={src} />
+						)}
+					</div>
+					<span className="text-xl typography-medium">
+						{name?.[lang] ?? name?.[invertedLang]}
+					</span>
 				</div>
-				<span className="text-xl typography-medium">
-					{name?.[lang] ?? name?.[invertedLang]}
-				</span>
 				<div className="flex gap-2 flex-wrap">
 					{/* TODO: Replace times */}
 					{/* {minutes > 0 && (
