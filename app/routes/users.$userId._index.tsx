@@ -15,6 +15,7 @@ import { UserRecipesParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
 import { prisma } from "~/utils/prisma.server";
+import { recipesOverview } from "~/utils/recipe.server";
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request);
@@ -32,22 +33,15 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	let foundUnpublishedRecipes = undefined;
 
 	if (userId === authData?.id || authData?.role === Role.ADMIN) {
-		foundUnpublishedRecipes = await prisma.recipe.findMany({
-			where: {
-				status: Status.UNPUBLISHED,
-				userId,
-			},
+		foundUnpublishedRecipes = await recipesOverview({
+			status: Status.UNPUBLISHED,
+			userId,
 		});
 	}
 
-	const foundPublishedRecipes = await prisma.recipe.findMany({
-		where: {
-			status: Status.PUBLISHED,
-			languages: {
-				has: locale,
-			},
-			userId,
-		},
+	const foundPublishedRecipes = await recipesOverview({
+		locale,
+		userId,
 	});
 
 	return json({

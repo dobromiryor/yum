@@ -7,15 +7,24 @@ interface RecipeDetailProps {
 	recipeId: string;
 	locale: Language;
 }
+interface RecipeOverviewProps {
+	locale?: Language;
+	userId?: string;
+	status?: Status;
+}
 
 type RecipeWithSteps = Prisma.RecipeGetPayload<{
-	include: {
-		user: true;
-		steps: true;
-		equipment: true;
-		ingredients: true;
-		subRecipes: true;
-	};
+	include:
+		| {
+				user: true;
+				steps: true;
+				equipment: true;
+				ingredients: true;
+				subRecipes: true;
+		  }
+		| {
+				steps: true;
+		  };
 }>;
 interface ComputeTimesProps<T> {
 	recipe: T;
@@ -137,6 +146,29 @@ export const recipeDetails = async ({
 	return computeTimes({ recipe: foundRecipe });
 };
 
-export const recipeOverview = () => {
-	/* TODO */
+export const recipesOverview = async ({
+	locale,
+	status = Status.PUBLISHED,
+	userId,
+}: RecipeOverviewProps) => {
+	const foundRecipes = await prisma.recipe.findMany({
+		where: {
+			userId,
+			status,
+			...(locale && {
+				languages: {
+					has: locale,
+				},
+			}),
+		},
+		include: {
+			steps: {
+				orderBy: {
+					position: "asc",
+				},
+			},
+		},
+	});
+
+	return foundRecipes.map((recipe) => computeTimes({ recipe }));
 };

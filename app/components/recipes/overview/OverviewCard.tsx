@@ -6,10 +6,11 @@ import { useTranslation } from "react-i18next";
 import { Pill } from "~/components/common/Pill";
 import { type Language } from "~/enums/language.enum";
 import { OptionalTranslatedContentSchema } from "~/schemas/common";
+import { formatTime } from "~/utils/helpers/format-time";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 
 interface OverviewCardProps {
-	recipe: SerializeFrom<Recipe>;
+	recipe: SerializeFrom<Recipe & { totalTime: number }>;
 	lang: Language;
 	isUnrestricted?: boolean;
 	linkTo?: "page" | "edit";
@@ -23,7 +24,7 @@ export const OverviewCard = ({
 }: OverviewCardProps) => {
 	const { t } = useTranslation();
 
-	const { name: n, servings, difficulty } = recipe;
+	const { name: n, servings, difficulty, totalTime } = recipe;
 
 	const name = OptionalTranslatedContentSchema.parse(n);
 	const invertedLang = getInvertedLang(lang);
@@ -58,20 +59,25 @@ export const OverviewCard = ({
 					</span>
 				</div>
 				<div className="flex gap-2 flex-wrap">
-					{/* TODO: Replace times */}
-					{/* {minutes > 0 && (
-						<Pill icon="timer" label={String(formatTime(minutes))} />
-					)} */}
-					{servings && (
-						<Pill
-							icon="group"
-							label={t("recipe.field.countServings", { count: servings })}
-						/>
-					)}
 					<Pill
 						icon="readiness_score"
 						label={t(`recipe.difficulty.${difficulty}`)}
+						tooltip={t("recipe.field.difficulty")}
 					/>
+					{servings && (
+						<Pill
+							icon="group"
+							label={servings}
+							tooltip={t("recipe.field.servings")}
+						/>
+					)}
+					{totalTime > 0 && (
+						<Pill
+							icon="timer"
+							label={String(formatTime(totalTime, t))}
+							tooltip={t("recipe.field.totalTime")}
+						/>
+					)}
 				</div>
 			</div>
 		</Link>

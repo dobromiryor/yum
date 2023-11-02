@@ -107,6 +107,13 @@ const RecipeDetailRoute = () => {
 					</Link>
 				</div>
 				<div className="flex gap-2 flex-wrap">
+					{!!difficulty && (
+						<Pill
+							icon="readiness_score"
+							label={t(`recipe.difficulty.${difficulty}`)}
+							tooltip={t("recipe.field.difficulty")}
+						/>
+					)}
 					{!!servings && (
 						<div className="flex gap-1">
 							<Button
@@ -132,26 +139,6 @@ const RecipeDetailRoute = () => {
 							</Button>
 						</div>
 					)}
-					{!!difficulty && (
-						<Pill
-							icon="readiness_score"
-							label={t(`recipe.difficulty.${difficulty}`)}
-							tooltip={t("recipe.field.difficulty")}
-						/>
-					)}
-					{languages.length > 0 &&
-						languages.map((item) => {
-							const parsedLang = LanguageSchema.parse(item);
-
-							return (
-								<Pill
-									key={`Language__Pill__${item}`}
-									icon="translate"
-									label={t(`nav.language.${parsedLang}`)}
-									tooltip={t("nav.language.label")}
-								/>
-							);
-						})}
 					{!!totalTime && (
 						<Pill
 							icon="timer"
@@ -187,6 +174,19 @@ const RecipeDetailRoute = () => {
 							tooltip={t("recipe.field.restTime")}
 						/>
 					)}
+					{languages.length > 0 &&
+						languages.map((item) => {
+							const parsedLang = LanguageSchema.parse(item);
+
+							return (
+								<Pill
+									key={`Language__Pill__${item}`}
+									icon="translate"
+									label={t(`nav.language.${parsedLang}`)}
+									tooltip={t("nav.language.label")}
+								/>
+							);
+						})}
 				</div>
 				{(authData?.id === user.id || authData?.role === Role.ADMIN) && (
 					<Link

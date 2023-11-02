@@ -1,4 +1,3 @@
-import { Status } from "@prisma/client";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
@@ -11,25 +10,19 @@ import {
 import { OverviewContainer } from "~/components/recipes/overview/OverviewContainer";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
-import { prisma } from "~/utils/prisma.server";
+import { recipesOverview } from "~/utils/recipe.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const locale = LanguageSchema.parse(await i18next.getLocale(request));
 
-	const foundRecipes = await prisma.recipe.findMany({
-		where: {
-			status: Status.PUBLISHED,
-			languages: {
-				has: locale,
-			},
-		},
-	});
+	const foundRecipes = await recipesOverview({ locale });
 
 	return json({ foundRecipes, locale });
 };
 
 export default function RecipesRoute() {
 	const { foundRecipes, locale } = useLoaderData<typeof loader>();
+
 	const {
 		t,
 		i18n: { language },
