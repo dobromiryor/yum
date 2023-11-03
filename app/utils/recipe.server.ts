@@ -1,6 +1,10 @@
 import { Status, type Prisma } from "@prisma/client";
+import { type z } from "zod";
 
+import { LIMIT_FALLBACK, PAGE_FALLBACK } from "~/consts/pagination.const";
 import { type Language } from "~/enums/language.enum";
+import { type PaginationSchema } from "~/schemas/pagination.schema";
+import { isPageGreaterThanPageCount } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 
 interface RecipeDetailProps {
@@ -11,6 +15,8 @@ interface RecipeOverviewProps {
 	locale?: Language;
 	userId?: string;
 	status?: Status;
+	pagination?: z.infer<typeof PaginationSchema>;
+	request: Request;
 }
 
 type RecipeWithSteps = Prisma.RecipeGetPayload<{
@@ -148,19 +154,32 @@ export const recipeDetails = async ({
 
 export const recipesOverview = async ({
 	locale,
-	status = Status.PUBLISHED,
+	// TODO: set fallback for status to Status.PUBLISHED
+	status,
 	userId,
+	pagination = { page: PAGE_FALLBACK, limit: LIMIT_FALLBACK },
+	request,
 }: RecipeOverviewProps) => {
+	const where = {
+		userId,
+		status,
+		...(locale && {
+			languages: {
+				has: locale,
+			},
+		}),
+	};
+
+	const count = await prisma.recipe.count({ where });
+
+	const { page, limit } = await isPageGreaterThanPageCount(
+		pagination,
+		count,
+		request
+	);
+
 	const foundRecipes = await prisma.recipe.findMany({
-		where: {
-			userId,
-			status,
-			...(locale && {
-				languages: {
-					has: locale,
-				},
-			}),
-		},
+		where,
 		include: {
 			steps: {
 				orderBy: {
@@ -168,7 +187,16 @@ export const recipesOverview = async ({
 				},
 			},
 		},
+		skip: (page - 1) * limit,
+		take: limit,
 	});
 
-	return foundRecipes.map((recipe) => computeTimes({ recipe }));
+	return {
+		items: foundRecipes.map((recipe) => computeTimes({ recipe })),
+		pagination: {
+			page,
+			limit,
+			count,
+		},
+	};
 };

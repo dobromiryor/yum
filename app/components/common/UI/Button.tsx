@@ -55,8 +55,7 @@ export const Button = (props: ButtonProps) => {
 		small: "text-xs",
 		medium: "text-base",
 		large: "text-lg",
-		smallSquare:
-			"text-xs aspect-square min-h-full flex-grow flex-shrink-0 basis-full",
+		smallSquare: "text-xs aspect-square flex-shrink-0",
 	};
 
 	const roundedStyles = {
