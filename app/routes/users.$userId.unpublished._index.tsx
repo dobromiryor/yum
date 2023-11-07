@@ -17,6 +17,7 @@ import { LanguageSchema } from "~/schemas/common";
 import { UserRecipesParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
+import { getFrom } from "~/utils/helpers/get-from.server";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 import { recipesOverview } from "~/utils/recipe.server";
@@ -30,15 +31,12 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 
-	const referer = request.clone().headers.get("Referer");
-	const from = referer && new URL(referer).pathname;
-
 	if (!foundUser) {
-		return redirect(from ?? "/recipes"); // TODO: Maybe change this to /users (TBD)
+		return redirect(getFrom(request) ?? "/recipes"); // TODO: Maybe change this to /users (TBD)
 	}
 
 	if (userId !== authData?.id || authData?.role !== Role.ADMIN) {
-		return redirect(from ?? `/users/${userId}`);
+		return redirect(getFrom(request) ?? `/users/${userId}`);
 	}
 
 	const foundRecipes = await recipesOverview({

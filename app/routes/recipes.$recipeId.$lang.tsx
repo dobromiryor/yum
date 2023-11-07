@@ -60,6 +60,7 @@ import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { debounce } from "~/utils/helpers/debounce";
 import { formatTime } from "~/utils/helpers/format-time";
+import { getFrom } from "~/utils/helpers/get-from.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { languageValidation } from "~/utils/helpers/language-validation.server";
 import { parseWithMessage } from "~/utils/helpers/parse-with-message.server";
@@ -110,7 +111,7 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 		!foundRecipe ||
 		(foundRecipe.userId !== authData.id && authData.role !== "ADMIN")
 	) {
-		return redirect("/recipes");
+		return redirect(getFrom(request) ?? `/users/${authData.id}`);
 	}
 
 	const { languages } = foundRecipe;

@@ -35,7 +35,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		!foundRecipe ||
 		(foundRecipe.userId !== authData.id && authData.role !== "ADMIN")
 	) {
-		return redirect("/recipes");
+		return redirect(`/users/${authData.id}`);
 	}
 
 	return json({ foundRecipe });

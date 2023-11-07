@@ -17,6 +17,7 @@ import { useIsLoading } from "~/hooks/useIsLoading";
 import { LanguageSchema } from "~/schemas/common";
 import { LoginDTOSchema, LoginIntentSchema } from "~/schemas/login.schema";
 import { auth } from "~/utils/auth.server";
+import { getFrom } from "~/utils/helpers/get-from.server";
 import { sessionStorage } from "~/utils/session.server";
 
 type FormData = z.infer<typeof LoginDTOSchema>;
@@ -27,9 +28,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		successRedirect: "/settings",
 	});
 
-	const referer = request.clone().headers.get("Referer");
-	const from = referer && new URL(referer).pathname;
-
 	const session = await sessionStorage.getSession(
 		request.headers.get("Cookie")
 	);
@@ -38,7 +36,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		authError: session.get("auth:error"),
 		magicLinkSent: session.has("auth:magiclink"),
 		magicLinkEmail: session.get("auth:email"),
-		from,
+		from: getFrom(request),
 	});
 };
 

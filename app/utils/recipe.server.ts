@@ -7,7 +7,7 @@ import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
 import { type PaginationSchema } from "~/schemas/pagination.schema";
 import { type RecipeWithSteps } from "~/types/recipe.type";
-import { caseInsensitiveJSONSearch } from "~/utils/helpers/case-insensitive-json-search";
+import { caseInsensitiveJSONSearch } from "~/utils/helpers/case-insensitive-json-search.server";
 import { isPageGreaterThanPageCount } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 
