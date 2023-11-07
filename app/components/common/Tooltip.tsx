@@ -112,8 +112,8 @@ export const TooltipWrapper = ({ label, children }: TooltipWrapperProps) => {
 					)}
 					style={{
 						...(y === "bottom"
-							? { top: "calc(100% + 2px)" }
-							: { bottom: "calc(100% + 2px)" }),
+							? { top: "calc(100% + 3px)" }
+							: { bottom: "calc(100% + 3px)" }),
 						translateX: `calc(-50% + 8px)`,
 					}}
 					transition={{ duration: 0.1 }}
