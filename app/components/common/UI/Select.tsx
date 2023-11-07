@@ -139,7 +139,7 @@ export const Select = ({
 							? {
 									opacity: 1,
 									height: "100%",
-									maxHeight: "calc(40px*3.5)",
+									maxHeight: 3.5 * 40,
 									display: "block",
 									transitionEnd: {
 										overflowY: "auto",
@@ -155,6 +155,7 @@ export const Select = ({
 					}
 					className={clsx(
 						"w-0 min-w-full -mt-1 pt-1 border border-t-0 rounded-b overflow-y-auto",
+						"bg-light dark:bg-dark",
 						"border-secondary dark:border-primary"
 					)}
 					transition={{ bounce: false }}

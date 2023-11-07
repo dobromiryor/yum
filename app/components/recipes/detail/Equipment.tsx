@@ -56,6 +56,10 @@ export const EquipmentCard = ({
 	title,
 	equipment,
 }: EquipmentCardProps) => {
+	if (!equipment.length) {
+		return null;
+	}
+
 	return (
 		<div className="flex flex-col gap-1 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors">
 			{title && <h3 className="text-lg typography-medium">{title}</h3>}

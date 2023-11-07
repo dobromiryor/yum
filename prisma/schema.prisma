@@ -54,7 +54,7 @@ model Recipe {
   name           Json // { [lang]: string | null }
   description    Json // { [lang]: string | null }
   difficulty     Difficulty
-  servings       Int?            @db.SmallInt
+  servings       Int            @db.SmallInt
   categories     String[]
   tags           String[]
   languages      String[]

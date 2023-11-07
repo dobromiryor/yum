@@ -215,45 +215,49 @@ const RecipeDetailRoute = () => {
 				</div>
 			</section>
 			{/* INGREDIENTS + SUBRECIPE INGREDIENTS + EQUIPMENT */}
-			<section className="sm:col-span-2 flex flex-col gap-3">
-				<h2 className="text-xl typography-medium">
-					{equipment.length > 0
-						? t("recipe.section.ingredientsAndEquipment")
-						: t("recipe.section.ingredients")}
-				</h2>
-				<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-					<IngredientCard
-						ingredients={ingredients}
-						servings={servings ?? 1}
-						servingsCount={servingsCount}
-						title={
-							subRecipes.length > 0 || equipment.length > 0
-								? t("recipe.section.mainIngredients")
-								: null
-						}
-					/>
-					<SubRecipeCardList
-						servings={servings ?? 1}
-						servingsCount={servingsCount}
-						subRecipes={subRecipes}
-					/>
-					<EquipmentCard
-						equipment={equipment}
-						title={t("recipe.section.equipment")}
-					/>
-				</div>
-			</section>
+			{(!!ingredients.length || !!subRecipes.length || !!equipment.length) && (
+				<section className="sm:col-span-2 flex flex-col gap-3">
+					<h2 className="text-xl typography-medium">
+						{equipment.length > 0
+							? t("recipe.section.ingredientsAndEquipment")
+							: t("recipe.section.ingredients")}
+					</h2>
+					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+						<IngredientCard
+							ingredients={ingredients}
+							servings={servings ?? 1}
+							servingsCount={servingsCount}
+							title={
+								subRecipes.length > 0 || equipment.length > 0
+									? t("recipe.section.mainIngredients")
+									: null
+							}
+						/>
+						<SubRecipeCardList
+							servings={servings ?? 1}
+							servingsCount={servingsCount}
+							subRecipes={subRecipes}
+						/>
+						<EquipmentCard
+							equipment={equipment}
+							title={t("recipe.section.equipment")}
+						/>
+					</div>
+				</section>
+			)}
 			{/* STEPS */}
-			<section className="sm:col-span-2 flex flex-col gap-3">
-				<h2 className="text-xl typography-medium">
-					{t("recipe.section.steps")}
-				</h2>
-				<StepList
-					servings={servings ?? 1}
-					servingsCount={servingsCount}
-					steps={steps}
-				/>
-			</section>
+			{!!steps.length && (
+				<section className="sm:col-span-2 flex flex-col gap-3">
+					<h2 className="text-xl typography-medium">
+						{t("recipe.section.steps")}
+					</h2>
+					<StepList
+						servings={servings ?? 1}
+						servingsCount={servingsCount}
+						steps={steps}
+					/>
+				</section>
+			)}
 		</article>
 	);
 };

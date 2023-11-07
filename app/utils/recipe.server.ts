@@ -77,6 +77,41 @@ const computeTimes = <T extends RecipeWithSteps>({
 	};
 };
 
+export const publishValidation = async (recipeId: string) => {
+	const foundRecipe = await prisma.recipe.findUnique({
+		where: { id: recipeId },
+		include: { steps: true, ingredients: true },
+	});
+
+	if (!foundRecipe) {
+		return false;
+	}
+
+	const {
+		name,
+		description,
+		difficulty,
+		servings,
+		ingredients,
+		steps,
+		languages,
+	} = foundRecipe;
+
+	if (
+		!name ||
+		!description ||
+		!difficulty ||
+		!servings ||
+		!ingredients.length ||
+		!steps.length ||
+		!languages.length
+	) {
+		return false;
+	}
+
+	return true;
+};
+
 export const recipeDetails = async ({
 	recipeId,
 	locale,

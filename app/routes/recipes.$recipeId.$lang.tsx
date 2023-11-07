@@ -1,6 +1,7 @@
 import {
 	Status,
 	type Ingredient as IngredientType,
+	type Prisma,
 	type Recipe,
 	type Step,
 } from "@prisma/client";
@@ -65,6 +66,7 @@ import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { languageValidation } from "~/utils/helpers/language-validation.server";
 import { parseWithMessage } from "~/utils/helpers/parse-with-message.server";
 import { prisma } from "~/utils/prisma.server";
+import { publishValidation } from "~/utils/recipe.server";
 
 export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
@@ -73,38 +75,40 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 	const params = EditRecipeParamsSchema.parse(p);
 	const { recipeId, lang } = params;
 
-	const foundRecipe = await prisma.recipe.findFirst({
-		where: { id: params.recipeId },
-		include: {
-			subRecipes: {
-				orderBy: {
-					position: "asc",
-				},
-			},
-			ingredients: {
-				orderBy: {
-					position: "asc",
-				},
-				include: {
-					subRecipe: true,
-				},
-			},
-			equipment: {
-				orderBy: {
-					position: "asc",
-				},
-			},
-			steps: {
-				orderBy: {
-					position: "asc",
-				},
-				include: {
-					ingredients: true,
-					subRecipes: true,
-					equipment: true,
-				},
+	const include = {
+		subRecipes: {
+			orderBy: {
+				position: "asc",
 			},
 		},
+		ingredients: {
+			orderBy: {
+				position: "asc",
+			},
+			include: {
+				subRecipe: true,
+			},
+		},
+		equipment: {
+			orderBy: {
+				position: "asc",
+			},
+		},
+		steps: {
+			orderBy: {
+				position: "asc",
+			},
+			include: {
+				ingredients: true,
+				subRecipes: true,
+				equipment: true,
+			},
+		},
+	} satisfies Prisma.RecipeInclude;
+
+	let foundRecipe = await prisma.recipe.findFirst({
+		where: { id: params.recipeId },
+		include,
 	});
 
 	if (
@@ -145,23 +149,25 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 		validation[lang]!.count > 0 &&
 		foundRecipe.languages.includes(lang)
 	) {
-		await prisma.recipe.update({
+		foundRecipe = await prisma.recipe.update({
 			data: {
 				languages: foundRecipe.languages.filter((item) => item !== lang).sort(),
 			},
 			where: { id: recipeId },
+			include,
 		});
 	}
 
 	if (
-		foundRecipe.languages.length === 0 &&
+		!(await publishValidation(recipeId)) &&
 		foundRecipe.status === Status.PUBLISHED
 	) {
-		await prisma.recipe.update({
+		foundRecipe = await prisma.recipe.update({
 			data: {
 				status: Status.UNPUBLISHED,
 			},
 			where: { id: recipeId },
+			include,
 		});
 	}
 
@@ -172,6 +178,7 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 			validation,
 			lang,
 			invertedLang,
+			canPublish: await publishValidation(recipeId),
 		},
 		{ headers: { "Set-Cookie": await commit() } }
 	);
@@ -250,17 +257,19 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 			break;
 		case "publishedStatus":
 			if (publishedStatus) {
-				try {
-					await prisma.recipe.update({
-						data: {
-							status: publishedStatus,
-						},
-						where: {
-							id: recipeId,
-						},
-					});
-				} catch (e) {
-					console.error(e);
+				if (await publishValidation(recipeId)) {
+					try {
+						await prisma.recipe.update({
+							data: {
+								status: publishedStatus,
+							},
+							where: {
+								id: recipeId,
+							},
+						});
+					} catch (e) {
+						console.error(e);
+					}
 				}
 			}
 
@@ -300,7 +309,7 @@ export default function EditRecipeRoute() {
 	);
 	const isIdle = state === "idle";
 
-	const { foundRecipe, validation, lang, invertedLang } =
+	const { foundRecipe, validation, lang, invertedLang, canPublish } =
 		useLoaderData<typeof loader>();
 	const {
 		id,
@@ -449,7 +458,7 @@ export default function EditRecipeRoute() {
 					buttons={
 						<Switch
 							className={clsx(isLoadingPublishedStatus && "animate-pulse")}
-							isDisabled={!foundRecipe.languages.length}
+							isDisabled={!canPublish}
 							label={t("recipe.field.published")}
 							labelPosition="hidden"
 							name="publishedStatus"
@@ -570,6 +579,7 @@ export default function EditRecipeRoute() {
 				)}
 			</Section>
 			<Section
+				isRequired
 				buttons={
 					<>
 						{ingredientsOrder.length > 1 && isReorderingIngredients ? (
@@ -727,6 +737,7 @@ export default function EditRecipeRoute() {
 				)}
 			</Section>
 			<Section
+				isRequired
 				buttons={
 					<>
 						{stepsOrder.length > 1 && isReorderingSteps ? (

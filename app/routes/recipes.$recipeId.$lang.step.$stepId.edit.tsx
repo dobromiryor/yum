@@ -302,7 +302,6 @@ export const EditStepModal = () => {
 						name="subRecipeAction"
 						render={({ field: { onChange, value, name } }) => (
 							<Select
-								isRequired
 								label={t("recipe.field.subRecipeAction")}
 								name={name}
 								options={subRecipeActionOptions}

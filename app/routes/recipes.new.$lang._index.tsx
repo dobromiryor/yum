@@ -110,7 +110,10 @@ const NewRecipeRoute = () => {
 						)}
 					/>
 					<Input
+						isRequired
 						label={t("recipe.field.servings")}
+						max={20}
+						min={1}
 						name="servings"
 						type="number"
 					/>

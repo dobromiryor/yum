@@ -13,6 +13,7 @@ interface SectionProps
 	children: ReactNode;
 	title: string;
 	errorCount?: number | null | undefined;
+	isRequired?: boolean;
 }
 
 export const Section = ({
@@ -21,6 +22,7 @@ export const Section = ({
 	title,
 	className,
 	errorCount,
+	isRequired = false,
 	...rest
 }: SectionProps) => {
 	return (
@@ -32,6 +34,9 @@ export const Section = ({
 				<div className="flex items-center gap-2">
 					<p className="flex items-center gap-2 text-2xl typography-bold">
 						{title}
+						{isRequired && (
+							<span className="typography-normal text-red-500">{" *"}</span>
+						)}
 					</p>
 					<ErrorCount errorCount={errorCount} />
 				</div>

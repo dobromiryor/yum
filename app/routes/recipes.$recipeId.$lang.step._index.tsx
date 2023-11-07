@@ -214,7 +214,6 @@ export const CreateStepModal = () => {
 						name="subRecipeAction"
 						render={({ field: { onChange, value, name } }) => (
 							<Select
-								isRequired
 								label={t("recipe.field.subRecipeAction")}
 								name={name}
 								options={subRecipeActionOptions}
@@ -297,7 +296,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					lang,
 					value: rest.content,
 				})),
-				subRecipeAction: subRecipeAction ?? SubRecipeAction.MAKE,
+				subRecipeAction,
 				...(ingredients && {
 					ingredients: {
 						connect: ingredients.map((item) => ({
