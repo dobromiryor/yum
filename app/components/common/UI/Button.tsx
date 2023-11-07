@@ -11,7 +11,7 @@ export type ButtonVariant =
 	| "warning"
 	| "danger";
 
-type ButtonSize = "small" | "medium" | "large" | "smallSquare";
+type ButtonSize = "small" | "medium" | "large" | "smallSquare" | "mediumSquare";
 
 type ButtonRounded = "full" | "default";
 
@@ -56,6 +56,7 @@ export const Button = (props: ButtonProps) => {
 		medium: "text-base",
 		large: "text-lg",
 		smallSquare: "text-xs aspect-square flex-shrink-0",
+		mediumSquare: "text-base aspect-square flex-shrink-0",
 	};
 
 	const roundedStyles = {

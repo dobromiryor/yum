@@ -24,6 +24,7 @@ import isEqual from "lodash.isequal";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ErrorCount } from "~/components/common/ErrorCount";
 import { Button } from "~/components/common/UI/Button";
 import { ParagraphMap } from "~/components/common/UI/ParagraphMap";
 import { Switch } from "~/components/common/UI/Switch";
@@ -34,7 +35,6 @@ import {
 	EquipmentFigure,
 	Volume,
 } from "~/components/recipes/crud/Equipment";
-import { ErrorCount } from "~/components/recipes/crud/ErrorCount";
 import { Figure } from "~/components/recipes/crud/Figure";
 import {
 	Ingredient,

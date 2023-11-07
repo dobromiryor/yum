@@ -1,8 +1,12 @@
 import { useSearchParams } from "@remix-run/react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { type z } from "zod";
 
-import { LIMIT_ARR, LIMIT_FALLBACK } from "~/consts/pagination.const";
+import {
+	LIMIT_ARR,
+	LIMIT_FALLBACK,
+	PAGE_FALLBACK,
+} from "~/consts/pagination.const";
 import { type PaginationWithCountSchema } from "~/schemas/pagination.schema";
 import { toNumber } from "~/utils/helpers/to-number";
 
@@ -12,49 +16,53 @@ export const usePagination = (
 	pagination: Pagination
 ): [Pagination, typeof set] => {
 	const [searchParams, setSearchParams] = useSearchParams();
+	const pageCount = useMemo(
+		() => Math.ceil(pagination.count / pagination.limit),
+		[pagination]
+	);
 
 	const set = useCallback(
-		(target: "page" | "limit", value: string | number) => {
-			setSearchParams((prev) => {
-				prev.set(target, String(value));
+		(target: "page" | "limit", value: string | number, replace = false) => {
+			setSearchParams(
+				(prev) => {
+					prev.set(target, String(value));
 
-				return prev;
-			});
+					return prev;
+				},
+				{ replace }
+			);
 		},
 		[setSearchParams]
 	);
 
 	useEffect(() => {
 		if (!searchParams.has("page") || !searchParams.has("limit")) {
-			set("page", pagination?.page);
-			set("limit", pagination?.limit);
+			set("page", pagination?.page, true);
+			set("limit", pagination?.limit, true);
 		}
 
 		if (searchParams.get("page")) {
-			if (toNumber(searchParams.get("page"))! < 1) {
-				set("page", 1);
-			}
-
-			if (
-				toNumber(searchParams.get("page"))! >
-				Math.ceil(pagination.count / pagination.limit)
-			) {
-				set("page", Math.ceil(pagination.count / pagination.limit));
+			if (pageCount < PAGE_FALLBACK) {
+				if (toNumber(searchParams.get("page"))! < PAGE_FALLBACK) {
+					set("page", PAGE_FALLBACK, true);
+				}
+			} else {
+				if (toNumber(searchParams.get("page"))! > pageCount) {
+					set("page", pageCount, true);
+				}
 			}
 		}
 
 		if (searchParams.get("limit")) {
 			if (toNumber(searchParams.get("limit"))! < 1) {
-				set("limit", LIMIT_FALLBACK);
-			}
-
-			if (
+				set("limit", LIMIT_FALLBACK, true);
+			} else if (
 				toNumber(searchParams.get("limit"))! > LIMIT_ARR[LIMIT_ARR.length - 1]
 			) {
-				set("limit", LIMIT_ARR[LIMIT_ARR.length - 1]);
+				set("limit", LIMIT_ARR[LIMIT_ARR.length - 1], true);
 			}
 		}
-	}, [pagination, searchParams, set]);
+	}, [pageCount, pagination, searchParams, set]);
 
 	return [
 		{

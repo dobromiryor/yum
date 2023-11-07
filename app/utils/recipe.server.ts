@@ -1,9 +1,13 @@
-import { Status, type Prisma } from "@prisma/client";
+import { Status } from "@prisma/client";
 import { type z } from "zod";
 
 import { LIMIT_FALLBACK, PAGE_FALLBACK } from "~/consts/pagination.const";
 import { type Language } from "~/enums/language.enum";
+import i18next from "~/modules/i18next.server";
+import { LanguageSchema } from "~/schemas/common";
 import { type PaginationSchema } from "~/schemas/pagination.schema";
+import { type RecipeWithSteps } from "~/types/recipe.type";
+import { caseInsensitiveJSONSearch } from "~/utils/helpers/case-insensitive-json-search";
 import { isPageGreaterThanPageCount } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 
@@ -11,27 +15,19 @@ interface RecipeDetailProps {
 	recipeId: string;
 	locale: Language;
 }
+
 interface RecipeOverviewProps {
-	locale?: Language;
 	userId?: string;
 	status?: Status;
 	pagination?: z.infer<typeof PaginationSchema>;
 	request: Request;
+	unlockLocale?: boolean;
 }
 
-type RecipeWithSteps = Prisma.RecipeGetPayload<{
-	include:
-		| {
-				user: true;
-				steps: true;
-				equipment: true;
-				ingredients: true;
-				subRecipes: true;
-		  }
-		| {
-				steps: true;
-		  };
-}>;
+interface UnpublishedRecipesCountProps {
+	userId: string;
+}
+
 interface ComputeTimesProps<T> {
 	recipe: T;
 }
@@ -153,24 +149,73 @@ export const recipeDetails = async ({
 };
 
 export const recipesOverview = async ({
-	locale,
-	// TODO: set fallback for status to Status.PUBLISHED
-	status,
+	status = Status.PUBLISHED,
 	userId,
 	pagination = { page: PAGE_FALLBACK, limit: LIMIT_FALLBACK },
 	request,
+	unlockLocale = false,
 }: RecipeOverviewProps) => {
+	const locale = LanguageSchema.parse(await i18next.getLocale(request.clone()));
+
+	const { searchParams } = new URL(request.clone().url);
+
+	const searchQuery = () => {
+		if (searchParams.has("q")) {
+			const searchQuery = searchParams.get("q");
+
+			if (!searchQuery?.trim().length) {
+				searchParams.delete("q");
+
+				return;
+			}
+
+			return searchQuery.trim();
+		}
+
+		return;
+	};
+
 	const where = {
-		userId,
-		status,
-		...(locale && {
-			languages: {
-				has: locale,
+		AND: [
+			{
+				status,
 			},
-		}),
+			{
+				...(!unlockLocale &&
+					locale && {
+						languages: {
+							has: locale,
+						},
+					}),
+			},
+			{
+				userId,
+			},
+			{
+				...(searchQuery() && {
+					OR: [
+						...caseInsensitiveJSONSearch("name", locale, searchQuery()!),
+						...caseInsensitiveJSONSearch("description", locale, searchQuery()!),
+						...caseInsensitiveJSONSearch(
+							"name",
+							locale,
+							searchQuery()!,
+							"ingredients"
+						),
+					],
+				}),
+			},
+		],
 	};
 
 	const count = await prisma.recipe.count({ where });
+
+	if (count <= 0) {
+		return {
+			items: [],
+			pagination: { page: PAGE_FALLBACK, limit: LIMIT_FALLBACK, count: 0 },
+		};
+	}
 
 	const { page, limit } = await isPageGreaterThanPageCount(
 		pagination,
@@ -181,6 +226,7 @@ export const recipesOverview = async ({
 	const foundRecipes = await prisma.recipe.findMany({
 		where,
 		include: {
+			...(searchQuery() && { ingredients: true }),
 			steps: {
 				orderBy: {
 					position: "asc",
@@ -199,4 +245,15 @@ export const recipesOverview = async ({
 			count,
 		},
 	};
+};
+
+export const unpublishedRecipesCount = async ({
+	userId,
+}: UnpublishedRecipesCountProps) => {
+	return await prisma.recipe.count({
+		where: {
+			status: Status.UNPUBLISHED,
+			userId,
+		},
+	});
 };

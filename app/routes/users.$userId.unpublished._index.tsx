@@ -1,11 +1,10 @@
-import { Role } from "@prisma/client";
+import { Role, Status } from "@prisma/client";
 import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useNavigate, useRevalidator } from "@remix-run/react";
+import { useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ErrorCount } from "~/components/common/ErrorCount";
-import { Button } from "~/components/common/UI/Button";
 import {
 	NoRecipes,
 	OverviewCard,
@@ -20,10 +19,7 @@ import { auth } from "~/utils/auth.server";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
-import {
-	recipesOverview,
-	unpublishedRecipesCount,
-} from "~/utils/recipe.server";
+import { recipesOverview } from "~/utils/recipe.server";
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request);
@@ -34,45 +30,41 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 
+	const referer = request.clone().headers.get("Referer");
+	const from = referer && new URL(referer).pathname;
+
 	if (!foundUser) {
-		return redirect("/recipes");
+		return redirect(from ?? "/recipes"); // TODO: Maybe change this to /users (TBD)
 	}
 
-	let foundUnpublishedRecipesCount = undefined;
-
-	if (userId === authData?.id || authData?.role === Role.ADMIN) {
-		foundUnpublishedRecipesCount = await unpublishedRecipesCount({ userId });
+	if (userId !== authData?.id || authData?.role !== Role.ADMIN) {
+		return redirect(from ?? `/users/${userId}`);
 	}
 
-	const foundPublishedRecipes = await recipesOverview({
+	const foundRecipes = await recipesOverview({
 		pagination: setPagination(request),
+		status: Status.UNPUBLISHED,
+		unlockLocale: true,
 		userId,
 		request,
 	});
 
 	return json({
 		foundUser,
-		foundPublishedRecipes,
-		foundUnpublishedRecipesCount,
+		foundRecipes,
 		locale,
 	});
 };
 
-export const UserRecipesRoute = () => {
-	const {
-		foundUser,
-		foundPublishedRecipes,
-		foundUnpublishedRecipesCount,
-		locale,
-	} = useLoaderData<typeof loader>();
+export const UnpublishedUserRecipesRoute = () => {
+	const { foundUser, foundRecipes, locale } = useLoaderData<typeof loader>();
 
 	const {
 		t,
 		i18n: { language },
 	} = useTranslation();
 	const revalidator = useRevalidator();
-	const navigate = useNavigate();
-	const [pagination, set] = usePagination(foundPublishedRecipes.pagination);
+	const [pagination, set] = usePagination(foundRecipes.pagination);
 
 	const lang = LanguageSchema.parse(language);
 
@@ -84,30 +76,24 @@ export const UserRecipesRoute = () => {
 
 	return (
 		<div className="flex flex-col gap-6">
-			<div className="flex justify-between gap-2 flex-wrap">
+			<div className="flex items-center gap-2 flex-wrap">
 				<h1 className="text-2xl typography-bold">
-					{t("user.profile.heading.userRecipes", {
+					{t("user.profile.heading.userUnpublishedRecipes", {
 						user: getDisplayName(foundUser),
 					})}
 				</h1>
-				{foundUnpublishedRecipesCount && (
-					<Button
-						className="ml-auto items-center gap-1"
-						onClick={() => navigate("unpublished")}
-					>
-						<ErrorCount errorCount={foundUnpublishedRecipesCount} />
-						<span>{t("recipe.field.unpublished")}</span>
-					</Button>
-				)}
+				<ErrorCount errorCount={foundRecipes.pagination.count} />
 			</div>
 			<div className="flex flex-col gap-4">
-				{foundPublishedRecipes.items.length ? (
+				{foundRecipes.items.length ? (
 					<>
 						<OverviewContainer>
-							{foundPublishedRecipes.items.map((recipe) => (
+							{foundRecipes.items.map((recipe) => (
 								<OverviewCard
-									key={`Recipe__${recipe.id}`}
+									key={`Unpublished__Recipe__${recipe.id}`}
+									isUnrestricted
 									lang={lang}
+									linkTo="edit"
 									recipe={recipe}
 								/>
 							))}
@@ -122,4 +108,4 @@ export const UserRecipesRoute = () => {
 	);
 };
 
-export default UserRecipesRoute;
+export default UnpublishedUserRecipesRoute;

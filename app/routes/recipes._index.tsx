@@ -10,6 +10,7 @@ import {
 import { OverviewContainer } from "~/components/recipes/overview/OverviewContainer";
 import { OverviewPagination } from "~/components/recipes/overview/OverviewPagination";
 import { usePagination } from "~/hooks/usePagination";
+import { useSearch } from "~/hooks/useSearch";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
@@ -20,7 +21,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	const pagination = setPagination(request);
 
-	// TODO: add missing locale
 	const foundRecipes = await recipesOverview({ pagination, request });
 
 	return json({ foundRecipes, locale });
@@ -36,6 +36,7 @@ export default function RecipesRoute() {
 	const [pagination, setPaginationState] = usePagination(
 		foundRecipes.pagination
 	);
+	const searchQuery = useSearch();
 	const revalidator = useRevalidator();
 
 	const lang = LanguageSchema.parse(language);
@@ -49,7 +50,11 @@ export default function RecipesRoute() {
 	return (
 		<div className="flex flex-col gap-6">
 			<h1 className="text-2xl typography-bold">
-				{t("recipe.heading.allRecipes")}
+				{searchQuery
+					? t("recipe.heading.allRecipesThatContain", {
+							query: searchQuery,
+					  })
+					: t("recipe.heading.allRecipes")}
 			</h1>
 			{foundRecipes.items.length ? (
 				<>

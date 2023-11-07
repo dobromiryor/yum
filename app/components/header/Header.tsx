@@ -1,4 +1,4 @@
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,13 +9,15 @@ import { ThemeSwitch } from "~/components/common/ThemeButton";
 import { MobileNavigation } from "~/components/header/MobileNavigation";
 import { NavMenuButton } from "~/components/header/NavMenuButton";
 import { NavigationLink } from "~/components/header/NavigationLink";
+import { SearchInput } from "~/components/header/SearchInput";
 import { type loader } from "~/root";
 
 export const Header = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
-	const { t } = useTranslation();
 	const { appName, authData } = useLoaderData<typeof loader>();
+	const { t } = useTranslation();
+	const { location } = useNavigation();
 
 	useEffect(() => {
 		if (isOpen) {
@@ -27,18 +29,17 @@ export const Header = () => {
 		}
 	}, [isOpen]);
 
+	useEffect(() => {
+		setIsOpen(false);
+	}, [location]);
+
 	return (
 		<header className="sticky top-0 mx-4 z-50">
-			<MobileNavigation
-				authData={authData}
-				isOpen={isOpen}
-				setIsOpen={setIsOpen}
-			/>
 			<div
 				className={clsx(
-					"mx-auto mb-4 max-w-5xl sm:backdrop-blur rounded-b-2xl shadow-none sm:shadow-lg ",
-					"bg-primary/0 sm:bg-primary/40 sm:backdrop-brightness-110",
-					"bg-primary/0 sm:dark:bg-primary/75 sm:dark:backdrop-brightness-125"
+					"mx-auto mb-4 max-w-5xl md:backdrop-blur rounded-b-2xl shadow-none md:shadow-lg ",
+					"bg-primary/0 md:bg-primary/40 md:backdrop-brightness-110",
+					"bg-primary/0 md:dark:bg-primary/75 md:dark:backdrop-brightness-125"
 				)}
 			>
 				<nav className={clsx("flex justify-between items-center", "px-5 h-16")}>
@@ -47,7 +48,7 @@ export const Header = () => {
 							<span aria-hidden>{appName}</span>
 							<span className="sr-only">{appName}</span>
 						</NavigationLink>
-						<div className="hidden sm:flex gap-2 items-center">
+						<div className="hidden md:flex gap-2 items-center">
 							<NavigationLink end to={"/recipes"}>
 								{t("nav.recipes")}
 							</NavigationLink>
@@ -65,7 +66,8 @@ export const Header = () => {
 					</div>
 
 					<div className="flex gap-2 items-center">
-						<div className="hidden sm:flex gap-2 items-center">
+						<div className="hidden md:flex gap-2 items-center">
+							<SearchInput isMobile={false} />
 							<ThemeSwitch />
 							<LanguageMenu />
 
@@ -79,6 +81,11 @@ export const Header = () => {
 					</div>
 				</nav>
 			</div>
+			<MobileNavigation
+				authData={authData}
+				isOpen={isOpen}
+				setIsOpen={setIsOpen}
+			/>
 		</header>
 	);
 };

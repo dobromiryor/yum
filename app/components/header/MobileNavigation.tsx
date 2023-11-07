@@ -73,7 +73,7 @@ export const MobileNavigation = ({
 				{isOpen && (
 					<motion.div
 						className={clsx(
-							"sm:hidden fixed inset-0 min-h-full backdrop-brightness-95 dark:backdrop-brightness-75 backdrop-blur-xl -z-10"
+							"md:hidden fixed inset-0 min-h-full backdrop-brightness-95 dark:backdrop-brightness-75 backdrop-blur-xl -z-10"
 						)}
 						{...backdropAnimationProps}
 					/>
@@ -81,7 +81,7 @@ export const MobileNavigation = ({
 			</AnimatePresence>
 			<AnimatePresence initial={false}>
 				<motion.div
-					className="sm:hidden inset-0 fixed pb-4 px-4 -z-10"
+					className="md:hidden inset-0 fixed pb-4 px-4 -z-10"
 					onClick={() => setIsOpen(false)}
 					{...containerAnimationProps}
 				>
@@ -103,31 +103,21 @@ export const MobileNavigation = ({
 								>
 									<div className="flex flex-col gap-6">
 										<SearchInput />
-										<MobileNavigationLink
-											end
-											closeMenu={setIsOpen}
-											to={"/recipes"}
-										>
+										<MobileNavigationLink end to={"/recipes"}>
 											{t("nav.recipes")}
 										</MobileNavigationLink>
 										{authData?.isVerified && (
-											<MobileNavigationLink
-												closeMenu={setIsOpen}
-												to={`/users/${authData?.id}`}
-											>
+											<MobileNavigationLink to={`/users/${authData?.id}`}>
 												{t("nav.myRecipes")}
 											</MobileNavigationLink>
 										)}
 										{authData?.isVerified && (
-											<MobileNavigationLink
-												closeMenu={setIsOpen}
-												to={`/recipes/new`}
-											>
+											<MobileNavigationLink to={`/recipes/new`}>
 												{t("nav.newRecipe")}
 											</MobileNavigationLink>
 										)}
 										{!authData && (
-											<MobileNavigationLink closeMenu={setIsOpen} to={"/login"}>
+											<MobileNavigationLink to={"/login"}>
 												{t("nav.login")}
 											</MobileNavigationLink>
 										)}

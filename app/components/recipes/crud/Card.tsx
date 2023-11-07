@@ -2,9 +2,9 @@ import clsx from "clsx";
 import { type DragControls } from "framer-motion";
 import { type ReactNode } from "react";
 
+import { ErrorCount } from "~/components/common/ErrorCount";
 import { Button } from "~/components/common/UI/Button";
 import { BasicCard } from "~/components/recipes/crud/BasicCard";
-import { ErrorCount } from "~/components/recipes/crud/ErrorCount";
 
 interface CardProps {
 	buttons?: ReactNode;

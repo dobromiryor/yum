@@ -60,15 +60,19 @@ export const isPageGreaterThanPageCount = async (
 	count: number,
 	request: Request
 ) => {
-	const { limit } = pagination;
-	let { page } = pagination;
+	const { page, limit } = pagination;
 	const pageCount = Math.ceil(count / limit);
 
-	if (page > pageCount) {
-		const { searchParams } = new URL(request.clone().url);
+	if (pageCount < PAGE_FALLBACK) {
+		return { page: PAGE_FALLBACK, limit };
+	} else {
+		if (page > pageCount) {
+			const { searchParams } = new URL(request.clone().url);
 
-		searchParams.set("page", String(pageCount));
-		page = pageCount;
+			searchParams.set("page", String(pageCount));
+
+			return { page: pageCount, limit };
+		}
 	}
 
 	return { page, limit };

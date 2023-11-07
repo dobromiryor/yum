@@ -39,7 +39,10 @@ export const LanguageMenu = ({ isMobile = false }: LanguageMenuProps) => {
 
 	const handleLanguageChange = (lang: Language) => {
 		i18n.changeLanguage(lang);
-		submit({ locale: lang, pathname }, { action: ACTION_URL, method: "post" });
+		submit(
+			{ locale: lang, pathname },
+			{ action: ACTION_URL, method: "post", replace: true }
+		);
 	};
 
 	return (

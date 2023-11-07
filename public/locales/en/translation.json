@@ -21,7 +21,10 @@
 			"METRIC": "Metric"
 		},
 		"view": "View",
-		"recipe": "Recipe"
+		"recipe": "Recipe",
+		"searchPlaceholder": "Search...",
+		"search": "Search",
+		"clear": "Clear"
 	},
 	"email": {
 		"changeEmail": {
@@ -154,6 +157,7 @@
 		},
 		"heading": {
 			"allRecipes": "All recipes",
+			"allRecipesThatContain": "All recipes that contain \"{{query}}\"",
 			"edit": "Edit recipe ({{lang}})",
 			"new": "Create recipe ({{lang}})"
 		},
@@ -321,7 +325,8 @@
 	"user": {
 		"profile": {
 			"heading": {
-				"userRecipes": "{{user}}'s recipes"
+				"userRecipes": "{{user}}'s recipes",
+				"userUnpublishedRecipes": "{{user}}'s unpublished recipes"
 			}
 		}
 	}

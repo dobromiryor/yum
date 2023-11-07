@@ -40,7 +40,7 @@ export const Input = ({
 			</TranslationHelper>
 			<input
 				className={clsx(
-					"bg-light dark:bg-dark text-dark dark:text-light border px-2 py-1 rounded transition-colors w-full outline-offset-[-1px]",
+					"bg-light dark:bg-dark text-dark dark:text-light border px-2 py-1 rounded transition-colors w-full",
 					errors[name]?.message || translationValidation === false
 						? "border-red-700"
 						: "border-secondary dark:border-primary",

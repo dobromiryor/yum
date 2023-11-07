@@ -1,6 +1,6 @@
 import { NavLink, type NavLinkProps } from "@remix-run/react";
 import { clsx } from "clsx";
-import { type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { type ReactNode } from "react";
 
 import { type ButtonVariant } from "~/components/common/UI/Button";
 
@@ -8,7 +8,6 @@ interface NavigationLinkProps extends NavLinkProps {
 	children: ReactNode;
 	variant?: ButtonVariant;
 	buttonClassName?: string;
-	closeMenu?: Dispatch<SetStateAction<boolean>>;
 }
 
 export const MobileNavigationLink = ({
@@ -16,14 +15,11 @@ export const MobileNavigationLink = ({
 	className,
 	variant,
 	buttonClassName,
-	closeMenu,
 	...rest
 }: NavigationLinkProps) => {
 	return (
 		<NavLink
-			className={clsx("flex justify-stretch", className)}
-			tabIndex={-1}
-			onClick={() => closeMenu?.((prev) => !prev)}
+			className={clsx("flex justify-stretch py-0.5", className)}
 			{...rest}
 		>
 			{({ isPending }) => (

@@ -12,8 +12,8 @@ export const NavMenuButton = ({ isOpen, setIsOpen }: MenuButtonProps) => {
 		"absolute min-w-5 min-h-0.5 bg-dark dark:bg-light transition-colors";
 
 	return (
-		<motion.div
-			className="relative flex flex-col justify-center items-center sm:hidden min-w-8 min-h-8 cursor-pointer"
+		<motion.button
+			className="relative flex flex-col justify-center items-center md:hidden min-w-8 min-h-8 cursor-pointer"
 			onClick={() => setIsOpen((prev) => !prev)}
 		>
 			<motion.div
@@ -22,15 +22,15 @@ export const NavMenuButton = ({ isOpen, setIsOpen }: MenuButtonProps) => {
 						? {
 								/* open */
 								rotate: -135,
-								translateY: 4,
+								translateY: 0,
 						  }
 						: {
 								/* close */
 								rotate: 0,
-								translateY: 0,
+								translateY: -4,
 						  }
 				}
-				className={clsx(lineStyles, "top-1/3")}
+				className={clsx(lineStyles)}
 				initial={false}
 			/>
 			<motion.div
@@ -39,17 +39,17 @@ export const NavMenuButton = ({ isOpen, setIsOpen }: MenuButtonProps) => {
 						? {
 								/* open */
 								rotate: 135,
-								translateY: -4,
+								translateY: 0,
 						  }
 						: {
 								/* close */
 								rotate: 0,
-								translateY: 0,
+								translateY: 4,
 						  }
 				}
-				className={clsx(lineStyles, "bottom-1/3")}
+				className={clsx(lineStyles)}
 				initial={false}
 			/>
-		</motion.div>
+		</motion.button>
 	);
 };

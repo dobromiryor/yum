@@ -21,7 +21,10 @@
 			"METRIC": "Метрична"
 		},
 		"view": "Преглед",
-		"recipe": "Рецепта"
+		"recipe": "Рецепта",
+		"searchPlaceholder": "Търсене...",
+		"search": "Търсене",
+		"clear": "Изчистване"
 	},
 	"email": {
 		"changeEmail": {
@@ -154,6 +157,7 @@
 		},
 		"heading": {
 			"allRecipes": "Всички рецепти",
+			"allRecipesThatContain": "Всички рецепти, които съдържат \"{{query}}\"",
 			"edit": "Редактиране на рецепта ({{lang}})",
 			"new": "Създаване на рецепта ({{lang}})"
 		},
@@ -321,7 +325,8 @@
 	"user": {
 		"profile": {
 			"heading": {
-				"userRecipes": "Рецептите на {{user}}"
+				"userRecipes": "Рецептите на {{user}}",
+				"userUnpublishedRecipes": "Непубликуваните рецепти на {{user}}"
 			}
 		}
 	}

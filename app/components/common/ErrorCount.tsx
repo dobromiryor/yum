@@ -8,7 +8,7 @@ export const ErrorCount = ({ errorCount }: ErrorCountProps) => {
 	}
 
 	return (
-		<span className="flex justify-center items-center flex-1 min-w-5 max-h-5 px-1 bg-red-700 rounded-md text-sm text-light select-none">
+		<span className="flex justify-center items-center min-w-5 max-h-5 px-1 bg-red-700 rounded-md text-sm text-light select-none">
 			{errorCount}
 		</span>
 	);

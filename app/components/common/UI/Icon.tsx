@@ -23,7 +23,10 @@ export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 		const isFontLoaded = async () => {
 			await document.fonts.ready.then(async (fonts) =>
 				fonts.forEach(async (font) => {
-					if (font.family === "Material Symbols Rounded") {
+					if (
+						font.family === "Material Symbols Rounded" ||
+						font.family === '"Material Symbols Rounded"'
+					) {
 						await font.load();
 						await font.loaded.then(() => setIsLoaded(true));
 					}

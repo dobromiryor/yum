@@ -5,7 +5,7 @@ import {
 	type ReactNode,
 } from "react";
 
-import { ErrorCount } from "~/components/recipes/crud/ErrorCount";
+import { ErrorCount } from "~/components/common/ErrorCount";
 
 interface SectionProps
 	extends DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> {
