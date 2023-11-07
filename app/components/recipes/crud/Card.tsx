@@ -4,6 +4,7 @@ import { type ReactNode } from "react";
 
 import { ErrorCount } from "~/components/common/ErrorCount";
 import { Button } from "~/components/common/UI/Button";
+import { Icon } from "~/components/common/UI/Icon";
 import { BasicCard } from "~/components/recipes/crud/BasicCard";
 
 interface CardProps {
@@ -43,8 +44,7 @@ export const Card = ({
 							size="small"
 							onPointerDown={(e) => controls && controls.start(e)}
 						>
-							{/* TODO: Bug on Chrome mobile */}
-							<span aria-hidden="true">&#8942;&#8942;</span>
+							<Icon name="drag_handle" />
 						</Button>
 					) : (
 						buttons && buttons
