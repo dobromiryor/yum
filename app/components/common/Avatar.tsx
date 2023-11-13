@@ -1,30 +1,49 @@
 import { type User } from "@prisma/client";
 import { type SerializeFrom } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Image } from "~/components/common/UI/Image";
 import { AvatarColor, AvatarShade } from "~/enums/avatar.enum";
-import { type loader } from "~/root";
+import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 
 interface AvatarProps {
-	size?: "fixed" | "fill";
+	layout?: "fixed" | "fill";
+	size?: "initial" | "20" | "32";
 	variant?: "square" | "circle";
 	user?: SerializeFrom<User>;
+	className?: string;
 }
 
 export const Avatar = ({
-	size = "fixed",
+	size = "initial",
+	layout = "fixed",
 	variant = "circle",
 	user,
+	className,
 }: AvatarProps) => {
-	const { authData } = useLoaderData<typeof loader>();
+	const { authData } = useTypedRouteLoaderData("root");
 	const { t } = useTranslation();
 
+	const p = user?.photo ?? authData?.photo;
+	const photo =
+		CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(p);
+
 	const sizeStyles = {
-		fixed: "w-8 h-8 text-sm",
-		fill: "w-full h-full text-4xl aspect-square",
+		initial: "",
+		"20": "w-5 h-5",
+		"32": "w-8 h-8",
 	};
+
+	const layoutStyles = useMemo(
+		() => ({
+			fixed: "aspect-square text-sm",
+			fill: "min-w-full min-h-full text-4xl aspect-square",
+		}),
+		[]
+	);
 
 	const variantStyles = {
 		square: "rounded-none",
@@ -82,15 +101,29 @@ export const Avatar = ({
 		};
 	};
 
-	return (
-		// TODO: Tooltip?
+	// TODO: Tooltip?
+	return photo ? (
+		<Image
+			className={clsx(
+				"shadow-md overflow-hidden select-none",
+				sizeStyles[size],
+				layoutStyles[layout],
+				variantStyles[variant],
+				className
+			)}
+			photo={photo}
+			transformation={layout === "fill" ? "lgAvatar" : "smAvatar"}
+		/>
+	) : (
 		<div
 			aria-label={t("settings.field.avatar")}
 			className={clsx(
 				"flex justify-center items-center shadow-md select-none",
 				sizeStyles[size],
+				layoutStyles[layout],
 				variantStyles[variant],
-				getAvatarColors(user ?? authData).background
+				getAvatarColors(user ?? authData).background,
+				className
 			)}
 		>
 			<span

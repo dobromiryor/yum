@@ -19,6 +19,11 @@ export const ENVIRONMENT_VARIABLES_SCHEMA = z.object({
 	SENDGRID_MAGIC_LINK_AUTH_TEMPLATE: z.string().min(1),
 	SENDGRID_CHANGE_EMAIL_TEMPLATE: z.string().min(1),
 
+	/* CLOUDINARY */
+	CLOUDINARY_CLOUD_NAME: z.string().min(1),
+	CLOUDINARY_API_KEY: z.string().min(1),
+	CLOUDINARY_API_SECRET: z.string().min(1),
+
 	/* PRISMA/DB */
 	DATABASE_URL: z.string().min(1),
 	SEED_EMAIL: z.string().email().min(1),

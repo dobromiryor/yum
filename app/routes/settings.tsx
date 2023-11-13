@@ -1,6 +1,7 @@
 import { DisplayName, Role } from "@prisma/client";
 import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -52,8 +53,6 @@ export default function SettingsRoute() {
 
 	const { prefersTemperatureScale, prefersUnitSystem, autoConvert } = foundUser;
 
-	const src = null; // TODO: Avatar
-
 	const getMessage = () => {
 		const message = z
 			.nativeEnum(Message)
@@ -104,12 +103,28 @@ export default function SettingsRoute() {
 				/>
 
 				<div className="flex flex-col sm:flex-row gap-3 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors">
-					<div className="flex-shrink-0 bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden">
-						{src ? (
-							<img alt="" className="aspect-square rounded-xl" src={src} />
-						) : (
-							<Avatar size="fill" user={foundUser} variant="square" />
-						)}
+					<div className="relative basis-min bg-light dark:bg-dark rounded-xl overflow-hidden">
+						<Avatar
+							className={clsx("max-w-none sm:max-w-xs")}
+							layout="fill"
+							user={foundUser}
+							variant="square"
+						/>
+						<Link
+							preventScrollReset
+							className="absolute top-2 right-2"
+							tabIndex={-1}
+							to="change-avatar"
+						>
+							<Button rounded="full" size="smallSquare" variant="normal">
+								<Icon
+									label={t("common.editSomething", {
+										something: t("settings.field.avatar").toLowerCase(),
+									})}
+									name="edit"
+								/>
+							</Button>
+						</Link>
 					</div>
 					<div className="flex-grow flex flex-col sm:flex-row gap-3 justify-between">
 						<div className="flex flex-col justify-between gap-3">

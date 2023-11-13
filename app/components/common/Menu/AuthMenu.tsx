@@ -14,7 +14,7 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 	return (
 		<Menu
 			isButtonRounded
-			button={<Avatar />}
+			button={<Avatar layout="fixed" size="32" variant="circle" />}
 			positionX={isMobile ? "right" : "right"}
 			positionY={isMobile ? "top" : "bottom"}
 		>

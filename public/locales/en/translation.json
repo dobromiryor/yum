@@ -51,7 +51,11 @@
 		"dataMissing": "Translation data missing. Please try again.",
 		"regex": "Doesn't match regex",
 		"somethingWentWrong": "Something went wrong. Please try again later.",
-		"translationMissing": "Translation missing."
+		"translationMissing": "Translation missing.",
+		"file-invalid-type": "Invalid file type",
+		"file-too-large": "File is too large",
+		"file-too-small": "File is too small",
+		"too-many-files": "Too many files."
 	},
 	"login": {
 		"heading": "Log in",
@@ -153,7 +157,8 @@
 			"withMinutes": "{{field}} (minutes)",
 			"subRecipeAction": "Sub recipe action",
 			"restTime": "Rest",
-			"totalTime": "Total"
+			"totalTime": "Total",
+			"lastUpdate": "Last update {{date}}"
 		},
 		"heading": {
 			"allRecipes": "All recipes",
@@ -296,6 +301,12 @@
 			"settings": "Settings"
 		},
 		"modal": {
+			"changeAvatar": {
+				"title": "Update avatar",
+				"dropzone": "Drag and drop your image here, or click and select one instead. Max size 5MB.",
+				"uploadPreview": "Upload preview",
+				"uploadNote": "This action might take longer depending on file size. Please be patient."
+			},
 			"changeEmail": {
 				"title": "Update email address"
 			},

@@ -64,7 +64,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			authData,
 			locale,
 			theme: themeSession.getTheme(),
-			appName: PARSED_ENV.APP_NAME,
+			ENV: {
+				APP_NAME: PARSED_ENV.APP_NAME,
+				CLOUDINARY_CLOUD_NAME: PARSED_ENV.CLOUDINARY_CLOUD_NAME,
+			},
 		} as const,
 		{
 			headers: {
@@ -76,7 +79,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return [
-		{ title: data?.appName },
+		{ title: data?.ENV.APP_NAME },
 		{ charset: "utf-8" },
 		{ name: "viewport", content: "width=device-width, initial-scale=1" },
 	];

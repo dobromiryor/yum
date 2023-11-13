@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Avatar } from "~/components/common/Avatar";
 import { Pill } from "~/components/common/Pill";
 import { Button } from "~/components/common/UI/Button";
 import { Icon } from "~/components/common/UI/Icon";
@@ -39,6 +40,7 @@ const RecipeDetailRoute = () => {
 	const {
 		authData,
 		foundRecipe: {
+			updatedAt,
 			name: n,
 			description: d,
 			user,
@@ -102,8 +104,14 @@ const RecipeDetailRoute = () => {
 					<h1 className="flex gap-2 text-2xl md:text-3xl lg:text-4xl sm:text-center typography-bold sm:typography-extrabold">
 						{name[locale]}
 					</h1>
-					<Link className="text-sm typography-light" to={`/users/${user.id}`}>
-						{getDisplayName(user)}
+					<Link
+						className="inline-flex items-center gap-2"
+						to={`/users/${user.id}`}
+					>
+						<Avatar layout="fixed" size="20" user={user} variant="circle" />
+						<span className="text-sm typography-medium">
+							{getDisplayName(user)}
+						</span>
 					</Link>
 				</div>
 				<div className="flex gap-2 flex-wrap">
@@ -187,6 +195,14 @@ const RecipeDetailRoute = () => {
 								/>
 							);
 						})}
+					<Pill
+						icon="calendar_today"
+						label={new Date(updatedAt).toLocaleDateString()}
+						tooltip={t("recipe.field.lastUpdate", {
+							date: new Date(updatedAt).toLocaleDateString(),
+							interpolation: { escapeValue: false },
+						})}
+					/>
 				</div>
 				{(authData?.id === user.id || authData?.role === Role.ADMIN) && (
 					<Link

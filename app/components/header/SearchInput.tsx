@@ -117,12 +117,13 @@ export const SearchInput = ({ isMobile = true }: SearchInputProps) => {
 	return (
 		<div
 			ref={scope}
-			className="flex items-center p-2 md:p-[3px] bg-light dark:bg-dark rounded-lg overflow-hidden"
+			className="flex items-center p-2 md:p-[3px] bg-light dark:bg-dark rounded-lg overflow-hidden  transition-colors duration-500"
 			role="search"
 		>
 			<input
 				className={clsx(
-					"bg-transparent text-dark dark:text-light placeholder:text-secondary placeholder:dark:text-primary text-xl md:text-base border-0 rounded-md transition-colors md:min-h-[26px] px-1 min-w-0 max-w-full basis-full shrink"
+					"bg-transparent text-dark dark:text-light placeholder:text-secondary placeholder:dark:text-primary text-xl md:text-base border-0 rounded-md md:min-h-[26px] px-1 min-w-0 max-w-full basis-full shrink",
+					"selection:bg-primary selection:text-light dark:selection:bg-secondary dark:selection:text-dark"
 				)}
 				placeholder={t("common.searchPlaceholder")}
 				role="searchbox"

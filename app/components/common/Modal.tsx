@@ -13,7 +13,7 @@ import { Button, type ButtonVariant } from "~/components/common/UI/Button";
 
 interface ModalProps {
 	children: ReactNode;
-	CTAFn?: () => void;
+	CTAFn?: (() => void) | string;
 	CTALabel?: string;
 	CTAVariant?: ButtonVariant;
 	dismissFn?: () => void;
@@ -48,7 +48,7 @@ export const Modal = ({
 	const navigate = useNavigate();
 
 	const handleCTA = () => {
-		if (CTAFn) {
+		if (CTAFn && typeof CTAFn !== "string") {
 			CTAFn();
 		}
 	};
@@ -86,13 +86,13 @@ export const Modal = ({
 					exit={{ opacity: 0 }}
 					initial={{ opacity: 0 }}
 					transition={{ duration: 0.3 }}
-					onMouseDown={() => handleDismiss()}
+					onMouseDown={() => !isLoading && handleDismiss()}
 				>
 					{isOpen && (
 						<motion.div
 							animate={{ opacity: 1, translateY: 0 }}
 							aria-modal={true}
-							className="flex flex-col gap-6 basis-[768px] h-fit max-h-screen min-w-80 max-w-3xl bg-light dark:bg-dark rounded-lg py-6 m-4 shadow-xl"
+							className="flex flex-col gap-6 basis-[768px] h-fit max-h-screen min-w-80 max-w-3xl bg-light dark:bg-dark rounded-2xl py-6 m-4 shadow-xl"
 							exit={{ opacity: 0, translateY: 20 }}
 							initial={{ opacity: 0, translateY: -20 }}
 							role="dialog"
@@ -110,7 +110,9 @@ export const Modal = ({
 							<div className="flex justify-end items-start gap-2 px-6">
 								{CTAFn && (
 									<Button
+										form={typeof CTAFn === "string" ? CTAFn : undefined}
 										isDisabled={isCTADisabled || isLoading}
+										type={typeof CTAFn === "string" ? "submit" : "button"}
 										variant={CTAVariant}
 										onClick={handleCTA}
 									>
@@ -120,7 +122,7 @@ export const Modal = ({
 								<Button
 									isDisabled={isLoading}
 									variant={dismissVariant}
-									onClick={() => handleDismiss()}
+									onClick={() => !isLoading && handleDismiss()}
 								>
 									{dismissLabel ?? t("common.cancel")}
 								</Button>

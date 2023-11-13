@@ -33,6 +33,7 @@ for (const color in tailwindColors) {
 		}
 	}
 }
+/** @type {import('tailwindcss').Config} */
 
 export default {
 	content: ["./app/**/*.{js,jsx,ts,tsx}"],
@@ -102,7 +103,12 @@ export default {
 			},
 			minHeight: ({ theme }) => ({ ...theme("spacing") }),
 			minWidth: ({ theme }) => ({ ...theme("spacing") }),
-			flexBasis: ({ theme }) => ({ ...theme("screens") }),
+			maxWidth: ({ theme }) => ({ ...theme("spacing") }),
+			maxHeight: ({ theme }) => ({ ...theme("spacing") }),
+			flexBasis: ({ theme }) => ({
+				...theme("screens"),
+				min: "min-content",
+			}),
 		},
 	},
 	plugins: [

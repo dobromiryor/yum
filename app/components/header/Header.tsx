@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigation } from "@remix-run/react";
+import { useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,12 +10,12 @@ import { MobileNavigation } from "~/components/header/MobileNavigation";
 import { NavMenuButton } from "~/components/header/NavMenuButton";
 import { NavigationLink } from "~/components/header/NavigationLink";
 import { SearchInput } from "~/components/header/SearchInput";
-import { type loader } from "~/root";
+import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
 
 export const Header = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
-	const { appName, authData } = useLoaderData<typeof loader>();
+	const { authData, ENV } = useTypedRouteLoaderData("root");
 	const { t } = useTranslation();
 	const { location } = useNavigation();
 
@@ -45,8 +45,8 @@ export const Header = () => {
 				<nav className={clsx("flex justify-between items-center", "px-5 h-16")}>
 					<div className="flex gap-2 items-center">
 						<NavigationLink to={"/"}>
-							<span aria-hidden>{appName}</span>
-							<span className="sr-only">{appName}</span>
+							<span aria-hidden>{ENV.APP_NAME}</span>
+							<span className="sr-only">{ENV.APP_NAME}</span>
 						</NavigationLink>
 						<div className="hidden md:flex gap-2 items-center">
 							<NavigationLink end to={"/recipes"}>

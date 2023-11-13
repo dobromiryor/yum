@@ -11,6 +11,8 @@
 		"typecheck": "tsc"
 	},
 	"dependencies": {
+		"@cloudinary/react": "^1.11.2",
+		"@cloudinary/url-gen": "^1.12.1",
 		"@hookform/resolvers": "^3.3.2",
 		"@prisma/client": "^5.5.2",
 		"@remix-run/css-bundle": "^2.1.0",
@@ -18,6 +20,8 @@
 		"@remix-run/react": "^2.1.0",
 		"@remix-run/serve": "^2.1.0",
 		"@sendgrid/mail": "^7.7.0",
+		"@unpic/placeholder": "^0.1.2",
+		"cloudinary": "^1.41.0",
 		"clsx": "^2.0.0",
 		"convert": "^4.13.2",
 		"downshift": "^8.2.2",
@@ -31,12 +35,14 @@
 		"lodash.isequal": "^4.5.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"react-dropzone": "^14.2.3",
 		"react-hook-form": "^7.47.0",
 		"react-i18next": "^13.3.1",
 		"remix-auth": "^3.6.0",
 		"remix-auth-email-link": "^2.1.0",
 		"remix-hook-form": "^2.0.3",
 		"remix-i18next": "^5.4.0",
+		"sharp": "^0.32.6",
 		"zod": "^3.22.4",
 		"zod-i18n-map": "^2.21.0"
 	},
