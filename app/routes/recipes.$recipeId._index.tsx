@@ -9,12 +9,14 @@ import { Avatar } from "~/components/common/Avatar";
 import { Pill } from "~/components/common/Pill";
 import { Button } from "~/components/common/UI/Button";
 import { Icon } from "~/components/common/UI/Icon";
+import { Image } from "~/components/common/UI/Image";
 import { ParagraphMap } from "~/components/common/UI/ParagraphMap";
 import { EquipmentCard } from "~/components/recipes/detail/Equipment";
 import { IngredientCard } from "~/components/recipes/detail/Ingredient";
 import { StepList } from "~/components/recipes/detail/Step";
 import { SubRecipeCardList } from "~/components/recipes/detail/SubRecipeCardList";
 import i18next from "~/modules/i18next.server";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
 import { RecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
@@ -56,6 +58,7 @@ const RecipeDetailRoute = () => {
 			difficulty,
 			languages,
 			servings,
+			photo: p,
 		},
 		locale,
 	} = useLoaderData<typeof loader>();
@@ -71,6 +74,8 @@ const RecipeDetailRoute = () => {
 
 	const name = TranslatedContentSchema.parse(n);
 	const description = TranslatedContentSchema.parse(d);
+	const photo =
+		CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(p);
 
 	useEffect(() => {
 		if (locale !== lang) {
@@ -78,30 +83,31 @@ const RecipeDetailRoute = () => {
 		}
 	}, [lang, locale, revalidator]);
 
-	const src = null;
-
 	return (
-		<article className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-			{/* {src && ( */}
+		<article className="grid grid-cols-2 gap-3">
+			{photo && (
+				<section
+					className={clsx(
+						"col-span-2 sm:col-span-1 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors"
+					)}
+				>
+					<Image className="rounded-xl overflow-hidden" photo={photo} />
+				</section>
+			)}
 			<section
 				className={clsx(
-					"p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors"
-				)}
-			>
-				<div className="bg-light dark:bg-dark transition-colors aspect-square rounded-xl overflow-hidden">
-					{src && <img alt="" className="aspect-square rounded-xl" src={src} />}
-				</div>
-			</section>
-			{/* )} */}
-			<section
-				className={clsx(
-					// !src && "col-span-2",
-					"relative flex flex-col justify-between items-center gap-3 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors"
+					"relative col-span-2 flex flex-col justify-between gap-3 p-3 bg-secondary dark:bg-primary rounded-2xl shadow-lg transition-colors",
+					photo ? "items-center sm:col-span-1" : ""
 				)}
 			>
 				<div>{/* placeholder */}</div>
 				<div className="flex flex-col sm:items-center gap-3">
-					<h1 className="flex gap-2 text-2xl md:text-3xl lg:text-4xl sm:text-center typography-bold sm:typography-extrabold">
+					<h1
+						className={clsx(
+							"flex gap-2 text-2xl md:text-3xl lg:text-4xl typography-bold sm:typography-extrabold",
+							photo && "sm:text-center"
+						)}
+					>
 						{name[locale]}
 					</h1>
 					<Link
@@ -222,7 +228,7 @@ const RecipeDetailRoute = () => {
 				)}
 			</section>
 			{/* DESCRIPTION */}
-			<section className="sm:col-span-2 flex flex-col gap-3">
+			<section className="col-span-2 flex flex-col gap-3">
 				<h2 className="text-xl typography-medium">
 					{t("recipe.field.description")}
 				</h2>
@@ -232,7 +238,7 @@ const RecipeDetailRoute = () => {
 			</section>
 			{/* INGREDIENTS + SUBRECIPE INGREDIENTS + EQUIPMENT */}
 			{(!!ingredients.length || !!subRecipes.length || !!equipment.length) && (
-				<section className="sm:col-span-2 flex flex-col gap-3">
+				<section className="col-span-2 flex flex-col gap-3">
 					<h2 className="text-xl typography-medium">
 						{equipment.length > 0
 							? t("recipe.section.ingredientsAndEquipment")
@@ -263,7 +269,7 @@ const RecipeDetailRoute = () => {
 			)}
 			{/* STEPS */}
 			{!!steps.length && (
-				<section className="sm:col-span-2 flex flex-col gap-3">
+				<section className="col-span-2 flex flex-col gap-3">
 					<h2 className="text-xl typography-medium">
 						{t("recipe.section.steps")}
 					</h2>

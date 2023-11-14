@@ -24,7 +24,12 @@
 		"recipe": "Recipe",
 		"searchPlaceholder": "Search...",
 		"search": "Search",
-		"clear": "Clear"
+		"clear": "Clear",
+		"dropzone": {
+			"instructions": "Drag and drop your image here, or press and select one instead. Max size 5MB.",
+			"uploadPreview": "Upload preview",
+			"uploadNote": "This action might take a few minutes depending on file size and your internet connection. Please be patient."
+		}
 	},
 	"email": {
 		"changeEmail": {
@@ -87,11 +92,13 @@
 	},
 	"recipe": {
 		"card": {
-			"emptyEquipment": "No equipment added yet",
-			"emptyIngredients": "No ingredients added yet",
-			"emptyRecipes": "No recipes added yet",
-			"emptySteps": "No steps added yet",
-			"emptySubRecipes": "No sub recipes added yet"
+			"emptyPhoto": "No photo added yet.",
+			"emptyEquipment": "No equipment added yet.",
+			"emptyIngredients": "No ingredients added yet.",
+			"emptyRecipes": "No recipes added yet.",
+			"emptySteps": "No steps added yet.",
+			"emptySubRecipes": "No sub recipes added yet.",
+			"pressToAddSomething": "Press to add a new {{something}}."
 		},
 		"difficulty": {
 			"EASY": "Easy",
@@ -158,7 +165,11 @@
 			"subRecipeAction": "Sub recipe action",
 			"restTime": "Rest",
 			"totalTime": "Total",
-			"lastUpdate": "Last update {{date}}"
+			"lastUpdate": "Last update {{date}}",
+			"photo": "Photo",
+			"recipe": "Recipe",
+			"ingredient": "Ingredient",
+			"step": "Step"
 		},
 		"heading": {
 			"allRecipes": "All recipes",
@@ -169,19 +180,23 @@
 		"modal": {
 			"create": {
 				"ingredient": {
-					"title": "Create ingredient"
+					"title": "Add ingredient"
 				},
 				"step": {
-					"title": "Create step"
+					"title": "Add step"
 				},
 				"subRecipe": {
-					"title": "Create sub recipe"
+					"title": "Add sub recipe"
 				},
 				"equipment": {
-					"title": "Create equipment item"
+					"title": "Add equipment item"
 				}
 			},
 			"delete": {
+				"photo": {
+					"content": "This photo will be permanently deleted.",
+					"title": "Delete photo"
+				},
 				"ingredient": {
 					"content": "This ingredient will be permanently deleted.",
 					"contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.ingredient.content)",
@@ -211,6 +226,9 @@
 			"update": {
 				"details": {
 					"title": "Update details"
+				},
+				"photo": {
+					"title": "Update photo"
 				},
 				"ingredient": {
 					"title": "Update ingredient"
@@ -302,10 +320,7 @@
 		},
 		"modal": {
 			"changeAvatar": {
-				"title": "Update avatar",
-				"dropzone": "Drag and drop your image here, or click and select one instead. Max size 5MB.",
-				"uploadPreview": "Upload preview",
-				"uploadNote": "This action might take longer depending on file size. Please be patient."
+				"title": "Update avatar"
 			},
 			"changeEmail": {
 				"title": "Update email address"

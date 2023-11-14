@@ -16,7 +16,7 @@ import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
 import { type CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 
 interface ImageProps {
-	className: string;
+	className?: string;
 	photo: z.infer<typeof CloudinaryUploadApiResponseWithBlurHashSchema>;
 	transformation?: string;
 }
@@ -40,7 +40,7 @@ export const Image = ({ className, photo, transformation }: ImageProps) => {
 		cldImg.namedTransformation(name(transformation)).format("auto");
 	} else {
 		cldImg
-			.resize(fill().aspectRatio(ar1X1()))
+			.resize(fill().gravity("auto").aspectRatio(ar1X1()))
 			.resize(scale().width("auto"))
 			.quality(autoBest())
 			.delivery(dpr(auto()))
@@ -51,16 +51,24 @@ export const Image = ({ className, photo, transformation }: ImageProps) => {
 
 	useEffect(() => {
 		if (ref.current?.imageRef.current) {
+			ref.current.imageRef.current.classList.add("w-full");
+			!transformation &&
+				ref.current.imageRef.current.classList.add("aspect-square");
+
 			ref.current.imageRef.current.onload = () => {
 				setIsLoaded(true);
 			};
 		}
-	}, [ref]);
+	}, [ref, transformation]);
 
 	return (
-		<div className={clsx(className)} style={placeholder}>
+		<div
+			className={clsx(!transformation && "aspect-square", className)}
+			style={placeholder}
+		>
 			<motion.div
 				animate={isLoaded ? { opacity: 1 } : { opacity: 0 }}
+				className={clsx("w-full", !transformation && "aspect-square")}
 				initial={{ opacity: 0 }}
 			>
 				<AdvancedImage ref={ref} cldImg={cldImg} plugins={[lazyload()]} />

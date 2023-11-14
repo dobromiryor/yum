@@ -18,7 +18,7 @@ model User {
   firstName               String?
   lastName                String?
   username                String?            @unique
-  photo                   Json? //Cloudinary UploadApiResponse
+  photo                   Json? // Cloudinary UploadApiResponse
   isVerified              Boolean            @default(false)
   role                    Role               @default(USER)
   autoConvert             Boolean            @default(false)
@@ -55,6 +55,7 @@ model Recipe {
   description    Json // { [lang]: string | null }
   difficulty     Difficulty
   servings       Int             @db.SmallInt
+  photo          Json? // Cloudinary UploadApiResponse
   categories     String[]
   tags           String[]
   languages      String[]

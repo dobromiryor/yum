@@ -11,15 +11,16 @@ cloudinary.v2.config({
 	analytics: false,
 });
 
-export const uploadAvatar = async (
+export const uploadImage = async (
 	data: AsyncIterable<Uint8Array>,
+	folder: "users" | "recipes",
 	id: string
 ) => {
 	const uploadPromise: Promise<UploadApiResponse> = new Promise(
 		async (resolve, reject) => {
 			const uploadStream = cloudinary.v2.uploader.upload_stream(
 				{
-					folder: "users",
+					folder,
 					public_id: id,
 
 					transformation: {
@@ -31,7 +32,14 @@ export const uploadAvatar = async (
 				},
 				(error, result) => {
 					if (error) {
-						console.error(getLocalTime(), "@uploadAvatar", data, id, error);
+						console.error(
+							getLocalTime(),
+							"@uploadImage",
+							data,
+							folder,
+							id,
+							error
+						);
 						reject(error);
 
 						return;
@@ -52,13 +60,13 @@ export const uploadAvatar = async (
 	return uploadPromise;
 };
 
-export const deleteAvatar = async (publicId: string): Promise<boolean> => {
+export const deleteImage = async (publicId: string): Promise<boolean> => {
 	const res = await cloudinary.v2.uploader.destroy(publicId, {
 		invalidate: true,
 	});
 
 	if (!res || res.result !== "ok") {
-		console.error(getLocalTime(), "@deleteAvatar", publicId, res);
+		console.error(getLocalTime(), "@deleteImage", publicId, res);
 
 		return false;
 	}

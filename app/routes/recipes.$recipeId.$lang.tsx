@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 
 import { ErrorCount } from "~/components/common/ErrorCount";
 import { Button } from "~/components/common/UI/Button";
+import { Image } from "~/components/common/UI/Image";
 import { ParagraphMap } from "~/components/common/UI/ParagraphMap";
 import { Switch } from "~/components/common/UI/Switch";
 import { Card } from "~/components/recipes/crud/Card";
@@ -47,6 +48,7 @@ import { SubRecipesFigure } from "~/components/recipes/crud/SubRecipe";
 import { TemperatureFigure } from "~/components/recipes/crud/Temperature";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import i18next from "~/modules/i18next.server";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import {
 	OptionalTranslatedContentSchema,
 	SessionDataStorageSchema,
@@ -319,9 +321,12 @@ export default function EditRecipeRoute() {
 		servings,
 		languages,
 		status,
+		photo: p,
 	} = foundRecipe;
 	const name = TranslatedContentSchema.parse(n);
 	const description = TranslatedContentSchema.parse(d);
+	const photo =
+		CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(p);
 
 	const languagesIncludesLocale = useMemo(
 		() => languages.includes(lang),
@@ -489,45 +494,77 @@ export default function EditRecipeRoute() {
 						lang: t(`nav.language.${lang}`),
 					})}
 				/>
-				<Card
-					buttons={
-						<>
-							{status === Status.PUBLISHED && languagesIncludesLocale && (
-								<Link preventScrollReset tabIndex={-1} to={`/recipes/${id}`}>
+				<div className="grid grid-cols-3 gap-4">
+					{photo ? (
+						<Card
+							buttons={
+								<>
+									<Link preventScrollReset tabIndex={-1} to="photo">
+										<Button>
+											<span>{t("common.edit")}</span>
+										</Button>
+									</Link>
+									<Link preventScrollReset tabIndex={-1} to="photo/delete">
+										<Button>{t("common.delete")}</Button>
+									</Link>
+								</>
+							}
+							className="col-span-3 sm:col-span-1"
+							title={t("recipe.field.photo")}
+						>
+							<Image className="rounded-xl overflow-hidden" photo={photo} />
+						</Card>
+					) : (
+						<EmptyCard to="photo">
+							<span>{t("recipe.card.emptyPhoto")}</span>
+							<span>
+								{t("recipe.card.pressToAddSomething", {
+									something: t("recipe.field.photo").toLowerCase(),
+								})}
+							</span>
+						</EmptyCard>
+					)}
+					<Card
+						buttons={
+							<>
+								{status === Status.PUBLISHED && languagesIncludesLocale && (
+									<Link preventScrollReset tabIndex={-1} to={`/recipes/${id}`}>
+										<Button className="flex items-center gap-1">
+											<span>{t("common.view")}</span>
+										</Button>
+									</Link>
+								)}
+								<Link preventScrollReset tabIndex={-1} to="details">
 									<Button className="flex items-center gap-1">
-										<span>{t("common.view")}</span>
+										<span>{t("common.edit")}</span>
+										<ErrorCount errorCount={validation[lang]?.recipe?.count} />
 									</Button>
 								</Link>
-							)}
-							<Link preventScrollReset tabIndex={-1} to="details">
-								<Button className="flex items-center gap-1">
-									<span>{t("common.edit")}</span>
-									<ErrorCount errorCount={validation[lang]?.recipe?.count} />
-								</Button>
-							</Link>
-							<Link preventScrollReset tabIndex={-1} to="delete">
-								<Button>{t("common.delete")}</Button>
-							</Link>
-						</>
-					}
-					title={name[lang] ?? t("error.translationMissing")}
-				>
-					<Figure
-						className="flex flex-col gap-2"
-						label={t("recipe.field.description")}
+								<Link preventScrollReset tabIndex={-1} to="delete">
+									<Button>{t("common.delete")}</Button>
+								</Link>
+							</>
+						}
+						className="col-span-3 sm:col-span-2"
+						title={name[lang] ?? t("error.translationMissing")}
 					>
-						{<ParagraphMap text={description?.[lang]} /> ??
-							t("error.translationMissing")}
-					</Figure>
-					<Figure isInline label={t("recipe.field.difficulty")}>
-						<span>{t(`recipe.difficulty.${difficulty}`)}</span>
-					</Figure>
-					{servings && (
-						<Figure isInline label={t("recipe.field.servings")}>
-							<span>{servings}</span>
+						<Figure
+							className="flex flex-col gap-2"
+							label={t("recipe.field.description")}
+						>
+							{<ParagraphMap text={description?.[lang]} /> ??
+								t("error.translationMissing")}
 						</Figure>
-					)}
-				</Card>
+						<Figure isInline label={t("recipe.field.difficulty")}>
+							<span>{t(`recipe.difficulty.${difficulty}`)}</span>
+						</Figure>
+						{servings && (
+							<Figure isInline label={t("recipe.field.servings")}>
+								<span>{servings}</span>
+							</Figure>
+						)}
+					</Card>
+				</div>
 			</Section>
 			<Section
 				buttons={
@@ -575,7 +612,14 @@ export default function EditRecipeRoute() {
 						);
 					})
 				) : (
-					<EmptyCard>{t("recipe.card.emptySubRecipes")}</EmptyCard>
+					<EmptyCard to="sub-recipe">
+						<span>{t("recipe.card.emptySubRecipes")}</span>
+						<span>
+							{t("recipe.card.pressToAddSomething", {
+								something: t("recipe.field.subRecipe").toLowerCase(),
+							})}
+						</span>
+					</EmptyCard>
 				)}
 			</Section>
 			<Section
@@ -681,7 +725,14 @@ export default function EditRecipeRoute() {
 							);
 						})
 					) : (
-						<EmptyCard>{t("recipe.card.emptyIngredients")}</EmptyCard>
+						<EmptyCard to="ingredient">
+							<span>{t("recipe.card.emptyIngredients")}</span>
+							<span>
+								{t("recipe.card.pressToAddSomething", {
+									something: t("recipe.field.ingredient").toLowerCase(),
+								})}
+							</span>
+						</EmptyCard>
 					)}
 				</Reorder.Group>
 			</Section>
@@ -733,7 +784,14 @@ export default function EditRecipeRoute() {
 						);
 					})
 				) : (
-					<EmptyCard>{t("recipe.card.emptyEquipment")}</EmptyCard>
+					<EmptyCard to="equipment">
+						<span>{t("recipe.card.emptyEquipment")}</span>
+						<span>
+							{t("recipe.card.pressToAddSomething", {
+								something: t("recipe.field.equipment").toLowerCase(),
+							})}
+						</span>
+					</EmptyCard>
 				)}
 			</Section>
 			<Section
@@ -851,7 +909,14 @@ export default function EditRecipeRoute() {
 						})}
 					</Reorder.Group>
 				) : (
-					<EmptyCard>{t("recipe.card.emptySteps")}</EmptyCard>
+					<EmptyCard to="step">
+						<span>{t("recipe.card.emptySteps")}</span>
+						<span>
+							{t("recipe.card.pressToAddSomething", {
+								something: t("recipe.field.step").toLowerCase(),
+							})}
+						</span>
+					</EmptyCard>
 				)}
 			</Section>
 			{/* Modal outlet */}

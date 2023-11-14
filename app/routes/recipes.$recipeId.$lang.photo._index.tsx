@@ -1,6 +1,5 @@
 import { fill } from "@cloudinary/url-gen/actions/resize";
 import { Cloudinary, CloudinaryImage } from "@cloudinary/url-gen/index";
-import { Prisma } from "@prisma/client";
 import {
 	json,
 	redirect,
@@ -14,22 +13,21 @@ import {
 	useActionData,
 	useLoaderData,
 	useLocation,
-	useNavigation,
 } from "@remix-run/react";
 import clsx from "clsx";
 import { useEffect, useState, type MouseEvent } from "react";
 import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
-import { Avatar } from "~/components/common/Avatar";
 import { Modal } from "~/components/common/Modal";
 import { Pill } from "~/components/common/Pill";
 import { Button } from "~/components/common/UI/Button";
 import { FormError } from "~/components/common/UI/FormError";
 import { Icon } from "~/components/common/UI/Icon";
+import { Image } from "~/components/common/UI/Image";
 import { MB } from "~/consts/mb";
 import { useDataTransfer } from "~/hooks/useDataTransfer";
+import { useIsLoading } from "~/hooks/useIsLoading";
 import { useSlowUpload } from "~/hooks/useSlowUpload";
 import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
 import i18next from "~/modules/i18next.server";
@@ -37,47 +35,49 @@ import {
 	CloudinaryUploadApiResponseSchema,
 	CloudinaryUploadApiResponseWithBlurHashSchema,
 } from "~/schemas/cloudinary.schema";
+import { RecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
-import { deleteImage, uploadImage } from "~/utils/cloudinary.server";
+import { uploadImage } from "~/utils/cloudinary.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import { getBlurHash } from "~/utils/helpers/get-blur-hash.server";
 import { prisma } from "~/utils/prisma.server";
-import { sessionStorage } from "~/utils/session.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/login",
 	});
 
-	const foundUser = await prisma.user.findFirst({
-		where: { id: authData.id },
+	const { recipeId } = RecipeParamsSchema.parse(p);
+
+	const foundRecipe = await prisma.recipe.findUnique({
+		where: { id: recipeId },
 	});
 
-	if (!foundUser) {
+	if (!foundRecipe) {
 		return redirect("/");
 	}
 
-	if (foundUser.id !== authData.id) {
+	if (foundRecipe.userId !== authData.id) {
 		return redirect("/");
 	}
 
 	return json({
-		authData,
-		foundUser,
+		foundRecipe,
 	});
 };
 
-const EditAvatarModal = () => {
+const AddPhotoModal = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(true);
 	const [isUploadSlow, setIsUploadSlow] = useState<boolean>(false);
 	const [files, setFiles] = useState<(File & { preview: string })[]>([]);
 
 	const { ENV } = useTypedRouteLoaderData("root");
-	const { foundUser } = useLoaderData<typeof loader>();
+	const { foundRecipe } = useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 
 	const { t } = useTranslation();
-	const { state, formMethod } = useNavigation();
+	const [isLoading] = useIsLoading();
+
 	const {
 		acceptedFiles,
 		fileRejections,
@@ -109,7 +109,7 @@ const EditAvatarModal = () => {
 	const { pathname } = useLocation();
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
 
-	const { photo: p } = foundUser;
+	const { photo: p } = foundRecipe;
 	const photo =
 		CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(p);
 
@@ -137,17 +137,14 @@ const EditAvatarModal = () => {
 			CTAFn="uploadAvatarForm"
 			dismissFn={() => handleRemoveFile()}
 			isCTADisabled={!acceptedFiles.length}
-			isLoading={state !== "idle"}
+			isLoading={isLoading}
 			isOpen={isOpen}
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("settings.modal.changeAvatar.title")}
+			title={t("recipe.modal.update.photo.title")}
 		>
 			<div className="flex flex-col gap-4">
-				<Form id="deleteAvatarForm" method="DELETE">
-					<input hidden readOnly name="photo" value={photo?.public_id} />
-				</Form>
 				<Form encType="multipart/form-data" id="uploadAvatarForm" method="POST">
 					<div
 						className={clsx(
@@ -156,7 +153,7 @@ const EditAvatarModal = () => {
 								? "border-red-500"
 								: "border-secondary dark:border-primary",
 							isDragActive && "bg-secondary dark:bg-primary",
-							state !== "idle" && formMethod === "POST" && "animate-pulse"
+							isLoading && "animate-pulse"
 						)}
 						{...getRootProps()}
 					>
@@ -196,48 +193,14 @@ const EditAvatarModal = () => {
 											/>
 										</Button>
 									</div>
-								) : (
-									<div
-										className={clsx(
-											"relative min-w-full max-w-64",
-											state !== "idle" &&
-												formMethod === "DELETE" &&
-												"animate-pulse"
-										)}
-									>
-										<Avatar
-											layout="fill"
-											size="initial"
-											user={foundUser}
-											variant="square"
-										/>
-										<div className="absolute top-2 right-2">
-											<Button
-												form="deleteAvatarForm"
-												rounded="full"
-												size="smallSquare"
-												type="submit"
-												variant="danger"
-												onClick={(e) => e.stopPropagation()}
-											>
-												<Icon
-													label={t("common.editSomething", {
-														something: t("settings.field.avatar").toLowerCase(),
-													})}
-													name="delete"
-												/>
-											</Button>
-										</div>
-									</div>
-								)}
+								) : photo ? (
+									<Image className="max-w-64" photo={photo} />
+								) : null}
 							</div>
 						)}
 						<div className="inline-flex flex-col justify-center items-center gap-2 text-center">
 							{t("common.dropzone.instructions")}
-							{((state === "submitting" &&
-								formMethod === "POST" &&
-								isUploadSlow) ||
-								files[0]?.size > 1 * MB) &&
+							{((isLoading && isUploadSlow) || files[0]?.size > 1 * MB) &&
 								` ${t("common.dropzone.uploadNote")}`}
 						</div>
 					</div>
@@ -256,114 +219,61 @@ const EditAvatarModal = () => {
 	);
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request, {
+export const action = async ({ request, params: p }: ActionFunctionArgs) => {
+	await auth.isAuthenticated(request, {
 		failureRedirect: "/login",
 	});
 
+	const { recipeId } = RecipeParamsSchema.parse(p);
 	const t = await i18next.getFixedT(request);
 
-	const session = await sessionStorage.getSession(
-		request.headers.get("Cookie")
+	const uploadHandler = unstable_composeUploadHandlers(
+		async ({ name, data }) => {
+			if (name !== "img") {
+				return undefined;
+			}
+
+			const uploadedImage = await uploadImage(data, "recipes", recipeId);
+
+			return JSON.stringify(uploadedImage);
+		}
 	);
 
-	switch (request.method) {
-		case "DELETE":
-			{
-				const clonedRequest = request.clone();
-				const photo = z.string().parse((await request.formData()).get("photo"));
+	const formData = await unstable_parseMultipartFormData(
+		request.clone(),
+		uploadHandler
+	);
 
-				const isAvatarDeleted = await deleteImage(photo);
+	const cloudinaryResponse = formData.get("img");
 
-				if (!isAvatarDeleted) {
-					return errorCatcher(clonedRequest, t("error.somethingWentWrong"));
-				}
-
-				const updatedUser = await prisma.user
-					.update({
-						data: { photo: Prisma.JsonNull },
-						where: {
-							id: authData.id,
-						},
-					})
-					.catch((formError) => errorCatcher(request, formError));
-
-				session.set(auth.sessionKey, updatedUser);
-			}
-
-			return json(
-				{
-					success: true,
-					formError: undefined as string | undefined,
-				},
-				{
-					headers: {
-						"Set-Cookie": await sessionStorage.commitSession(session),
-					},
-				}
-			);
-		case "POST":
-			{
-				const uploadHandler = unstable_composeUploadHandlers(
-					async ({ name, data }) => {
-						if (name !== "img") {
-							return undefined;
-						}
-
-						const uploadedImage = await uploadImage(data, "users", authData.id);
-
-						return JSON.stringify(uploadedImage);
-					}
-				);
-
-				const formData = await unstable_parseMultipartFormData(
-					request.clone(),
-					uploadHandler
-				);
-
-				const cloudinaryResponse = formData.get("img");
-
-				if (!cloudinaryResponse) {
-					return errorCatcher(request, t("error.somethingWentWrong"));
-				}
-
-				const cloudinaryObject = CloudinaryUploadApiResponseSchema.parse(
-					JSON.parse(cloudinaryResponse.toString())
-				);
-
-				const blurHash = await getBlurHash(cloudinaryObject);
-
-				Object.assign(cloudinaryObject, { blurHash });
-
-				const cloudinaryData =
-					CloudinaryUploadApiResponseWithBlurHashSchema.parse(cloudinaryObject);
-
-				const updatedUser = await prisma.user
-					.update({
-						data: { photo: cloudinaryData },
-						where: {
-							id: authData.id,
-						},
-					})
-					.catch((formError) => errorCatcher(request, formError));
-
-				session.set(auth.sessionKey, updatedUser);
-			}
-
-			return json(
-				{
-					success: true,
-					formError: undefined as string | undefined,
-				},
-				{
-					headers: {
-						"Set-Cookie": await sessionStorage.commitSession(session),
-					},
-				}
-			);
+	if (!cloudinaryResponse) {
+		return errorCatcher(request, t("error.somethingWentWrong"));
 	}
 
-	return errorCatcher(request, t("error.somethingWentWrong"));
+	const cloudinaryObject = CloudinaryUploadApiResponseSchema.parse(
+		JSON.parse(cloudinaryResponse.toString())
+	);
+
+	const blurHash = await getBlurHash(cloudinaryObject);
+
+	Object.assign(cloudinaryObject, { blurHash });
+
+	const cloudinaryData =
+		CloudinaryUploadApiResponseWithBlurHashSchema.parse(cloudinaryObject);
+
+	await prisma.recipe
+		.update({
+			data: { photo: cloudinaryData },
+			where: {
+				id: recipeId,
+			},
+		})
+		.catch((formError) => errorCatcher(request, formError));
+
+	return json({
+		success: true,
+		formError: undefined as string | undefined,
+	});
 };
 
-export default EditAvatarModal;
+export default AddPhotoModal;

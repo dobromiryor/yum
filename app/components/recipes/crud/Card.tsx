@@ -10,6 +10,7 @@ import { BasicCard } from "~/components/recipes/crud/BasicCard";
 interface CardProps {
 	buttons?: ReactNode;
 	children?: ReactNode;
+	className?: string;
 	controls?: DragControls;
 	index?: number;
 	isReordering?: boolean;
@@ -20,6 +21,7 @@ interface CardProps {
 export const Card = ({
 	buttons,
 	children,
+	className,
 	controls,
 	index,
 	isReordering = false,
@@ -27,7 +29,7 @@ export const Card = ({
 	errorCount,
 }: CardProps) => {
 	return (
-		<BasicCard>
+		<BasicCard className={className}>
 			<div className="flex justify-between items-center gap-2">
 				<div className={clsx("flex items-center gap-2", "truncate")}>
 					<p className="text-lg typography-semibold truncate">

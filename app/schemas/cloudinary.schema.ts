@@ -12,7 +12,7 @@ export const CloudinaryUploadApiResponseSchema = z.object({
 	url: z.string().url(),
 	secure_url: z.string().url(),
 	original_filename: z.string(),
-	overwritten: z.boolean(),
+	overwritten: z.boolean().optional(),
 });
 
 export const CloudinaryUploadApiResponseWithBlurHashSchema =

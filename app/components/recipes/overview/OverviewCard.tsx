@@ -4,7 +4,9 @@ import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { Pill } from "~/components/common/Pill";
+import { Image } from "~/components/common/UI/Image";
 import { type Language } from "~/enums/language.enum";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { OptionalTranslatedContentSchema } from "~/schemas/common";
 import { formatTime } from "~/utils/helpers/format-time";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
@@ -24,7 +26,7 @@ export const OverviewCard = ({
 }: OverviewCardProps) => {
 	const { t } = useTranslation();
 
-	const { name: n, servings, difficulty, totalTime } = recipe;
+	const { name: n, servings, difficulty, totalTime, photo: p } = recipe;
 
 	const name = OptionalTranslatedContentSchema.parse(n);
 	const invertedLang = getInvertedLang(lang);
@@ -33,7 +35,8 @@ export const OverviewCard = ({
 		return null;
 	}
 
-	const src = null; // TODO: Recipe photo
+	const photo =
+		CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(p);
 
 	return (
 		<Link
@@ -50,8 +53,8 @@ export const OverviewCard = ({
 			>
 				<div className="flex flex-col gap-3">
 					<div className="bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden transition-colors">
-						{src && (
-							<img alt="" className="aspect-square rounded-xl" src={src} />
+						{photo && (
+							<Image className="rounded-xl overflow-hidden" photo={photo} />
 						)}
 					</div>
 					<span className="text-xl typography-medium">
