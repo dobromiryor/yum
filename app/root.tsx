@@ -27,6 +27,12 @@ import i18n from "~/modules/i18n";
 import i18next, { i18nCookie } from "~/modules/i18next.server";
 import tailwind from "~/styles/tailwind.css";
 import { auth } from "~/utils/auth.server";
+import { getFrom } from "~/utils/helpers/get-from.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import {
 	ThemeHead,
 	ThemeProvider,
@@ -35,6 +41,10 @@ import {
 import { getThemeSession } from "~/utils/theme.server";
 
 export const handle = NAMESPACES;
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const links: LinksFunction = () => {
 	return [
@@ -59,14 +69,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	const authData = await auth.isAuthenticated(request);
 
+	const from = getFrom(request);
+
+	const t = await i18next.getFixedT(request);
+
+	const title = generateMetaTitle({
+		title: PARSED_ENV.APP_NAME,
+	});
+
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
 	return json(
 		{
 			authData,
 			locale,
 			theme: themeSession.getTheme(),
+			from,
 			ENV: {
 				APP_NAME: PARSED_ENV.APP_NAME,
 				CLOUDINARY_CLOUD_NAME: PARSED_ENV.CLOUDINARY_CLOUD_NAME,
+			},
+			meta: {
+				title,
+				description,
+				url: PARSED_ENV.DOMAIN_URL,
 			},
 		} as const,
 		{
@@ -76,14 +104,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 	);
 }
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-	return [
-		{ title: data?.ENV.APP_NAME },
-		{ charset: "utf-8" },
-		{ name: "viewport", content: "width=device-width, initial-scale=1" },
-	];
-};
 
 function App() {
 	const { locale, theme: loaderTheme } = useLoaderData<typeof loader>();
@@ -101,6 +121,8 @@ function App() {
 			lang={locale}
 		>
 			<head>
+				<meta charSet="utf-8" />
+				<meta content="width=device-width, initial-scale=1" name="viewport" />
 				<Meta />
 				<Links />
 				<ThemeHead ssrTheme={Boolean(loaderTheme)} />
@@ -127,3 +149,5 @@ export default function AppWithProviders() {
 		</ThemeProvider>
 	);
 }
+
+export { ErrorBoundary } from "~/routes/500._index";

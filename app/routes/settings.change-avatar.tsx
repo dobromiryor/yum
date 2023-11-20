@@ -8,6 +8,7 @@ import {
 	unstable_parseMultipartFormData,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Form,
@@ -29,6 +30,7 @@ import { Button } from "~/components/common/UI/Button";
 import { FormError } from "~/components/common/UI/FormError";
 import { Icon } from "~/components/common/UI/Icon";
 import { MB } from "~/consts/mb";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useDataTransfer } from "~/hooks/useDataTransfer";
 import { useSlowUpload } from "~/hooks/useSlowUpload";
 import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
@@ -41,12 +43,21 @@ import { auth } from "~/utils/auth.server";
 import { deleteImage, uploadImage } from "~/utils/cloudinary.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import { getBlurHash } from "~/utils/helpers/get-blur-hash.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const foundUser = await prisma.user.findFirst({
@@ -54,16 +65,32 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundUser) {
-		return redirect("/");
+		return redirect("/404", 404);
 	}
 
 	if (foundUser.id !== authData.id) {
-		return redirect("/");
+		return redirect("/403", 403);
 	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.editSomething", {
+			something: `${t("settings.field.avatar")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
 
 	return json({
 		authData,
 		foundUser,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/settings/change-avatar`,
+		},
 	});
 };
 
@@ -258,7 +285,7 @@ const EditAvatarModal = () => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const t = await i18next.getFixedT(request);

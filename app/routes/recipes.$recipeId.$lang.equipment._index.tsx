@@ -2,8 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Length, Volume } from "@prisma/client";
 import {
 	json,
+	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Form,
@@ -24,21 +26,63 @@ import { z } from "zod";
 import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18next from "~/modules/i18next.server";
 import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { translatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
 
 type FormData = z.infer<typeof EquipmentDTOSchema>;
 const resolver = zodResolver(EquipmentDTOSchema);
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-	await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
+export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
+	const authData = await auth.isAuthenticated(request.clone(), {
+		failureRedirect: "/401",
 	});
 
-	return json({});
+	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+
+	const foundRecipe = await prisma.recipe.findUnique({
+		where: { id: recipeId },
+	});
+
+	if (!foundRecipe) {
+		return redirect("/404", 404);
+	}
+
+	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+		return redirect("/403", 403);
+	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.addSomething", {
+			something: `${t("recipe.field.equipment")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/equipment`,
+		},
+	});
 };
 
 const CreateEquipmentModal = () => {
@@ -152,7 +196,7 @@ const CreateEquipmentModal = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const { id: userId } = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);

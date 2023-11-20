@@ -5,6 +5,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import { Form, Link, useParams } from "@remix-run/react";
 import { useMemo } from "react";
@@ -22,24 +23,53 @@ import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { Section } from "~/components/recipes/crud/Section";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useIsLoading } from "~/hooks/useIsLoading";
+import i18next from "~/modules/i18next.server";
 import { DifficultySchema, LanguageSchema } from "~/schemas/common";
 import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { CreateRecipeSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 
 type FormData = z.infer<typeof NewRecipeSchema>;
 const resolver = zodResolver(NewRecipeSchema);
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
-	return json({ authData });
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("seo.newRecipe.title"),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		authData,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/new/${LanguageSchema.parse(
+				params.lang
+			)}`,
+		},
+	});
 };
 
 const NewRecipeRoute = () => {
@@ -130,7 +160,7 @@ const NewRecipeRoute = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { lang } = CreateRecipeSchema.parse(p);

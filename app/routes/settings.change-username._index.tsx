@@ -5,6 +5,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Form,
@@ -25,19 +26,29 @@ import { type z } from "zod";
 import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { UsernameSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
 
 type FormData = z.infer<typeof UsernameSchema>;
 const resolver = zodResolver(UsernameSchema);
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const foundUser = await prisma.user.findFirst({
@@ -45,14 +56,33 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundUser) {
-		return redirect("/");
+		return redirect("/404", 404);
 	}
 
 	if (foundUser.id !== authData.id) {
-		return redirect("/");
+		return redirect("/403", 403);
 	}
 
-	return json({ authData, foundUser });
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.editSomething", {
+			something: `${t("settings.field.username")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		authData,
+		foundUser,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/settings/change-username`,
+		},
+	});
 };
 
 const EditUsernameModal = () => {
@@ -122,7 +152,7 @@ const EditUsernameModal = () => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const session = await sessionStorage.getSession(

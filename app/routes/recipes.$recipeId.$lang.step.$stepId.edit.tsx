@@ -5,6 +5,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Form,
@@ -28,6 +29,8 @@ import { Input } from "~/components/common/UI/Input";
 import { Multiselect } from "~/components/common/UI/Multiselect";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18next from "~/modules/i18next.server";
 import { TranslatedContentSchema } from "~/schemas/common";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeStepParamsSchema } from "~/schemas/params.schema";
@@ -36,6 +39,11 @@ import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { stepLanguageValidation } from "~/utils/helpers/language-validation.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { nullishTranslatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
 
@@ -49,9 +57,13 @@ const temperatureScaleOptions = OptionsSchema.parse(
 	}))
 );
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { recipeId, lang, stepId } = EditRecipeStepParamsSchema.parse(p);
@@ -66,12 +78,23 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundStep) {
-		return redirect(`/recipes/${recipeId}/${lang}`);
+		return redirect("/404", 404);
 	}
 
 	if (foundStep.userId !== authData.id && authData.role !== "ADMIN") {
-		return redirect("/recipes");
+		return redirect("/403", 403);
 	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.editSomething", {
+			something: `${t("recipe.field.step")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
 
 	const { content } = foundStep;
 	const { setData, commit } = await getDataSession(request);
@@ -102,6 +125,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 			foundSubRecipes,
 			lang,
 			validation,
+			meta: {
+				title,
+				description,
+				url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/step/${stepId}/edit`,
+			},
 		},
 		{ headers: { "Set-Cookie": await commit() } }
 	);
@@ -357,7 +385,7 @@ export const EditStepModal = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { lang, stepId } = EditRecipeStepParamsSchema.parse(p);

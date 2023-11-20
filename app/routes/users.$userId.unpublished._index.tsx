@@ -1,6 +1,10 @@
 import { Role, Status } from "@prisma/client";
 import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useRevalidator } from "@remix-run/react";
+import {
+	useLoaderData,
+	useRevalidator,
+	type MetaFunction,
+} from "@remix-run/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,19 +15,31 @@ import {
 } from "~/components/recipes/overview/OverviewCard";
 import { OverviewContainer } from "~/components/recipes/overview/OverviewContainer";
 import { OverviewPagination } from "~/components/recipes/overview/OverviewPagination";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { usePagination } from "~/hooks/usePagination";
 import i18next from "~/modules/i18next.server";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { LanguageSchema } from "~/schemas/common";
 import { UserRecipesParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
-import { getFrom } from "~/utils/helpers/get-from.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 import { recipesOverview } from "~/utils/recipe.server";
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request);
+	const authData = await auth.isAuthenticated(request, {
+		failureRedirect: "/401",
+	});
 
 	const { userId } = UserRecipesParamsSchema.parse(p);
 
@@ -32,12 +48,22 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 
 	if (!foundUser) {
-		return redirect(getFrom(request) ?? "/recipes"); // TODO: Maybe change this to /users (TBD)
+		return redirect("/404", 404);
 	}
 
 	if (userId !== authData?.id || authData?.role !== Role.ADMIN) {
-		return redirect(getFrom(request) ?? `/users/${userId}`);
+		return redirect("/403", 403);
 	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		prefix: t("seo.user.unpublished.prefix"),
+		title: getDisplayName(foundUser),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
 
 	const foundRecipes = await recipesOverview({
 		pagination: setPagination(request),
@@ -51,6 +77,14 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		foundUser,
 		foundRecipes,
 		locale,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/users/${userId}/unpublished`,
+			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
+				foundUser.photo
+			)?.url,
+		},
 	});
 };
 

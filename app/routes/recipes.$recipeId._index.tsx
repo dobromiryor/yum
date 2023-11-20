@@ -1,6 +1,11 @@
 import { Role } from "@prisma/client";
 import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
-import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
+import {
+	Link,
+	useLoaderData,
+	useRevalidator,
+	type MetaFunction,
+} from "@remix-run/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +20,7 @@ import { EquipmentCard } from "~/components/recipes/detail/Equipment";
 import { IngredientCard } from "~/components/recipes/detail/Ingredient";
 import { StepList } from "~/components/recipes/detail/Step";
 import { SubRecipeCardList } from "~/components/recipes/detail/SubRecipeCardList";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
@@ -22,7 +28,16 @@ import { RecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { formatTime } from "~/utils/helpers/format-time";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { recipeDetails } from "~/utils/recipe.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone());
@@ -32,10 +47,34 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const foundRecipe = await recipeDetails({ recipeId, locale });
 
 	if (!foundRecipe) {
-		return redirect("/recipes");
+		return redirect("/404", 404);
 	}
 
-	return json({ authData, foundRecipe, locale });
+	const name = TranslatedContentSchema.parse(foundRecipe.name);
+
+	const title = generateMetaTitle({
+		title: name[locale]!,
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: TranslatedContentSchema.parse(foundRecipe.description)[
+			locale
+		]!,
+	});
+
+	return json({
+		authData,
+		foundRecipe,
+		locale,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}`,
+			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
+				foundRecipe.photo
+			)?.url,
+		},
+	});
 };
 
 const RecipeDetailRoute = () => {

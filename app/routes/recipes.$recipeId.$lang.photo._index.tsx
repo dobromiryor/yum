@@ -7,6 +7,7 @@ import {
 	unstable_parseMultipartFormData,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Form,
@@ -26,6 +27,7 @@ import { FormError } from "~/components/common/UI/FormError";
 import { Icon } from "~/components/common/UI/Icon";
 import { Image } from "~/components/common/UI/Image";
 import { MB } from "~/consts/mb";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useDataTransfer } from "~/hooks/useDataTransfer";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { useSlowUpload } from "~/hooks/useSlowUpload";
@@ -40,11 +42,20 @@ import { auth } from "~/utils/auth.server";
 import { uploadImage } from "~/utils/cloudinary.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import { getBlurHash } from "~/utils/helpers/get-blur-hash.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { recipeId } = RecipeParamsSchema.parse(p);
@@ -54,15 +65,31 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundRecipe) {
-		return redirect("/");
+		return redirect("/404", 404);
 	}
 
-	if (foundRecipe.userId !== authData.id) {
-		return redirect("/");
+	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+		return redirect("/403", 403);
 	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.addSomething", {
+			something: `${t("recipe.field.photo")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
 
 	return json({
 		foundRecipe,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/photo`,
+		},
 	});
 };
 
@@ -221,7 +248,7 @@ const AddPhotoModal = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	await auth.isAuthenticated(request, {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { recipeId } = RecipeParamsSchema.parse(p);

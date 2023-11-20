@@ -3,6 +3,7 @@ import {
 	json,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import { Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { useEffect } from "react";
@@ -13,19 +14,39 @@ import { type z } from "zod";
 import { Button } from "~/components/common/UI/Button";
 import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useIsLoading } from "~/hooks/useIsLoading";
+import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
 import { LoginDTOSchema, LoginIntentSchema } from "~/schemas/login.schema";
 import { auth } from "~/utils/auth.server";
 import { getFrom } from "~/utils/helpers/get-from.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { sessionStorage } from "~/utils/session.server";
 
 type FormData = z.infer<typeof LoginDTOSchema>;
 const resolver = zodResolver(LoginDTOSchema);
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await auth.isAuthenticated(request, {
 		successRedirect: "/settings",
+	});
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("seo.login.title"),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
 	});
 
 	const session = await sessionStorage.getSession(
@@ -37,6 +58,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		magicLinkSent: session.has("auth:magiclink"),
 		magicLinkEmail: session.get("auth:email"),
 		from: getFrom(request),
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/login`,
+		},
 	});
 };
 

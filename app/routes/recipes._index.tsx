@@ -1,5 +1,9 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useRevalidator } from "@remix-run/react";
+import {
+	useLoaderData,
+	useRevalidator,
+	type MetaFunction,
+} from "@remix-run/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,21 +13,52 @@ import {
 } from "~/components/recipes/overview/OverviewCard";
 import { OverviewContainer } from "~/components/recipes/overview/OverviewContainer";
 import { OverviewPagination } from "~/components/recipes/overview/OverviewPagination";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { usePagination } from "~/hooks/usePagination";
 import { useSearch } from "~/hooks/useSearch";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { recipesOverview } from "~/utils/recipe.server";
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const locale = LanguageSchema.parse(await i18next.getLocale(request));
+
+	const result = new URL(request.clone().url).searchParams.get("q");
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: result
+			? t("seo.searchRecipes.title", { result })
+			: t("seo.recipes.title"),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
 
 	const pagination = setPagination(request);
 
 	const foundRecipes = await recipesOverview({ pagination, request });
 
-	return json({ foundRecipes, locale });
+	return json({
+		foundRecipes,
+		locale,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes${result ? `?q=${result}` : ""}`,
+		},
+	});
 };
 
 export default function RecipesRoute() {

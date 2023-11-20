@@ -10,6 +10,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Link,
@@ -46,6 +47,7 @@ import { ReorderCard } from "~/components/recipes/crud/ReorderCard";
 import { Section } from "~/components/recipes/crud/Section";
 import { SubRecipesFigure } from "~/components/recipes/crud/SubRecipe";
 import { TemperatureFigure } from "~/components/recipes/crud/Temperature";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import i18next from "~/modules/i18next.server";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
@@ -63,16 +65,24 @@ import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { debounce } from "~/utils/helpers/debounce";
 import { formatTime } from "~/utils/helpers/format-time";
-import { getFrom } from "~/utils/helpers/get-from.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import { languageValidation } from "~/utils/helpers/language-validation.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { parseWithMessage } from "~/utils/helpers/parse-with-message.server";
 import { prisma } from "~/utils/prisma.server";
 import { publishValidation } from "~/utils/recipe.server";
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 	const params = EditRecipeParamsSchema.parse(p);
 	const { recipeId, lang } = params;
@@ -113,12 +123,24 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 		include,
 	});
 
-	if (
-		!foundRecipe ||
-		(foundRecipe.userId !== authData.id && authData.role !== "ADMIN")
-	) {
-		return redirect(getFrom(request) ?? `/users/${authData.id}`);
+	if (!foundRecipe) {
+		return redirect("/404", 404);
 	}
+
+	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+		return redirect("/403", 403);
+	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.editSomething", {
+			something: `${t("common.recipe")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
 
 	const { languages } = foundRecipe;
 	const { setData, commit } = await getDataSession(request);
@@ -181,6 +203,11 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 			lang,
 			invertedLang,
 			canPublish: await publishValidation(recipeId),
+			meta: {
+				title,
+				description,
+				url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}`,
+			},
 		},
 		{ headers: { "Set-Cookie": await commit() } }
 	);
@@ -188,7 +215,7 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const params = EditRecipeParamsSchema.parse(p);

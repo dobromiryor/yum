@@ -1,6 +1,7 @@
 {
 	"common": {
 		"add": "Add",
+		"addSomething": "$t(common.add) {{something}}",
 		"admin": "Admin",
 		"and": "and",
 		"back": "Back",
@@ -354,6 +355,65 @@
 				"userRecipes": "{{user}}'s recipes",
 				"userUnpublishedRecipes": "{{user}}'s unpublished recipes"
 			}
+		}
+	},
+	"seo": {
+		"home": {
+			"title": "Home",
+			"description": "Welcome to {{appName}}! Embark on a gastronomic adventure with our recipe app and discover the boundless joys of cooking."
+		},
+		"user": {
+			"unpublished": {
+				"prefix": "Unpublished"
+			}
+		},
+		"recipes": {
+			"title": "Recipes",
+			"description": "Explore our extensive collection of recipes, featuring customizable servings, unit conversions, detailed ingredients, step-by-step instructions, and essential equipment."
+		},
+		"searchRecipes": {
+			"title": "Results for \"{{result}}\""
+		},
+		"newRecipe": {
+			"title": "Add recipe"
+		},
+		"editRecipe": {
+			"title": "Edit recipe"
+		},
+		"login": {
+			"title": "Login"
+		},
+		"settings": {
+			"title": "Settings"
+		},
+		"notFound": {
+			"title": "Not found"
+		},
+		"unauthorized": {
+			"title": "Unauthorized"
+		},
+		"forbidden": {
+			"title": "Forbidden"
+		}
+	},
+	"errorPages": {
+		"common": {
+			"backCTA": "Back",
+			"homeCTA": "Home"
+		},
+		"401": {
+			"title": "Looks like you're not authorized to be here.",
+			"loginCTA": "Log in"
+		},
+		"403": {
+			"title": "Looks like you don't have access."
+		},
+		"404": {
+			"title": "Hmm, there's nothing here."
+		},
+		"500": {
+			"title": "Whoops! Looks like someone set the timer wrong.",
+			"refreshCTA": "Refresh"
 		}
 	}
 }

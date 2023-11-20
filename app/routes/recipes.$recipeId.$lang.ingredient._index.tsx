@@ -2,8 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Prisma, Unit } from "@prisma/client";
 import {
 	json,
+	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Form,
@@ -11,7 +13,6 @@ import {
 	useLoaderData,
 	useLocation,
 } from "@remix-run/react";
-import { t } from "i18next";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -26,11 +27,18 @@ import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18next from "~/modules/i18next.server";
 import { IngredientDTOSchema } from "~/schemas/ingredient.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { parseQuantity } from "~/utils/helpers/parse-quantity.server";
 import {
 	nullishTranslatedContent,
@@ -48,12 +56,28 @@ const options = OptionsSchema.parse(
 	}))
 );
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+
+	const foundRecipe = await prisma.recipe.findUnique({
+		where: { id: recipeId },
+	});
+
+	if (!foundRecipe) {
+		return redirect("/404", 404);
+	}
+
+	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+		return redirect("/403", 403);
+	}
 
 	const invertedLang = getInvertedLang(lang);
 
@@ -71,7 +95,26 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		}))
 	);
 
-	return json({ authData, subRecipeOptions });
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.addSomething", {
+			something: `${t("recipe.field.ingredient")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		authData,
+		subRecipeOptions,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/ingredient`,
+		},
+	});
 };
 
 export const CreateIngredientModal = () => {
@@ -151,7 +194,7 @@ export const CreateIngredientModal = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const { id: userId } = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);

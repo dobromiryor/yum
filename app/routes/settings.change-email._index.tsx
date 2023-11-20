@@ -4,6 +4,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	Form,
@@ -26,22 +27,32 @@ import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { NAMESPACES } from "~/consts/namespaces.const";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { Message } from "~/enums/message.enum";
 import i18next from "~/modules/i18next.server";
 import { EmailSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sendChangeEmail } from "~/utils/sendgrid.server";
 
 type FormData = z.infer<typeof EmailSchema>;
 const resolver = zodResolver(EmailSchema);
 
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
+
 export const handle = NAMESPACES;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const foundUser = await prisma.user.findFirst({
@@ -49,14 +60,33 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundUser) {
-		return redirect("/");
+		return redirect("/404", 404);
 	}
 
 	if (foundUser.id !== authData.id) {
-		return redirect("/");
+		return redirect("/403", 403);
 	}
 
-	return json({ authData, foundUser });
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.editSomething", {
+			something: `${t("settings.field.email")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		authData,
+		foundUser,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/settings/change-email`,
+		},
+	});
 };
 
 const EditUsernameModal = () => {
@@ -125,7 +155,7 @@ const EditUsernameModal = () => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const t = await i18next.getFixedT(request);

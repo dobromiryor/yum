@@ -3,6 +3,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	useActionData,
@@ -14,15 +15,56 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Modal } from "~/components/common/Modal";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18next from "~/modules/i18next.server";
 import { auth } from "~/utils/auth.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
-	return json({ authData });
+	const foundUser = await prisma.user.findFirst({
+		where: { id: authData.id },
+	});
+
+	if (!foundUser) {
+		return redirect("/404", 404);
+	}
+
+	if (foundUser.id !== authData.id) {
+		return redirect("/403", 403);
+	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.deleteSomething", {
+			something: `${t("settings.field.account")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		authData,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/settings/delete`,
+		},
+	});
 };
 
 export const DeleteUserModal = () => {
@@ -57,14 +99,14 @@ export const DeleteUserModal = () => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const formData = await request.formData();
 	const id = formData.get("id")?.toString();
 
 	if (authData.id !== id) {
-		return redirect("/");
+		return redirect("/403", 403);
 	}
 
 	try {

@@ -3,6 +3,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	useActionData,
@@ -15,30 +16,63 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18next from "~/modules/i18next.server";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
-import { RecipeParamsSchema } from "~/schemas/params.schema";
+import {
+	EditRecipeParamsSchema,
+	RecipeParamsSchema,
+} from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
-	const { recipeId } = RecipeParamsSchema.parse(p);
+	const { recipeId, lang } = EditRecipeParamsSchema.parse(p);
 
 	const foundRecipe = await prisma.recipe.findFirst({
 		where: { id: recipeId },
 	});
 
-	if (
-		!foundRecipe ||
-		(foundRecipe.userId !== authData.id && authData.role !== "ADMIN")
-	) {
-		return redirect(`/users/${authData.id}`);
+	if (!foundRecipe) {
+		return redirect("/404", 404);
 	}
 
-	return json({ foundRecipe });
+	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+		return redirect("/403", 403);
+	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.deleteSomething", {
+			something: `${t("common.recipe")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		foundRecipe,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/delete`,
+		},
+	});
 };
 
 export const DeleteRecipeModal = () => {
@@ -91,7 +125,7 @@ export const DeleteRecipeModal = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const formData = await request.formData();
@@ -105,7 +139,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		id !== recipeId ||
 		(userId !== authData.id && authData.role !== "ADMIN")
 	) {
-		redirect("/recipes");
+		redirect("/403", 403);
 	}
 
 	try {

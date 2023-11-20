@@ -1,44 +1,75 @@
 import {
-    json,
-    redirect,
-    type ActionFunctionArgs,
-    type LoaderFunctionArgs,
+	json,
+	redirect,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
-    useActionData,
-    useLoaderData,
-    useLocation,
-    useSubmit,
+	useActionData,
+	useLoaderData,
+	useLocation,
+	useSubmit,
 } from "@remix-run/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18next from "~/modules/i18next.server";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
 import { EditRecipeStepParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
-	const { stepId } = EditRecipeStepParamsSchema.parse(p);
+	const { stepId, lang, recipeId } = EditRecipeStepParamsSchema.parse(p);
 
 	const foundStep = await prisma.step.findFirst({
 		where: { id: stepId },
 	});
 
-	if (
-		!foundStep ||
-		(foundStep.userId !== authData.id && authData.role !== "ADMIN")
-	) {
-		return redirect("/recipes");
+	if (!foundStep) {
+		return redirect("/404", 404);
 	}
 
-	return json({ foundStep });
+	if (foundStep.userId !== authData.id && authData.role !== "ADMIN") {
+		return redirect("/403", 403);
+	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.deleteSomething", {
+			something: `${t("recipe.field.step")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		foundStep,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/step/${stepId}/delete`,
+		},
+	});
 };
 
 const DeleteStepModal = () => {
@@ -92,7 +123,7 @@ const DeleteStepModal = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const formData = await request.formData();
@@ -103,7 +134,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const userId = formData.get("userId")?.toString();
 
 	if (id !== stepId || (userId !== authData.id && authData.role !== "ADMIN")) {
-		redirect("/recipes");
+		redirect("/403", 403);
 	}
 
 	try {

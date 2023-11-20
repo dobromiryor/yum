@@ -1,5 +1,10 @@
 import { DisplayName, Role } from "@prisma/client";
-import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import {
+	json,
+	redirect,
+	type LoaderFunctionArgs,
+	type MetaFunction,
+} from "@remix-run/node";
 import { Link, Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -10,14 +15,34 @@ import { Note } from "~/components/common/Note";
 import { Pill } from "~/components/common/Pill";
 import { Button } from "~/components/common/UI/Button";
 import { Icon } from "~/components/common/UI/Icon";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { Message } from "~/enums/message.enum";
+import i18next from "~/modules/i18next.server";
 import { auth } from "~/utils/auth.server";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
+	});
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("seo.settings.title"),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
 	});
 
 	const foundUser = await prisma.user.findUnique({
@@ -25,7 +50,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundUser) {
-		return redirect("/login");
+		return redirect("/404", 404);
 	}
 
 	let updatedUser;
@@ -43,6 +68,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	return json({
 		foundUser: updatedUser ?? foundUser,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/settings`,
+		},
 	});
 };
 

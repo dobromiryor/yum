@@ -7,7 +7,7 @@ export const getDisplayName = ({
 	lastName,
 	username,
 	prefersDisplayName,
-}: SerializeFrom<User>) => {
+}: User | SerializeFrom<User>) => {
 	if (
 		prefersDisplayName !== DisplayName.email &&
 		(username || (firstName && lastName))

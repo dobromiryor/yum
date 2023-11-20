@@ -1,5 +1,10 @@
 import { Role } from "@prisma/client";
-import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import {
+	json,
+	redirect,
+	type LoaderFunctionArgs,
+	type MetaFunction,
+} from "@remix-run/node";
 import { useLoaderData, useNavigate, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,18 +17,29 @@ import {
 } from "~/components/recipes/overview/OverviewCard";
 import { OverviewContainer } from "~/components/recipes/overview/OverviewContainer";
 import { OverviewPagination } from "~/components/recipes/overview/OverviewPagination";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { usePagination } from "~/hooks/usePagination";
 import i18next from "~/modules/i18next.server";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { LanguageSchema } from "~/schemas/common";
 import { UserRecipesParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 import {
 	recipesOverview,
 	unpublishedRecipesCount,
 } from "~/utils/recipe.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request);
@@ -35,8 +51,17 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 
 	if (!foundUser) {
-		return redirect("/recipes");
+		return redirect("/404", 404);
 	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: getDisplayName(foundUser),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
 
 	let foundUnpublishedRecipesCount = undefined;
 
@@ -55,6 +80,14 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		foundPublishedRecipes,
 		foundUnpublishedRecipesCount,
 		locale,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/users/${userId}`,
+			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
+				foundUser.photo
+			)?.url,
+		},
 	});
 };
 
@@ -92,7 +125,7 @@ export const UserRecipesRoute = () => {
 				</h1>
 				{foundUnpublishedRecipesCount && (
 					<Button
-						className="ml-auto items-center gap-1"
+						className="sm:ml-auto items-center gap-1"
 						onClick={() => navigate("unpublished")}
 					>
 						<ErrorCount errorCount={foundUnpublishedRecipesCount} />

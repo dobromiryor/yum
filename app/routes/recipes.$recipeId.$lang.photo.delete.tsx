@@ -4,6 +4,7 @@ import {
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
 	useActionData,
@@ -17,33 +18,65 @@ import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
-import { RecipeParamsSchema } from "~/schemas/params.schema";
+import {
+	EditRecipeParamsSchema,
+	RecipeParamsSchema,
+} from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { deleteImage } from "~/utils/cloudinary.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
+};
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
-	const { recipeId } = RecipeParamsSchema.parse(p);
+	const { recipeId, lang } = EditRecipeParamsSchema.parse(p);
 
 	const foundRecipe = await prisma.recipe.findFirst({
 		where: { id: recipeId },
 	});
 
-	if (
-		!foundRecipe ||
-		(foundRecipe.userId !== authData.id && authData.role !== "ADMIN")
-	) {
-		return redirect("/recipes");
+	if (!foundRecipe) {
+		return redirect("/404", 404);
 	}
 
-	return json({ foundRecipe });
+	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+		return redirect("/403", 403);
+	}
+
+	const t = await i18next.getFixedT(request);
+	const title = generateMetaTitle({
+		title: t("common.deleteSomething", {
+			something: `${t("recipe.field.photo")}`.toLowerCase(),
+		}),
+		postfix: PARSED_ENV.APP_NAME,
+	});
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json({
+		foundRecipe,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/photo/delete`,
+		},
+	});
 };
 
 const DeletePhotoModal = () => {
@@ -80,7 +113,7 @@ const DeletePhotoModal = () => {
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const t = await i18next.getFixedT(request);
@@ -94,7 +127,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		!foundRecipe ||
 		(foundRecipe.userId !== authData.id && authData.role !== "ADMIN")
 	) {
-		redirect("/recipes");
+		redirect("/403", 403);
 	}
 
 	const clonedRequest = request.clone();

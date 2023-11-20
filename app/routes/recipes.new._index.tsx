@@ -5,7 +5,7 @@ import { auth } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
+		failureRedirect: "/401",
 	});
 
 	const lang = await i18next.getLocale(request);

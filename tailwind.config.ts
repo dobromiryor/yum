@@ -109,6 +109,30 @@ export default {
 				...theme("screens"),
 				min: "min-content",
 			}),
+			animation: {
+				blink: "blink 2s step-start 0s infinite",
+				malfunction: "malfunction 2s linear infinite alternate",
+			},
+			keyframes: {
+				blink: {
+					"50%": { opacity: "0" },
+				},
+				malfunction: {
+					"10%": { opacity: "0" },
+					"11%": { opacity: "1" },
+					"12%": { opacity: "0" },
+					"19%": { opacity: "0" },
+					"20%": { opacity: "1" },
+					"21%": { opacity: "0" },
+					"60%": { opacity: "0" },
+					"61%": { opacity: "1" },
+					"80%": { opacity: "1" },
+					"81%": { opacity: "0" },
+					"82%": { opacity: "1" },
+					"99%": { opacity: "1" },
+					"100%": { opacity: "0" },
+				},
+			},
 		},
 	},
 	plugins: [
