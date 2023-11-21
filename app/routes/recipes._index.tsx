@@ -26,6 +26,10 @@ import {
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { recipesOverview } from "~/utils/recipe.server";
 
+export const sitemap = () => ({
+	priority: 1.0,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };

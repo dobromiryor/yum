@@ -43,11 +43,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundUser) {
-		return redirect("/404", 404);
+		return redirect("/404");
 	}
 
 	if (foundUser.id !== authData.id) {
-		return redirect("/403", 403);
+		return redirect("/403");
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -110,7 +110,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	const id = formData.get("id")?.toString();
 
 	if (authData.id !== id) {
-		return redirect("/403", 403);
+		return redirect("/403");
 	}
 
 	try {

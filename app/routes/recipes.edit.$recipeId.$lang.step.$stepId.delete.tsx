@@ -48,11 +48,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundStep) {
-		return redirect("/404", 404);
+		return redirect("/404");
 	}
 
 	if (foundStep.userId !== authData.id && authData.role !== "ADMIN") {
-		return redirect("/403", 403);
+		return redirect("/403");
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -138,7 +138,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const userId = formData.get("userId")?.toString();
 
 	if (id !== stepId || (userId !== authData.id && authData.role !== "ADMIN")) {
-		redirect("/403", 403);
+		redirect("/403");
 	}
 
 	try {

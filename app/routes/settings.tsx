@@ -54,7 +54,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundUser) {
-		return redirect("/404", 404);
+		return redirect("/404");
 	}
 
 	let updatedUser;

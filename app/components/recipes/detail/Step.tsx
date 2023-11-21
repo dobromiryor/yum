@@ -8,7 +8,7 @@ import { ParagraphMap } from "~/components/common/UI/ParagraphMap";
 import { Temperature } from "~/components/recipes/crud/Temperature";
 import { EquipmentList } from "~/components/recipes/detail/Equipment";
 import { IngredientList } from "~/components/recipes/detail/Ingredient";
-import { type loader } from "~/routes/recipes.$recipeId.$lang._index";
+import { type loader } from "~/routes/recipes.$recipeId._index";
 import {
 	OptionalTranslatedContentSchema,
 	TranslatedContentSchema,

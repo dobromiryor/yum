@@ -10,9 +10,11 @@ export const RecipeParamsSchema = z.object({
 	recipeId: NonEmptyStringSchema,
 });
 
-export const EditRecipeParamsSchema = RecipeParamsSchema.extend({
+export const RecipeParamsWithLanguageSchema = RecipeParamsSchema.extend({
 	lang: LanguageSchema,
 });
+
+export const EditRecipeParamsSchema = RecipeParamsWithLanguageSchema;
 
 export const EditRecipeSubRecipeParamsSchema = EditRecipeParamsSchema.extend({
 	subRecipeId: NonEmptyStringSchema,

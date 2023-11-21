@@ -3,7 +3,7 @@ import { type SerializeFrom } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import { Dimension, Volume } from "~/components/recipes/crud/Equipment";
-import { type loader } from "~/routes/recipes.$recipeId.$lang._index";
+import { type loader } from "~/routes/recipes.$recipeId._index";
 import { TranslatedContentSchema } from "~/schemas/common";
 
 interface EquipmentProps {

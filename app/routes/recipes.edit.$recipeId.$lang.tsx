@@ -128,11 +128,11 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundRecipe) {
-		return redirect("/404", 404);
+		return redirect("/404");
 	}
 
 	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
-		return redirect("/403", 403);
+		return redirect("/403");
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -559,11 +559,7 @@ export default function EditRecipeRoute() {
 						buttons={
 							<>
 								{status === Status.PUBLISHED && languagesIncludesLocale && (
-									<Link
-										preventScrollReset
-										tabIndex={-1}
-										to={`/recipes/${id}/${lang}`}
-									>
+									<Link preventScrollReset tabIndex={-1} to={`/recipes/${id}`}>
 										<Button className="flex items-center gap-1">
 											<span>{t("common.view")}</span>
 										</Button>

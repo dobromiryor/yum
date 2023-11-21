@@ -73,11 +73,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundRecipe) {
-		return redirect("/404", 404);
+		return redirect("/404");
 	}
 
 	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
-		return redirect("/403", 403);
+		return redirect("/403");
 	}
 
 	const foundIngredients = await prisma.ingredient.findMany({

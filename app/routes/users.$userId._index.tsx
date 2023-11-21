@@ -70,7 +70,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 
 	if (!foundUser) {
-		return redirect("/404", 404);
+		return redirect("/404");
 	}
 
 	const t = await i18next.getFixedT(request);

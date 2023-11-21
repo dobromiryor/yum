@@ -5,7 +5,7 @@ import { convertMany } from "convert";
 import { useTranslation } from "react-i18next";
 
 import { Figure } from "~/components/recipes/crud/Figure";
-import { type loader as detailsLoader } from "~/routes/recipes.$recipeId.$lang._index";
+import { type loader as detailsLoader } from "~/routes/recipes.$recipeId._index";
 import { type loader as crudLoader } from "~/routes/recipes.edit.$recipeId.$lang";
 
 interface TemperatureProps {
