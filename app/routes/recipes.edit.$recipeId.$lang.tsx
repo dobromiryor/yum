@@ -546,7 +546,7 @@ export default function EditRecipeRoute() {
 							<Image className="rounded-xl overflow-hidden" photo={photo} />
 						</Card>
 					) : (
-						<EmptyCard to="photo">
+						<EmptyCard className="col-span-3 sm:col-span-1" to="photo">
 							<span>{t("recipe.card.emptyPhoto")}</span>
 							<span>
 								{t("recipe.card.pressToAddSomething", {
