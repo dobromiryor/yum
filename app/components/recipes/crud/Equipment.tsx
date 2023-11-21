@@ -155,7 +155,7 @@ export const Equipment = ({ equipment, as = "span" }: EquipmentProps) => {
 
 	return (
 		<ElementType>
-			{name?.[lang] ?? t("error.translationMissing")}{" "}
+			{name?.[lang] ?? `[ ${t("error.translationMissing")} ]`}{" "}
 			<Dimension equipment={equipment} />
 			<Volume equipment={equipment} />
 		</ElementType>

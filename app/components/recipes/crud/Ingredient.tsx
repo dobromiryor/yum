@@ -41,7 +41,7 @@ export const Ingredient = ({ ingredient, as = "span" }: IngredientProps) => {
 	let string = name?.[lang ?? language];
 
 	if (!string) {
-		string = t("error.translationMissing");
+		string = `[ ${t("error.translationMissing")} ]`;
 	}
 
 	if (quantity && unit) {

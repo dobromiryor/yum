@@ -34,7 +34,9 @@ export const SubRecipe = ({ subRecipe, as = "span" }: SubRecipeProps) => {
 	const ElementType = as as keyof JSX.IntrinsicElements;
 
 	return (
-		<ElementType>{name?.[lang] ?? t("error.translationMissing")}</ElementType>
+		<ElementType>
+			{name?.[lang] ?? `[ ${t("error.translationMissing")} ]`}
+		</ElementType>
 	);
 };
 

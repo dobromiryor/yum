@@ -159,7 +159,7 @@ export const CreateStepModal = () => {
 					label:
 						item.name?.[lang as keyof typeof item.name] ??
 						item.name?.[invertedLang as keyof typeof item.name] ??
-						t("error.translationMissing"),
+						`[ ${t("error.translationMissing")} ]`,
 					value: item.id,
 				};
 			}),
@@ -172,7 +172,7 @@ export const CreateStepModal = () => {
 					label:
 						item.name?.[lang as keyof typeof item.name] ??
 						item.name?.[invertedLang as keyof typeof item.name] ??
-						t("error.translationMissing"),
+						`[ ${t("error.translationMissing")} ]`,
 					value: item.id,
 				};
 			}),
@@ -185,7 +185,7 @@ export const CreateStepModal = () => {
 					label:
 						item.name?.[lang as keyof typeof item.name] ??
 						item.name?.[invertedLang as keyof typeof item.name] ??
-						t("error.translationMissing"),
+						`[ ${t("error.translationMissing")} ]`,
 					value: item.id,
 				};
 			}),

@@ -577,14 +577,14 @@ export default function EditRecipeRoute() {
 							</>
 						}
 						className="col-span-3 sm:col-span-2"
-						title={name[lang] ?? t("error.translationMissing")}
+						title={name[lang] ?? `[ ${t("error.translationMissing")} ]`}
 					>
 						<Figure
 							className="flex flex-col gap-2"
 							label={t("recipe.field.description")}
 						>
 							{<ParagraphMap text={description?.[lang]} /> ??
-								t("error.translationMissing")}
+								`[ ${t("error.translationMissing")} ]`}
 						</Figure>
 						<Figure isInline label={t("recipe.field.difficulty")}>
 							<span>{t(`recipe.difficulty.${difficulty}`)}</span>
@@ -638,7 +638,7 @@ export default function EditRecipeRoute() {
 										</Link>
 									</>
 								}
-								title={name?.[lang] ?? t("error.translationMissing")}
+								title={name?.[lang] ?? `[ ${t("error.translationMissing")} ]`}
 							/>
 						);
 					})
@@ -741,14 +741,15 @@ export default function EditRecipeRoute() {
 									{subRecipe && (
 										<Figure isInline label={t("recipe.field.subRecipe")}>
 											<span>
-												{subRecipeName?.[lang] ?? t("error.translationMissing")}
+												{subRecipeName?.[lang] ??
+													`[ ${t("error.translationMissing")} ]`}
 											</span>
 										</Figure>
 									)}
 									{note && (
 										<Figure isInline label={t("recipe.field.note")}>
 											<span>
-												{note?.[lang] ?? t("error.translationMissing")}
+												{note?.[lang] ?? `[ ${t("error.translationMissing")} ]`}
 											</span>
 										</Figure>
 									)}
@@ -807,7 +808,7 @@ export default function EditRecipeRoute() {
 										</Link>
 									</>
 								}
-								title={name?.[lang] ?? t("error.translationMissing")}
+								title={name?.[lang] ?? `[ ${t("error.translationMissing")} ]`}
 							>
 								<Dimension hasLabel equipment={item} />
 								<Volume hasLabel equipment={item} />
@@ -909,7 +910,9 @@ export default function EditRecipeRoute() {
 									index={index}
 									isReordering={isReorderingSteps}
 									item={item}
-									title={content[lang] ?? t("error.translationMissing")}
+									title={
+										content[lang] ?? `[ ${t("error.translationMissing")} ]`
+									}
 								>
 									{prepTime && (
 										<Figure isInline label={t("recipe.field.prepTime")}>
