@@ -34,6 +34,10 @@ import { prisma } from "~/utils/prisma.server";
 type FormData = z.infer<typeof SubRecipeDTOSchema>;
 const resolver = zodResolver(SubRecipeDTOSchema);
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };
@@ -72,7 +76,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/sub-recipe`,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/sub-recipe`,
 		},
 	});
 };

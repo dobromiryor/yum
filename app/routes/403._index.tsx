@@ -18,6 +18,10 @@ import {
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };

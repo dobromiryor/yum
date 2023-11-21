@@ -9,7 +9,9 @@ import isbot from "isbot";
 import { StrictMode } from "react";
 import { renderToPipeableStream } from "react-dom/server";
 import { I18nextProvider, initReactI18next } from "react-i18next";
+import { createSitemapGenerator } from "remix-sitemap";
 
+import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18n from "~/modules/i18n";
 import i18next from "~/modules/i18next.server";
 
@@ -17,6 +19,15 @@ import { resolve } from "node:path";
 import { PassThrough } from "stream";
 
 const ABORT_DELAY = 5000;
+
+const { isSitemapUrl, sitemap } = createSitemapGenerator({
+	siteUrl: PARSED_ENV.DOMAIN_URL,
+	format: true,
+	generateRobotsTxt: true,
+	headers: {
+		"Cache-Control": "max-age=3600",
+	},
+});
 
 export default async function handleRequest(
 	request: Request,
@@ -31,6 +42,10 @@ export default async function handleRequest(
 	const instance = createInstance();
 	const lng = await i18next.getLocale(request);
 	const ns = i18next.getRouteNamespaces(remixContext);
+
+	if (isSitemapUrl(request)) {
+		return await sitemap(request, remixContext);
+	}
 
 	await instance
 		.use(initReactI18next)

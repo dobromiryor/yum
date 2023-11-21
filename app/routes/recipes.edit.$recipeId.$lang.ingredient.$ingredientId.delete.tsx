@@ -19,7 +19,7 @@ import { Modal } from "~/components/common/Modal";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
-import { EditRecipeSubRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeIngredientParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import {
 	generateMetaDescription,
@@ -27,6 +27,10 @@ import {
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const sitemap = () => ({
+	exclude: true,
+});
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
@@ -37,25 +41,25 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		failureRedirect: "/401",
 	});
 
-	const { recipeId, lang, subRecipeId } =
-		EditRecipeSubRecipeParamsSchema.parse(p);
+	const { ingredientId, lang, recipeId } =
+		EditRecipeIngredientParamsSchema.parse(p);
 
-	const foundSubRecipe = await prisma.subRecipe.findFirst({
-		where: { id: subRecipeId },
+	const foundIngredient = await prisma.ingredient.findFirst({
+		where: { id: ingredientId },
 	});
 
-	if (!foundSubRecipe) {
+	if (!foundIngredient) {
 		return redirect("/404", 404);
 	}
 
-	if (foundSubRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+	if (foundIngredient.userId !== authData.id && authData.role !== "ADMIN") {
 		return redirect("/403", 403);
 	}
 
 	const t = await i18next.getFixedT(request);
 	const title = generateMetaTitle({
 		title: t("common.deleteSomething", {
-			something: `${t("recipe.field.subRecipe")}`.toLowerCase(),
+			something: `${t("recipe.field.ingredient")}`.toLowerCase(),
 		}),
 		postfix: PARSED_ENV.APP_NAME,
 	});
@@ -64,23 +68,22 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	return json({
-		foundSubRecipe,
+		foundIngredient,
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/sub-recipe/${subRecipeId}/delete`,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/ingredient/${ingredientId}/delete`,
 		},
 	});
 };
 
-const DeleteSubRecipeModal = () => {
-	const { foundSubRecipe } = useLoaderData<typeof loader>();
-	const { id, name: n, userId } = foundSubRecipe;
+export const DeleteIngredientModal = () => {
+	const { foundIngredient } = useLoaderData<typeof loader>();
+	const { id, name: n, userId } = foundIngredient;
 
 	const actionData = useActionData<typeof action>();
 
 	const [isOpen, setIsOpen] = useState(true);
-
 	const submit = useSubmit();
 	const { pathname } = useLocation();
 	const {
@@ -92,7 +95,8 @@ const DeleteSubRecipeModal = () => {
 
 	const parsedName = z
 		.string()
-		.nullish()
+		.nullable()
+		.optional()
 		.parse(TranslatedContentSchema.parse(n)?.[LanguageSchema.parse(lang)]);
 	const name =
 		parsedName && parsedName.length > 47
@@ -108,12 +112,12 @@ const DeleteSubRecipeModal = () => {
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("recipe.modal.delete.subRecipe.title")}
+			title={t("recipe.modal.delete.ingredient.title")}
 		>
 			{t(
 				parsedName
-					? "recipe.modal.delete.subRecipe.contentWithName"
-					: "recipe.modal.delete.subRecipe.content",
+					? "recipe.modal.delete.ingredient.contentWithName"
+					: "recipe.modal.delete.ingredient.content",
 				{ name }
 			)}
 		</Modal>
@@ -127,20 +131,20 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const formData = await request.formData();
 
-	const { subRecipeId } = EditRecipeSubRecipeParamsSchema.parse(p);
+	const { ingredientId } = EditRecipeIngredientParamsSchema.parse(p);
 
 	const id = formData.get("id")?.toString();
 	const userId = formData.get("userId")?.toString();
 
 	if (
-		id !== subRecipeId ||
+		id !== ingredientId ||
 		(userId !== authData.id && authData.role !== "ADMIN")
 	) {
 		redirect("/403", 403);
 	}
 
 	try {
-		await prisma.subRecipe.delete({ where: { id: subRecipeId } });
+		await prisma.ingredient.delete({ where: { id: ingredientId } });
 	} catch (error) {
 		console.error(error);
 
@@ -150,4 +154,4 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	return json({ success: true });
 };
 
-export default DeleteSubRecipeModal;
+export default DeleteIngredientModal;

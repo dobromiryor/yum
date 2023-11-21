@@ -46,6 +46,10 @@ import { prisma } from "~/utils/prisma.server";
 type FormData = z.infer<typeof StepDTOSchema>;
 const resolver = zodResolver(StepDTOSchema);
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 const temperatureScaleOptions = OptionsSchema.parse(
 	Object.values(TemperatureScale).map((item) => ({
 		label: `°${item}`,
@@ -109,7 +113,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/step`,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/step`,
 		},
 	});
 };

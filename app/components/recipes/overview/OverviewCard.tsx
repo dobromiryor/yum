@@ -43,7 +43,7 @@ export const OverviewCard = ({
 			className="flex rounded-2xl"
 			to={
 				linkTo === "edit"
-					? `/recipes/${recipe.id}/${lang}`
+					? `/recipes/edit/${recipe.id}/${lang}`
 					: `/recipes/${recipe.id}`
 			}
 		>

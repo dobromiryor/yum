@@ -18,6 +18,10 @@ import oven from "public/images/500/oven_base.png";
 import { Button } from "~/components/common/UI/Button";
 import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const loader = () => {
 	return redirect("/");
 };

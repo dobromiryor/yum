@@ -12,6 +12,7 @@ import {
 	useActionData,
 	useLoaderData,
 	useLocation,
+	useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
@@ -29,11 +30,17 @@ import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
+import {
+	OptionalTranslatedContentSchema,
+	TranslatedContentSchema,
+} from "~/schemas/common";
 import { IngredientDTOSchema } from "~/schemas/ingredient.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
-import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeIngredientParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import { getDataSession } from "~/utils/dataStorage.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
+import { ingredientLanguageValidation } from "~/utils/helpers/language-validation.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
@@ -48,6 +55,10 @@ import { prisma } from "~/utils/prisma.server";
 
 type FormData = z.infer<typeof IngredientDTOSchema>;
 const resolver = zodResolver(IngredientDTOSchema);
+
+export const sitemap = () => ({
+	exclude: true,
+});
 
 const options = OptionsSchema.parse(
 	Object.values(Unit).map((item) => ({
@@ -64,18 +75,20 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/401",
 	});
+	const t = await i18next.getFixedT(request.clone());
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { recipeId, lang, ingredientId } =
+		EditRecipeIngredientParamsSchema.parse(p);
 
-	const foundRecipe = await prisma.recipe.findUnique({
-		where: { id: recipeId },
+	const foundIngredient = await prisma.ingredient.findFirst({
+		where: { id: ingredientId },
 	});
 
-	if (!foundRecipe) {
+	if (!foundIngredient) {
 		return redirect("/404", 404);
 	}
 
-	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
+	if (foundIngredient.userId !== authData.id && authData.role !== "ADMIN") {
 		return redirect("/403", 403);
 	}
 
@@ -84,7 +97,6 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const foundSubRecipes = await prisma.subRecipe.findMany({
 		where: { recipeId },
 	});
-
 	const subRecipeOptions = OptionsSchema.parse(
 		foundSubRecipes.map((item) => ({
 			label:
@@ -95,9 +107,15 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		}))
 	);
 
-	const t = await i18next.getFixedT(request);
+	const { name, note } = foundIngredient;
+	const { setData, commit } = await getDataSession(request);
+
+	setData({ name, note });
+
+	const validation = ingredientLanguageValidation({ name, note });
+
 	const title = generateMetaTitle({
-		title: t("common.addSomething", {
+		title: t("common.editSomething", {
 			something: `${t("recipe.field.ingredient")}`.toLowerCase(),
 		}),
 		postfix: PARSED_ENV.APP_NAME,
@@ -106,44 +124,72 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
 	});
 
-	return json({
-		authData,
-		subRecipeOptions,
-		meta: {
-			title,
-			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/ingredient`,
+	return json(
+		{
+			authData,
+			foundIngredient,
+			lang,
+			validation,
+			subRecipeOptions,
+			meta: {
+				title,
+				description,
+				url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/ingredient/${ingredientId}/edit`,
+			},
 		},
-	});
+		{ headers: { "Set-Cookie": await commit() } }
+	);
 };
 
-export const CreateIngredientModal = () => {
-	const { subRecipeOptions } = useLoaderData<typeof loader>();
+export const EditIngredientModal = () => {
+	const [isOpen, setIsOpen] = useState(true);
+
+	const { foundIngredient, lang, validation, subRecipeOptions } =
+		useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 
-	const [isOpen, setIsOpen] = useState(true);
 	const { t } = useTranslation();
+	const { state } = useNavigation();
 	const { pathname } = useLocation();
 
-	const prevPath = pathname.split("/").slice(0, -1).join("/");
+	const prevPath = pathname.split("/").slice(0, -3).join("/");
+
+	const { name, note, quantity, unit } = foundIngredient;
+
+	const parsedName = TranslatedContentSchema.parse(name);
+	const parsedNote = OptionalTranslatedContentSchema.parse(note);
+	const invertedLang = getInvertedLang(lang);
 
 	const form = useRemixForm<FormData>({
 		resolver,
+		defaultValues: {
+			name: name?.[lang as keyof typeof name] ?? "",
+			note: note?.[lang as keyof typeof note] ?? "",
+			quantity: quantity ?? undefined,
+			unit: unit ?? undefined,
+		},
 		submitConfig: {
-			method: "post",
+			method: "patch",
 		},
 	});
-	const { reset, handleSubmit, control } = form;
+	const {
+		reset,
+		handleSubmit,
+		control,
+		formState: { isDirty },
+	} = form;
 
 	return (
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
+			isCTADisabled={!isDirty}
+			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("recipe.modal.create.ingredient.title")}
+			title={t("recipe.modal.update.ingredient.title")}
 		>
 			<RemixFormProvider {...form}>
 				<Form
@@ -157,8 +203,9 @@ export const CreateIngredientModal = () => {
 						isRequired
 						label={t("recipe.field.name")}
 						name="name"
+						translationContent={parsedName[invertedLang]}
+						translationValidation={validation[lang]?.name}
 					/>
-					<Input label={t("recipe.field.quantity")} name="quantity" />
 					<Controller
 						control={control}
 						name="unit"
@@ -172,7 +219,13 @@ export const CreateIngredientModal = () => {
 							/>
 						)}
 					/>
-					<Textarea label={t("recipe.field.note")} name="note" />
+					<Input label={t("recipe.field.quantity")} name="quantity" />
+					<Textarea
+						label={t("recipe.field.note")}
+						name="note"
+						translationContent={parsedNote?.[invertedLang]}
+						translationValidation={validation[lang]?.note}
+					/>
 					<Controller
 						control={control}
 						name="subRecipeId"
@@ -193,11 +246,11 @@ export const CreateIngredientModal = () => {
 };
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
-	const { id: userId } = await auth.isAuthenticated(request.clone(), {
+	await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/401",
 	});
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { lang, ingredientId } = EditRecipeIngredientParamsSchema.parse(p);
 
 	const { errors, data } = await getValidatedFormData<FormData>(
 		request.clone(),
@@ -209,11 +262,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	}
 
 	try {
-		const { name, note, subRecipeId, quantity } = data;
+		const { name, note, quantity, unit, subRecipeId } = data;
 
-		await prisma.ingredient.create({
+		await prisma.ingredient.update({
 			data: {
-				...data,
 				...(await translatedContent({
 					request,
 					key: "name",
@@ -222,8 +274,8 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 				})),
 				...(await nullishTranslatedContent({
 					request,
-					key: "note",
 					lang,
+					key: "note",
 					value: note,
 				})),
 				quantity:
@@ -232,9 +284,11 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 						: quantity === undefined
 						? undefined
 						: new Prisma.Decimal(parseQuantity(quantity)),
+				unit,
 				subRecipeId,
-				recipeId,
-				userId,
+			},
+			where: {
+				id: ingredientId,
 			},
 		});
 	} catch (error) {
@@ -246,4 +300,4 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	return json({ success: true });
 };
 
-export default CreateIngredientModal;
+export default EditIngredientModal;

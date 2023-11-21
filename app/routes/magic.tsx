@@ -5,6 +5,10 @@ import { auth } from "~/utils/auth.server";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.authenticate("email-link", request.clone(), {
 		failureRedirect: "/login",

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import {
 	json,
 	redirect,
@@ -16,20 +17,27 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
-import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import {
 	EditRecipeParamsSchema,
 	RecipeParamsSchema,
 } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import { deleteImage } from "~/utils/cloudinary.server";
+import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+
+export const sitemap = () => ({
+	exclude: true,
+});
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
@@ -57,7 +65,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const t = await i18next.getFixedT(request);
 	const title = generateMetaTitle({
 		title: t("common.deleteSomething", {
-			something: `${t("common.recipe")}`.toLowerCase(),
+			something: `${t("recipe.field.photo")}`.toLowerCase(),
 		}),
 		postfix: PARSED_ENV.APP_NAME,
 	});
@@ -70,55 +78,39 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/delete`,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/photo/delete`,
 		},
 	});
 };
 
-export const DeleteRecipeModal = () => {
-	const { foundRecipe } = useLoaderData<typeof loader>();
-	const { id, name: n, userId } = foundRecipe;
-
-	const actionData = useActionData<typeof action>();
-
+const DeletePhotoModal = () => {
 	const [isOpen, setIsOpen] = useState(true);
+
+	const { foundRecipe } = useLoaderData<typeof loader>();
+	const photo = CloudinaryUploadApiResponseWithBlurHashSchema.parse(
+		foundRecipe.photo
+	);
+	const actionData = useActionData<typeof action>();
 
 	const submit = useSubmit();
 	const { pathname } = useLocation();
-	const {
-		t,
-		i18n: { language: lang },
-	} = useTranslation();
+	const { t } = useTranslation();
 
-	const prevPath = pathname.split("/").slice(0, -1).join("/");
-
-	const parsedName = z
-		.string()
-		.nullable()
-		.optional()
-		.parse(TranslatedContentSchema.parse(n)?.[LanguageSchema.parse(lang)]);
-	const name =
-		parsedName && parsedName.length > 47
-			? parsedName.substring(0, 47) + "..."
-			: parsedName;
+	const prevPath = pathname.split("/").slice(0, -2).join("/");
 
 	return (
 		<Modal
-			CTAFn={() => submit({ id, userId }, { method: "delete" })}
+			CTAFn={() => submit({ photo: photo.public_id }, { method: "delete" })}
 			CTALabel={t("common.confirm")}
 			CTAVariant="danger"
 			isOpen={isOpen}
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("recipe.modal.delete.recipe.title")}
+			title={t("recipe.modal.delete.photo.title")}
 		>
-			{t(
-				parsedName
-					? "recipe.modal.delete.recipe.contentWithName"
-					: "recipe.modal.delete.recipe.content",
-				{ name }
-			)}
+			{t("recipe.modal.delete.photo.content")}
+			<FormError error={actionData?.formError} />
 		</Modal>
 	);
 };
@@ -128,29 +120,39 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		failureRedirect: "/401",
 	});
 
-	const formData = await request.formData();
+	const t = await i18next.getFixedT(request);
 
 	const { recipeId } = RecipeParamsSchema.parse(p);
-
-	const id = formData.get("id")?.toString();
-	const userId = formData.get("userId")?.toString();
+	const foundRecipe = await prisma.recipe.findUnique({
+		where: { id: recipeId },
+	});
 
 	if (
-		id !== recipeId ||
-		(userId !== authData.id && authData.role !== "ADMIN")
+		!foundRecipe ||
+		(foundRecipe.userId !== authData.id && authData.role !== "ADMIN")
 	) {
 		redirect("/403", 403);
 	}
 
-	try {
-		await prisma.recipe.delete({ where: { id: recipeId } });
-	} catch (error) {
-		console.error(error);
+	const clonedRequest = request.clone();
+	const photo = z.string().parse((await request.formData()).get("photo"));
 
-		return json({ success: false, error });
+	const isImageDeleted = await deleteImage(photo);
+
+	if (!isImageDeleted) {
+		return errorCatcher(clonedRequest, t("error.somethingWentWrong"));
 	}
 
-	return json({ success: true });
+	await prisma.recipe
+		.update({
+			data: { photo: Prisma.JsonNull },
+			where: {
+				id: recipeId,
+			},
+		})
+		.catch((formError) => errorCatcher(request, formError));
+
+	return json({ success: true, formError: undefined as string | undefined });
 };
 
-export default DeleteRecipeModal;
+export default DeletePhotoModal;

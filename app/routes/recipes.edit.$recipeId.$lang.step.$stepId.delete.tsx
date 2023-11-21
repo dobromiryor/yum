@@ -28,6 +28,10 @@ import {
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };
@@ -67,7 +71,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/step/${stepId}/delete`,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/step/${stepId}/delete`,
 		},
 	});
 };

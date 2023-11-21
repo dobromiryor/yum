@@ -32,6 +32,10 @@ import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 import { recipesOverview } from "~/utils/recipe.server";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };
@@ -83,7 +87,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 			url: `${PARSED_ENV.DOMAIN_URL}/users/${userId}/unpublished`,
 			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
 				foundUser.photo
-			)?.url,
+			)?.secure_url,
 		},
 	});
 };

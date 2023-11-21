@@ -3,6 +3,10 @@ import { json, redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { isTheme } from "~/utils/providers/theme-provider";
 import { getThemeSession } from "~/utils/theme.server";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const themeSession = await getThemeSession(request);
 	const requestText = await request.text();

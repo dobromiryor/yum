@@ -9,7 +9,7 @@ import { convertMany } from "convert";
 import Fraction from "fraction.js";
 import { useTranslation } from "react-i18next";
 
-import { type loader } from "~/routes/recipes.$recipeId._index";
+import { type loader } from "~/routes/recipes.$recipeId.$lang._index";
 import {
 	OptionalTranslatedContentSchema,
 	TranslatedContentSchema,

@@ -8,6 +8,7 @@ import {
 import { useLoaderData, useNavigate, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { type SitemapFunction } from "remix-sitemap";
 
 import { ErrorCount } from "~/components/common/ErrorCount";
 import { Button } from "~/components/common/UI/Button";
@@ -36,6 +37,24 @@ import {
 	recipesOverview,
 	unpublishedRecipesCount,
 } from "~/utils/recipe.server";
+
+export const sitemap: SitemapFunction = async () => {
+	const users = await prisma.user.findMany();
+
+	return users.map((user) => ({
+		loc: `/users/${user.id}`,
+		lastmod: user.updatedAt.toISOString(),
+		exclude: !user.isVerified,
+		...(user.photo && {
+			images: [
+				{
+					loc: CloudinaryUploadApiResponseWithBlurHashSchema.parse(user.photo)
+						.secure_url,
+				},
+			],
+		}),
+	}));
+};
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
@@ -86,7 +105,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 			url: `${PARSED_ENV.DOMAIN_URL}/users/${userId}`,
 			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
 				foundUser.photo
-			)?.url,
+			)?.secure_url,
 		},
 	});
 };

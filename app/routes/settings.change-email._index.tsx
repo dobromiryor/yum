@@ -44,6 +44,10 @@ import { sendChangeEmail } from "~/utils/sendgrid.server";
 type FormData = z.infer<typeof EmailSchema>;
 const resolver = zodResolver(EmailSchema);
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };

@@ -3,6 +3,10 @@ import { redirect, type LoaderFunctionArgs } from "@remix-run/node";
 import i18next from "~/modules/i18next.server";
 import { auth } from "~/utils/auth.server";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/401",

@@ -42,6 +42,10 @@ import { prisma } from "~/utils/prisma.server";
 type FormData = z.infer<typeof NewRecipeSchema>;
 const resolver = zodResolver(NewRecipeSchema);
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };

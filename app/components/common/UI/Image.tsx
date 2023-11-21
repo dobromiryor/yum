@@ -1,5 +1,5 @@
 import { AdvancedImage, lazyload } from "@cloudinary/react";
-import { CloudinaryImage } from "@cloudinary/url-gen";
+import * as urlGen from "@cloudinary/url-gen";
 import { dpr } from "@cloudinary/url-gen/actions/delivery";
 import { name } from "@cloudinary/url-gen/actions/namedTransformation";
 import { fill, scale } from "@cloudinary/url-gen/actions/resize";
@@ -26,7 +26,7 @@ export const Image = ({ className, photo, transformation }: ImageProps) => {
 	const { ENV } = useTypedRouteLoaderData("root");
 	const ref = useRef<AdvancedImage>(null);
 
-	const cldImg = new CloudinaryImage(
+	const cldImg = new urlGen.CloudinaryImage(
 		photo.public_id,
 		{
 			cloudName: ENV.CLOUDINARY_CLOUD_NAME,

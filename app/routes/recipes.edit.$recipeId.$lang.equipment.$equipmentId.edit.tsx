@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Prisma, Unit } from "@prisma/client";
+import { Length, Volume } from "@prisma/client";
 import {
 	json,
 	redirect,
@@ -14,7 +14,7 @@ import {
 	useLocation,
 	useNavigation,
 } from "@remix-run/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -22,46 +22,34 @@ import {
 	getValidatedFormData,
 	useRemixForm,
 } from "remix-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
-import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
-import {
-	OptionalTranslatedContentSchema,
-	TranslatedContentSchema,
-} from "~/schemas/common";
-import { IngredientDTOSchema } from "~/schemas/ingredient.schema";
-import { OptionsSchema } from "~/schemas/option.schema";
-import { EditRecipeIngredientParamsSchema } from "~/schemas/params.schema";
+import { TranslatedContentSchema } from "~/schemas/common";
+import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
+import { EditRecipeEquipmentParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
-import { ingredientLanguageValidation } from "~/utils/helpers/language-validation.server";
+import { equipmentLanguageValidation } from "~/utils/helpers/language-validation.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
-import { parseQuantity } from "~/utils/helpers/parse-quantity.server";
-import {
-	nullishTranslatedContent,
-	translatedContent,
-} from "~/utils/helpers/translated-content.server";
+import { translatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
 
-type FormData = z.infer<typeof IngredientDTOSchema>;
-const resolver = zodResolver(IngredientDTOSchema);
+type FormData = z.infer<typeof EquipmentDTOSchema>;
+const resolver = zodResolver(EquipmentDTOSchema);
 
-const options = OptionsSchema.parse(
-	Object.values(Unit).map((item) => ({
-		label: item.replace("_", " "),
-		value: item,
-	}))
-);
+export const sitemap = () => ({
+	exclude: true,
+});
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
@@ -71,48 +59,35 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/401",
 	});
-	const t = await i18next.getFixedT(request.clone());
 
-	const { recipeId, lang, ingredientId } =
-		EditRecipeIngredientParamsSchema.parse(p);
+	const { recipeId, lang, equipmentId } =
+		EditRecipeEquipmentParamsSchema.parse(p);
 
-	const foundIngredient = await prisma.ingredient.findFirst({
-		where: { id: ingredientId },
+	const foundEquipment = await prisma.equipment.findFirst({
+		where: { id: equipmentId },
 	});
 
-	if (!foundIngredient) {
+	if (!foundEquipment) {
 		return redirect("/404", 404);
 	}
 
-	if (foundIngredient.userId !== authData.id && authData.role !== "ADMIN") {
+	if (foundEquipment.userId !== authData.id && authData.role !== "ADMIN") {
 		return redirect("/403", 403);
 	}
 
-	const invertedLang = getInvertedLang(lang);
-
-	const foundSubRecipes = await prisma.subRecipe.findMany({
-		where: { recipeId },
-	});
-	const subRecipeOptions = OptionsSchema.parse(
-		foundSubRecipes.map((item) => ({
-			label:
-				item.name?.[lang as keyof typeof item.name] ??
-				item.name?.[invertedLang as keyof typeof item.name] ??
-				t("error.translationMissing"),
-			value: item.id,
-		}))
-	);
-
-	const { name, note } = foundIngredient;
+	const { name } = foundEquipment;
 	const { setData, commit } = await getDataSession(request);
 
-	setData({ name, note });
+	setData({ name });
 
-	const validation = ingredientLanguageValidation({ name, note });
+	const validation = equipmentLanguageValidation({ name });
 
+	const invertedLang = getInvertedLang(lang);
+
+	const t = await i18next.getFixedT(request);
 	const title = generateMetaTitle({
 		title: t("common.editSomething", {
-			something: `${t("recipe.field.ingredient")}`.toLowerCase(),
+			something: `${t("recipe.field.equipment")}`.toLowerCase(),
 		}),
 		postfix: PARSED_ENV.APP_NAME,
 	});
@@ -123,57 +98,96 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	return json(
 		{
 			authData,
-			foundIngredient,
+			foundEquipment,
 			lang,
+			invertedLang,
 			validation,
-			subRecipeOptions,
 			meta: {
 				title,
 				description,
-				url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/ingredient/${ingredientId}/edit`,
+				url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/equipment/${equipmentId}/edit`,
 			},
 		},
 		{ headers: { "Set-Cookie": await commit() } }
 	);
 };
 
-export const EditIngredientModal = () => {
-	const [isOpen, setIsOpen] = useState(true);
+const EditEquipmentModal = () => {
+	const [isOpen, setIsOpen] = useState<boolean>(true);
 
-	const { foundIngredient, lang, validation, subRecipeOptions } =
+	const { foundEquipment, lang, invertedLang, validation } =
 		useLoaderData<typeof loader>();
+
 	const actionData = useActionData<typeof action>();
 
 	const { t } = useTranslation();
 	const { state } = useNavigation();
-	const { pathname } = useLocation();
 
+	const { pathname } = useLocation();
 	const prevPath = pathname.split("/").slice(0, -3).join("/");
 
-	const { name, note, quantity, unit } = foundIngredient;
-
-	const parsedName = TranslatedContentSchema.parse(name);
-	const parsedNote = OptionalTranslatedContentSchema.parse(note);
-	const invertedLang = getInvertedLang(lang);
+	const {
+		name: n,
+		height,
+		volume,
+		volumeUnit,
+		width,
+		length,
+		dimensionUnit,
+	} = foundEquipment;
+	const name = TranslatedContentSchema.parse(n);
 
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
-			name: name?.[lang as keyof typeof name] ?? "",
-			note: note?.[lang as keyof typeof note] ?? "",
-			quantity: quantity ?? undefined,
-			unit: unit ?? undefined,
+			name: name?.[lang] ?? undefined,
+			dimensionUnit,
+			length,
+			width,
+			height,
+			volume,
+			volumeUnit,
 		},
 		submitConfig: {
 			method: "patch",
 		},
 	});
+
 	const {
+		control,
 		reset,
 		handleSubmit,
-		control,
 		formState: { isDirty },
 	} = form;
+
+	const dimensionUnitOptions = useMemo(
+		() =>
+			Object.keys(Length).map((item) => {
+				const lengthItem = z.nativeEnum(Length).parse(item);
+
+				return {
+					label: t(`recipe.units.${lengthItem}`, {
+						count: 0,
+					}),
+					value: item,
+				};
+			}),
+		[t]
+	);
+	const volumeUnitOptions = useMemo(
+		() =>
+			Object.keys(Volume).map((item) => {
+				const volumeItem = z.nativeEnum(Volume).parse(item);
+
+				return {
+					label: t(`recipe.units.${volumeItem}`, {
+						count: 0,
+					}),
+					value: item,
+				};
+			}),
+		[t]
+	);
 
 	return (
 		<Modal
@@ -185,7 +199,7 @@ export const EditIngredientModal = () => {
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("recipe.modal.update.ingredient.title")}
+			title={t("recipe.modal.update.equipment.title")}
 		>
 			<RemixFormProvider {...form}>
 				<Form
@@ -195,41 +209,37 @@ export const EditIngredientModal = () => {
 					onSubmit={handleSubmit}
 				>
 					<Input
-						autoFocus
 						isRequired
 						label={t("recipe.field.name")}
 						name="name"
-						translationContent={parsedName[invertedLang]}
+						translationContent={name[invertedLang]}
 						translationValidation={validation[lang]?.name}
 					/>
+					<Input label={t("recipe.field.length")} name="length" type="number" />
+					<Input label={t("recipe.field.width")} name="width" type="number" />
+					<Input label={t("recipe.field.height")} name="height" type="number" />
 					<Controller
 						control={control}
-						name="unit"
+						name="dimensionUnit"
 						render={({ field: { onChange, value, name } }) => (
 							<Select
-								label={t("recipe.field.unit")}
+								label={t("recipe.field.dimensionUnit")}
 								name={name}
-								options={options}
+								options={dimensionUnitOptions}
 								selected={value}
 								onChange={onChange}
 							/>
 						)}
 					/>
-					<Input label={t("recipe.field.quantity")} name="quantity" />
-					<Textarea
-						label={t("recipe.field.note")}
-						name="note"
-						translationContent={parsedNote?.[invertedLang]}
-						translationValidation={validation[lang]?.note}
-					/>
+					<Input label={t("recipe.field.volume")} name="volume" type="number" />
 					<Controller
 						control={control}
-						name="subRecipeId"
+						name="volumeUnit"
 						render={({ field: { onChange, value, name } }) => (
 							<Select
-								label={t("recipe.field.subRecipe")}
+								label={t("recipe.field.volumeUnit")}
 								name={name}
-								options={subRecipeOptions}
+								options={volumeUnitOptions}
 								selected={value}
 								onChange={onChange}
 							/>
@@ -246,7 +256,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		failureRedirect: "/401",
 	});
 
-	const { lang, ingredientId } = EditRecipeIngredientParamsSchema.parse(p);
+	const { lang, equipmentId } = EditRecipeEquipmentParamsSchema.parse(p);
 
 	const { errors, data } = await getValidatedFormData<FormData>(
 		request.clone(),
@@ -254,37 +264,24 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	);
 
 	if (errors) {
+		console.error(errors);
+
 		return json({ success: false, errors });
 	}
 
 	try {
-		const { name, note, quantity, unit, subRecipeId } = data;
-
-		await prisma.ingredient.update({
+		await prisma.equipment.update({
 			data: {
+				...data,
 				...(await translatedContent({
 					request,
 					key: "name",
 					lang,
-					value: name,
+					value: data.name,
 				})),
-				...(await nullishTranslatedContent({
-					request,
-					lang,
-					key: "note",
-					value: note,
-				})),
-				quantity:
-					quantity === null
-						? null
-						: quantity === undefined
-						? undefined
-						: new Prisma.Decimal(parseQuantity(quantity)),
-				unit,
-				subRecipeId,
 			},
 			where: {
-				id: ingredientId,
+				id: equipmentId,
 			},
 		});
 	} catch (error) {
@@ -296,4 +293,4 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	return json({ success: true });
 };
 
-export default EditIngredientModal;
+export default EditEquipmentModal;

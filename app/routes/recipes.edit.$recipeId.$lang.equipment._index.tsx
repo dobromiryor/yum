@@ -10,7 +10,6 @@ import {
 import {
 	Form,
 	useActionData,
-	useLoaderData,
 	useLocation,
 	useNavigation,
 } from "@remix-run/react";
@@ -29,13 +28,9 @@ import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
-import { TranslatedContentSchema } from "~/schemas/common";
 import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
-import { EditRecipeEquipmentParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
-import { getDataSession } from "~/utils/dataStorage.server";
-import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
-import { equipmentLanguageValidation } from "~/utils/helpers/language-validation.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
@@ -47,6 +42,10 @@ import { prisma } from "~/utils/prisma.server";
 type FormData = z.infer<typeof EquipmentDTOSchema>;
 const resolver = zodResolver(EquipmentDTOSchema);
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };
@@ -56,33 +55,23 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		failureRedirect: "/401",
 	});
 
-	const { recipeId, lang, equipmentId } =
-		EditRecipeEquipmentParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
 
-	const foundEquipment = await prisma.equipment.findFirst({
-		where: { id: equipmentId },
+	const foundRecipe = await prisma.recipe.findUnique({
+		where: { id: recipeId },
 	});
 
-	if (!foundEquipment) {
+	if (!foundRecipe) {
 		return redirect("/404", 404);
 	}
 
-	if (foundEquipment.userId !== authData.id && authData.role !== "ADMIN") {
+	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
 		return redirect("/403", 403);
 	}
 
-	const { name } = foundEquipment;
-	const { setData, commit } = await getDataSession(request);
-
-	setData({ name });
-
-	const validation = equipmentLanguageValidation({ name });
-
-	const invertedLang = getInvertedLang(lang);
-
 	const t = await i18next.getFixedT(request);
 	const title = generateMetaTitle({
-		title: t("common.editSomething", {
+		title: t("common.addSomething", {
 			something: `${t("recipe.field.equipment")}`.toLowerCase(),
 		}),
 		postfix: PARSED_ENV.APP_NAME,
@@ -91,64 +80,32 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
 	});
 
-	return json(
-		{
-			authData,
-			foundEquipment,
-			lang,
-			invertedLang,
-			validation,
-			meta: {
-				title,
-				description,
-				url: `${PARSED_ENV.DOMAIN_URL}/recipes/${recipeId}/${lang}/equipment/${equipmentId}/edit`,
-			},
+	return json({
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/equipment`,
 		},
-		{ headers: { "Set-Cookie": await commit() } }
-	);
+	});
 };
 
-const EditEquipmentModal = () => {
+const CreateEquipmentModal = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(true);
-
-	const { foundEquipment, lang, invertedLang, validation } =
-		useLoaderData<typeof loader>();
 
 	const actionData = useActionData<typeof action>();
 
 	const { t } = useTranslation();
+	const { pathname } = useLocation();
 	const { state } = useNavigation();
 
-	const { pathname } = useLocation();
-	const prevPath = pathname.split("/").slice(0, -3).join("/");
-
-	const {
-		name: n,
-		height,
-		volume,
-		volumeUnit,
-		width,
-		length,
-		dimensionUnit,
-	} = foundEquipment;
-	const name = TranslatedContentSchema.parse(n);
+	const prevPath = pathname.split("/").slice(0, -1).join("/");
 
 	const form = useRemixForm<FormData>({
 		resolver,
-		defaultValues: {
-			name: name?.[lang] ?? undefined,
-			dimensionUnit,
-			length,
-			width,
-			height,
-			volume,
-			volumeUnit,
-		},
 		submitConfig: {
-			method: "patch",
+			method: "post",
 		},
 	});
-
 	const {
 		control,
 		reset,
@@ -195,7 +152,7 @@ const EditEquipmentModal = () => {
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("recipe.modal.update.equipment.title")}
+			title={t("recipe.modal.create.equipment.title")}
 		>
 			<RemixFormProvider {...form}>
 				<Form
@@ -204,13 +161,7 @@ const EditEquipmentModal = () => {
 					className="flex flex-col gap-2"
 					onSubmit={handleSubmit}
 				>
-					<Input
-						isRequired
-						label={t("recipe.field.name")}
-						name="name"
-						translationContent={name[invertedLang]}
-						translationValidation={validation[lang]?.name}
-					/>
+					<Input isRequired label={t("recipe.field.name")} name="name" />
 					<Input label={t("recipe.field.length")} name="length" type="number" />
 					<Input label={t("recipe.field.width")} name="width" type="number" />
 					<Input label={t("recipe.field.height")} name="height" type="number" />
@@ -248,11 +199,11 @@ const EditEquipmentModal = () => {
 };
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
-	await auth.isAuthenticated(request.clone(), {
+	const { id: userId } = await auth.isAuthenticated(request.clone(), {
 		failureRedirect: "/401",
 	});
 
-	const { lang, equipmentId } = EditRecipeEquipmentParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
 
 	const { errors, data } = await getValidatedFormData<FormData>(
 		request.clone(),
@@ -260,13 +211,11 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	);
 
 	if (errors) {
-		console.error(errors);
-
 		return json({ success: false, errors });
 	}
 
 	try {
-		await prisma.equipment.update({
+		await prisma.equipment.create({
 			data: {
 				...data,
 				...(await translatedContent({
@@ -275,9 +224,8 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					lang,
 					value: data.name,
 				})),
-			},
-			where: {
-				id: equipmentId,
+				recipeId,
+				userId,
 			},
 		});
 	} catch (error) {
@@ -289,4 +237,4 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	return json({ success: true });
 };
 
-export default EditEquipmentModal;
+export default CreateEquipmentModal;
