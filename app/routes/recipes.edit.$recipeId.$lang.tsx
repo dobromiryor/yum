@@ -481,7 +481,7 @@ export default function EditRecipeRoute() {
 		<>
 			<Section
 				buttons={
-					<Link tabIndex={-1} to={`/recipes/${id}/${invertedLang}`}>
+					<Link tabIndex={-1} to={`/recipes/edit/${id}/${invertedLang}`}>
 						<Button className="flex items-center gap-1">
 							<span>{t(`nav.language.${invertedLang}`)}</span>
 							<ErrorCount errorCount={validation[invertedLang]?.count} />
@@ -559,7 +559,11 @@ export default function EditRecipeRoute() {
 						buttons={
 							<>
 								{status === Status.PUBLISHED && languagesIncludesLocale && (
-									<Link preventScrollReset tabIndex={-1} to={`/recipes/${id}`}>
+									<Link
+										preventScrollReset
+										tabIndex={-1}
+										to={`/recipes/${id}/${lang}`}
+									>
 										<Button className="flex items-center gap-1">
 											<span>{t("common.view")}</span>
 										</Button>

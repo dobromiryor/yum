@@ -192,7 +192,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	});
 
 	if (createdRecipe) {
-		return redirect(`/recipes/${createdRecipe.id}/${lang}`);
+		return redirect(`/recipes/edit/${createdRecipe.id}/${lang}`);
 	}
 
 	return json({ success: false });
