@@ -140,8 +140,17 @@ const EditUserNamesModal = () => {
 					className="flex flex-col gap-2"
 					onSubmit={handleSubmit}
 				>
-					<Input label={t("settings.field.firstName")} name="firstName" />
-					<Input label={t("settings.field.lastName")} name="lastName" />
+					<Input
+						autoFocus
+						autoComplete="given-name"
+						label={t("settings.field.firstName")}
+						name="firstName"
+					/>
+					<Input
+						autoComplete="family-name"
+						label={t("settings.field.lastName")}
+						name="lastName"
+					/>
 					<input
 						hidden
 						readOnly

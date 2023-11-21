@@ -162,6 +162,7 @@ const EditSubRecipeModal = () => {
 					onSubmit={handleSubmit}
 				>
 					<Input
+						autoFocus
 						isRequired
 						label={t("recipe.field.name")}
 						name="name"

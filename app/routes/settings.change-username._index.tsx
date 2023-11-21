@@ -136,11 +136,15 @@ const EditUsernameModal = () => {
 			<RemixFormProvider {...form}>
 				<Form
 					preventScrollReset
-					autoComplete="off"
 					className="flex flex-col gap-2"
 					onSubmit={handleSubmit}
 				>
-					<Input label={t("settings.field.username")} name="username" />
+					<Input
+						autoFocus
+						autoComplete="username"
+						label={t("settings.field.username")}
+						name="username"
+					/>
 					<input
 						hidden
 						readOnly

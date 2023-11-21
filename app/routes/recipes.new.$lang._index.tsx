@@ -123,7 +123,12 @@ const NewRecipeRoute = () => {
 					className="flex flex-col gap-2"
 					onSubmit={(e) => (isLoading ? e.preventDefault() : handleSubmit(e))}
 				>
-					<Input isRequired label={t("recipe.field.name")} name="name" />
+					<Input
+						autoFocus
+						isRequired
+						label={t("recipe.field.name")}
+						name="name"
+					/>
 					<Textarea
 						isRequired
 						label={t("recipe.field.description")}

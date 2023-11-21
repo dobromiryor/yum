@@ -210,6 +210,7 @@ export const CreateStepModal = () => {
 					onSubmit={handleSubmit}
 				>
 					<Textarea
+						autoFocus
 						isRequired
 						label={t("recipe.field.description")}
 						name="content"

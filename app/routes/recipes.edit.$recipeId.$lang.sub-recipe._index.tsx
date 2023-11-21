@@ -116,7 +116,12 @@ const CreateSubRecipeModal = () => {
 					className="flex flex-col gap-2"
 					onSubmit={handleSubmit}
 				>
-					<Input isRequired label={t("recipe.field.name")} name="name" />
+					<Input
+						autoFocus
+						isRequired
+						label={t("recipe.field.name")}
+						name="name"
+					/>
 				</Form>
 			</RemixFormProvider>
 		</Modal>

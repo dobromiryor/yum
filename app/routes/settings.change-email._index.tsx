@@ -145,11 +145,15 @@ const EditUsernameModal = () => {
 			<RemixFormProvider {...form}>
 				<Form
 					preventScrollReset
-					autoComplete="off"
 					className="flex flex-col gap-2"
 					onSubmit={handleSubmit}
 				>
-					<Input label={t("settings.field.email")} name="email" />
+					<Input
+						autoFocus
+						autoComplete="email"
+						label={t("settings.field.email")}
+						name="email"
+					/>
 					<FormError error={actionData?.formError} />
 				</Form>
 			</RemixFormProvider>
