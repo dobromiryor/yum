@@ -16,7 +16,7 @@ export const Pill = ({ icon, label, tooltip }: CardPillProps) => {
 	}
 
 	return (
-		<TooltipWrapper label={tooltip}>
+		<TooltipWrapper content={tooltip}>
 			<div
 				className={clsx(
 					"flex justify-center items-center gap-1.5 p-1.5 bg-light dark:bg-dark text-xs leading-[14px] h-min transition-colors select-none",

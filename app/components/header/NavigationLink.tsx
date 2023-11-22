@@ -30,6 +30,7 @@ export const NavigationLink = ({
 						isPending && "animate-pulse",
 						buttonClassName
 					)}
+					rounded="large"
 					variant={isActive ? "normal" : variant ? variant : "text"}
 				>
 					{children}

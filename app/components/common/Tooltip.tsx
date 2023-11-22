@@ -1,126 +1,137 @@
-import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+	createContext,
+	useContext,
+	useMemo,
+	useState,
+	type Dispatch,
+	type MouseEvent,
+	type ReactNode,
+	type SetStateAction,
+} from "react";
 
-interface TooltipWrapperProps {
-	label: string | undefined;
+interface TooltipProviderProps {
 	children: ReactNode;
 }
+interface TooltipWrapperProps {
+	children: ReactNode;
+	content: string | undefined;
+}
 
-export const TooltipWrapper = ({ label, children }: TooltipWrapperProps) => {
-	const [x, setX] = useState<"left" | "center">("center");
-	const [y, setY] = useState<"top" | "bottom">("top");
-	const [isHovered, setIsHovered] = useState(false);
+type TooltipContextType = [
+	{
+		isShowing: boolean;
+		content: string | null;
+		rect: DOMRect;
+	},
+	{
+		setIsShowing: Dispatch<SetStateAction<boolean>>;
+		setContent: Dispatch<SetStateAction<string | null>>;
+		setRect: Dispatch<SetStateAction<DOMRect>>;
+	},
+];
 
-	const tooltipRef = useRef<HTMLDivElement>(null);
+const TooltipContext = createContext<TooltipContextType | undefined>(undefined);
 
-	useEffect(() => {
-		if (tooltipRef.current) {
-			const tooltipObserver = new IntersectionObserver((entries) => {
-				const { isIntersecting, boundingClientRect } = entries[0];
+export const TooltipProvider = ({ children }: TooltipProviderProps) => {
+	const [content, setContent] = useState<string | null>(null);
+	const [isShowing, setIsShowing] = useState<boolean>(false);
+	const [rect, setRect] = useState<DOMRect>({
+		bottom: 0,
+		height: 0,
+		left: 0,
+		right: 0,
+		top: 0,
+		width: 0,
+		x: 0,
+		y: 0,
+		toJSON: () => undefined,
+	});
 
-				if (isIntersecting && boundingClientRect.x < 0) {
-					setX("left");
-				} else {
-					setX("center");
-				}
-
-				if (isIntersecting && boundingClientRect.y < 64) {
-					setY("bottom");
-				} else {
-					setY("top");
-				}
-			});
-
-			tooltipObserver.observe(tooltipRef.current);
-
-			return () => tooltipObserver.disconnect();
-		}
-	}, [tooltipRef]);
-
-	const tooltipYStyles = {
-		top: "bottom-[calc(100%+10px)]",
-		bottom: "top-[calc(100%+10px)]",
-	};
-
-	const arrowYStyles = {
-		top: "border-l-8 border-r-8 border-t-8 border-x-transparent border-t-light dark:border-t-dark",
-		bottom:
-			"border-l-8 border-r-8 border-b-8 border-x-transparent border-b-light dark:border-b-dark",
-	};
-
-	return label ? (
-		<div
-			className="relative"
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
+	return (
+		<TooltipContext.Provider
+			value={[
+				{ content, isShowing, rect },
+				{ setContent, setIsShowing, setRect },
+			]}
 		>
 			{children}
-			<AnimatePresence initial={false}>
+		</TooltipContext.Provider>
+	);
+};
+
+const useTooltip = () => {
+	const context = useContext(TooltipContext);
+
+	if (context === undefined) {
+		throw new Error("useTooltip must be used within a TooltipProvider");
+	}
+
+	return context;
+};
+
+const TOOLTIP_MARGIN = 8;
+
+export const Tooltip = () => {
+	const [{ isShowing, rect, content }] = useTooltip();
+
+	const sharedStyles = useMemo(
+		() => ({
+			top: rect.top + rect.height + TOOLTIP_MARGIN,
+			left: rect.left + rect.width / 2,
+			translateX: "-50%",
+		}),
+		[rect]
+	);
+
+	return (
+		<AnimatePresence initial={false}>
+			{isShowing && content && (
 				<motion.div
-					key="Tooltip"
-					ref={tooltipRef}
-					animate={
-						isHovered
-							? {
-									opacity: 1,
-									translateY: 0,
-									display: "block",
-									visibility: "visible",
-							  }
-							: {
-									opacity: 0,
-									translateY: y === "bottom" ? "4px" : "-4px",
-									transitionEnd: { display: "none", visibility: "hidden" },
-							  }
-					}
-					className={clsx(
-						"px-2 py-1 rounded shadow-lg bg-light dark:bg-dark z-40",
-						"absolute select-none",
-						tooltipYStyles[y]
-					)}
-					role="tooltip"
-					style={{
-						left: x === "center" ? "50%" : 0,
-						translateX: x === "center" ? "-50%" : 0,
+					animate={{
+						opacity: 1,
+						translateY: 0,
+						...sharedStyles,
 					}}
-					transition={{ duration: 0.1 }}
+					className="fixed drop-shadow-md backdrop-blur bg-primary/40 dark:bg-primary/75 backdrop-brightness-110 dark:backdrop-brightness-125 text-dark dark:text-light py-1 px-2 rounded-lg pointer-events-none"
+					exit={{
+						opacity: 0,
+						translateY: 4,
+						...sharedStyles,
+					}}
+					initial={{
+						opacity: 0,
+						translateY: 4,
+						...sharedStyles,
+					}}
 				>
-					{label}
+					{content}
 				</motion.div>
-				<motion.div
-					/* arrow */
-					key="Tooltip__Arrow"
-					animate={
-						isHovered
-							? {
-									opacity: 1,
-									translateY: 0,
-									display: "block",
-									visibility: "visible",
-							  }
-							: {
-									opacity: 0,
-									translateY: y === "bottom" ? "4px" : "-4px",
-									transitionEnd: { display: "none", visibility: "hidden" },
-							  }
-					}
-					className={clsx(
-						"absolute w-0 h-0 z-40",
-						"left-[calc(50%-(8px*0.866))]",
-						arrowYStyles[y]
-					)}
-					style={{
-						...(y === "bottom"
-							? { top: "calc(100% + 3px)" }
-							: { bottom: "calc(100% + 3px)" }),
-						translateX: `calc(-50% + 8px)`,
-					}}
-					transition={{ duration: 0.1 }}
-				/>
-			</AnimatePresence>
+			)}
+		</AnimatePresence>
+	);
+};
+
+export const TooltipWrapper = ({ content, children }: TooltipWrapperProps) => {
+	const [, { setIsShowing, setContent, setRect }] = useTooltip();
+
+	const handleMouseEnter = (e: MouseEvent<HTMLDivElement>) => {
+		setContent(content ?? "");
+		setRect(e.currentTarget.getBoundingClientRect());
+		setIsShowing(true);
+	};
+
+	const handleMouseLeave = () => {
+		setIsShowing(false);
+	};
+
+	return (
+		<div
+			className="relative"
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+		>
+			{children}
 		</div>
-	) : (
-		<>{children}</>
 	);
 };

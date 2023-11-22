@@ -20,6 +20,8 @@ import { setErrorMap } from "zod";
 import { makeZodI18nMap } from "zod-i18n-map";
 
 import { Layout } from "~/components/common/Layout";
+import { Menu, MenuProvider } from "~/components/common/Menu/Menu";
+import { Tooltip, TooltipProvider } from "~/components/common/Tooltip";
 import { Header } from "~/components/header/Header";
 import { NAMESPACES } from "~/consts/namespaces.const";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
@@ -132,6 +134,8 @@ function App() {
 				<Layout>
 					<Outlet />
 				</Layout>
+				<Tooltip />
+				<Menu />
 				<ScrollRestoration />
 				<Scripts />
 				{process.env.NODE_ENV === "development" ? <LiveReload /> : null}
@@ -145,7 +149,11 @@ export default function AppWithProviders() {
 
 	return (
 		<ThemeProvider specifiedTheme={theme}>
-			<App />
+			<TooltipProvider>
+				<MenuProvider>
+					<App />
+				</MenuProvider>
+			</TooltipProvider>
 		</ThemeProvider>
 	);
 }
