@@ -30,7 +30,8 @@
 			"instructions": "Drag and drop your image here, or press and select one instead. Max size 5MB.",
 			"uploadPreview": "Upload preview",
 			"uploadNote": "This action might take a few minutes depending on file size and your internet connection. Please be patient."
-		}
+		},
+		"cookingMode": "Cooking mode"
 	},
 	"email": {
 		"changeEmail": {

@@ -1,8 +1,10 @@
+import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import {
 	createContext,
 	useContext,
-	useMemo,
+	useEffect,
+	useRef,
 	useState,
 	type Dispatch,
 	type MouseEvent,
@@ -14,6 +16,7 @@ interface TooltipProviderProps {
 	children: ReactNode;
 }
 interface TooltipWrapperProps {
+	className?: string;
 	children: ReactNode;
 	content: string | undefined;
 }
@@ -73,36 +76,111 @@ const useTooltip = () => {
 const TOOLTIP_MARGIN = 8;
 
 export const Tooltip = () => {
-	const [{ isShowing, rect, content }] = useTooltip();
-
-	const sharedStyles = useMemo(
-		() => ({
-			top: rect.top + rect.height + TOOLTIP_MARGIN,
-			left: rect.left + rect.width / 2,
-			translateX: "-50%",
-		}),
-		[rect]
+	const [translateX, setTranslateX] = useState<string | number | undefined>(
+		undefined
 	);
+	const [translateY, setTranslateY] = useState<string | number | undefined>(
+		undefined
+	);
+
+	const [{ isShowing, rect, content }, { setIsShowing }] = useTooltip();
+
+	const tooltipRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		let active = true;
+		let tooltipWidth = 0;
+		let tooltipHeight = 0;
+		let overflowPosition: "left" | "right" | null = null;
+
+		const isOverflowing = async () => {
+			if (tooltipRef.current) {
+				const tooltipRect = tooltipRef.current.getBoundingClientRect();
+
+				if (
+					rect.left + rect.width + tooltipRect.width + TOOLTIP_MARGIN >
+					window.innerWidth
+				) {
+					overflowPosition = "right";
+					tooltipWidth = tooltipRect.width;
+				}
+
+				if (rect.left + rect.width - tooltipRect.width - TOOLTIP_MARGIN < 0) {
+					overflowPosition = "left";
+					tooltipWidth = tooltipRect.width;
+				}
+
+				if (
+					rect.top + rect.height + tooltipRect.height + 2 * TOOLTIP_MARGIN >
+					window.innerHeight
+				) {
+					tooltipHeight = tooltipRect.height;
+				}
+			}
+		};
+
+		const getTranslate = async () => {
+			await isOverflowing();
+
+			if (!active) {
+				return;
+			}
+
+			tooltipWidth > 0
+				? setTranslateX(
+						overflowPosition === "left"
+							? `calc(${rect.left}px)`
+							: `calc(${rect.left}px + ${rect.width}px - ${tooltipWidth}px)`
+				  )
+				: setTranslateX(`calc(-50% + ${rect.left + rect.width / 2}px)`);
+			tooltipHeight > 0
+				? setTranslateY(rect.top - tooltipHeight - TOOLTIP_MARGIN)
+				: setTranslateY(rect.top + rect.height + TOOLTIP_MARGIN);
+		};
+
+		getTranslate();
+
+		return () => {
+			active = false;
+		};
+	}, [rect]);
+
+	useEffect(() => {
+		const hideTooltip = () => setIsShowing(false);
+
+		window.addEventListener("scroll", hideTooltip);
+
+		return () => window.removeEventListener("scroll", hideTooltip);
+	}, [setIsShowing]);
 
 	return (
 		<AnimatePresence initial={false}>
 			{isShowing && content && (
 				<motion.div
+					ref={tooltipRef}
 					animate={{
 						opacity: 1,
-						translateY: 0,
-						...sharedStyles,
+						translateX,
+						translateY,
 					}}
 					className="fixed drop-shadow-md backdrop-blur bg-primary/40 dark:bg-primary/75 backdrop-brightness-110 dark:backdrop-brightness-125 text-dark dark:text-light py-1 px-2 rounded-lg pointer-events-none"
 					exit={{
 						opacity: 0,
-						translateY: 4,
-						...sharedStyles,
+						translateX,
+						translateY,
 					}}
 					initial={{
 						opacity: 0,
-						translateY: 4,
-						...sharedStyles,
+						translateX,
+						translateY,
+					}}
+					style={{
+						opacity: 0,
+						top: 0,
+						left: 0,
+					}}
+					transition={{
+						ease: "easeInOut",
 					}}
 				>
 					{content}
@@ -112,7 +190,11 @@ export const Tooltip = () => {
 	);
 };
 
-export const TooltipWrapper = ({ content, children }: TooltipWrapperProps) => {
+export const TooltipWrapper = ({
+	className,
+	content,
+	children,
+}: TooltipWrapperProps) => {
 	const [, { setIsShowing, setContent, setRect }] = useTooltip();
 
 	const handleMouseEnter = (e: MouseEvent<HTMLDivElement>) => {
@@ -127,7 +209,7 @@ export const TooltipWrapper = ({ content, children }: TooltipWrapperProps) => {
 
 	return (
 		<div
-			className="relative"
+			className={clsx("relative", className)}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 		>

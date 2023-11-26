@@ -136,7 +136,7 @@ export default {
 		},
 	},
 	plugins: [
-		plugin(({ addComponents }) => {
+		plugin(({ addComponents, theme }) => {
 			addComponents({
 				".typography-light": {
 					"@apply font-light": "",
@@ -158,6 +158,21 @@ export default {
 				},
 				".typography-black": {
 					"@apply font-black tracking-wider": "",
+				},
+				".bg-eyeline": {
+					"background-image": `radial-gradient(ellipse 66% 133% at 0% 0%, transparent 65%,	${theme(
+						"colors.stone.800"
+					)} 66%), radial-gradient(ellipse 66% 133% at 100% 0%, transparent 65%, ${theme(
+						"colors.stone.800"
+					)} 66%), radial-gradient(ellipse 66% 133% at 100% 100%, transparent 65%, ${theme(
+						"colors.stone.800"
+					)} 66%), radial-gradient(ellipse 66% 133% at 0% 100%, transparent 65%, ${theme(
+						"colors.stone.800"
+					)} 66%)`,
+					"background-size": "50% 50%",
+					"background-repeat": "no-repeat",
+					"background-position":
+						"top left, top right, bottom right, bottom left",
 				},
 			});
 		}),

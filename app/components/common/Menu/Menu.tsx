@@ -133,11 +133,11 @@ export const Menu = () => {
 			...(positionX === "left"
 				? { left: 8 }
 				: positionX === "right"
-				? { left: rect.left + rect.width, translateX: "-100%" }
-				: {
-						left: rect.left + rect.width / 2,
-						translateX: "-50%",
-				  }),
+				  ? { left: rect.left + rect.width, translateX: "-100%" }
+				  : {
+							left: rect.left + rect.width / 2,
+							translateX: "-50%",
+				    }),
 		}),
 		[positionX, positionY, rect]
 	);
