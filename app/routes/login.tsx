@@ -134,7 +134,7 @@ export default function LoginRoute() {
 						})}
 					</p>
 					<Button
-						className="self-end mt-4"
+						className="self-start mt-4"
 						isLoading={isResetLoading}
 						variant="normal"
 						onClick={handleResetSubmit}
