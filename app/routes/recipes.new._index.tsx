@@ -8,9 +8,11 @@ export const sitemap = () => ({
 });
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const lang = await i18next.getLocale(request);
 
@@ -20,3 +22,5 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function NewRecipeRedirect() {
 	return null;
 }
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

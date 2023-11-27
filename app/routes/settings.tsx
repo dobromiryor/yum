@@ -1,7 +1,6 @@
 import { DisplayName, Role } from "@prisma/client";
 import {
 	json,
-	redirect,
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from "@remix-run/node";
@@ -36,9 +35,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request);
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const t = await i18next.getFixedT(request);
 	const title = generateMetaTitle({
@@ -54,7 +55,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundUser) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
+	}
+
+	if (foundUser.id !== authData.id) {
+		throw new Response(null, { status: 500, statusText: "Wrong user" });
 	}
 
 	let updatedUser;
@@ -256,3 +261,5 @@ export default function SettingsRoute() {
 		</>
 	);
 }
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

@@ -1,6 +1,5 @@
 import {
 	json,
-	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
@@ -37,9 +36,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const { equipmentId, recipeId, lang } =
 		EditRecipeEquipmentParamsSchema.parse(p);
@@ -49,11 +50,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundEquipment) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
 	}
 
 	if (foundEquipment.userId !== authData.id && authData.role !== "ADMIN") {
-		return redirect("/403");
+		throw new Response(null, { status: 403 });
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -125,9 +126,11 @@ const DeleteEquipmentModal = () => {
 };
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const formData = await request.formData();
 
@@ -136,11 +139,12 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const id = formData.get("id")?.toString();
 	const userId = formData.get("userId")?.toString();
 
-	if (
-		id !== equipmentId ||
-		(userId !== authData.id && authData.role !== "ADMIN")
-	) {
-		redirect("/403");
+	if (id !== equipmentId) {
+		throw new Response(null, { status: 404 });
+	}
+
+	if (userId !== authData.id && authData.role !== "ADMIN") {
+		throw new Response(null, { status: 403 });
 	}
 
 	try {

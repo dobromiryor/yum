@@ -117,3 +117,5 @@ export default function RecipesRoute() {
 		</div>
 	);
 }
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

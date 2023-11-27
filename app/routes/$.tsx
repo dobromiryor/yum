@@ -3,13 +3,9 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { useTranslation } from "react-i18next";
+import { useLoaderData } from "@remix-run/react";
 
-import on from "public/images/404/display_on.png";
-import placeholder from "public/images/404/display_placeholder.png";
-import oven from "public/images/404/oven.png";
-import { Button } from "~/components/common/UI/Button";
+import { NotFound } from "~/components/common/ErrorBoundary";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { getFrom } from "~/utils/helpers/get-from.server";
@@ -40,28 +36,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const NotFoundRoute = () => {
 	const { from } = useLoaderData<typeof loader>();
-	const { t } = useTranslation();
 
 	return (
 		<div className="flex flex-col items-center gap-6">
-			<h1 className="text-2xl typography-bold text-center">
-				{t("errorPages.404.title")}
-			</h1>
-			<div className="flex gap-2">
-				{from && (
-					<Link to={from}>
-						<Button>{t("errorPages.common.backCTA")}</Button>
-					</Link>
-				)}
-				<Link to="/">
-					<Button>{t("errorPages.common.homeCTA")}</Button>
-				</Link>
-			</div>
-			<div className="relative w-full max-w-lg max-h-lg aspect-square">
-				<img alt="" className="absolute w-full drop-shadow-xl" src={oven} />
-				<img alt="" className="absolute" src={placeholder} />
-				<img alt="" className="absolute animate-blink" src={on} />
-			</div>
+			<NotFound from={from} />
 		</div>
 	);
 };

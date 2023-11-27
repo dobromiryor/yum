@@ -11,3 +11,5 @@ export const loader = async () => {
 export default function IndexRoute() {
 	return null;
 }
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

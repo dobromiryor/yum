@@ -3,7 +3,6 @@ import { Cloudinary, CloudinaryImage } from "@cloudinary/url-gen/index";
 import { Prisma } from "@prisma/client";
 import {
 	json,
-	redirect,
 	unstable_composeUploadHandlers,
 	unstable_parseMultipartFormData,
 	type ActionFunctionArgs,
@@ -60,20 +59,22 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const foundUser = await prisma.user.findFirst({
 		where: { id: authData.id },
 	});
 
 	if (!foundUser) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
 	}
 
 	if (foundUser.id !== authData.id) {
-		return redirect("/403");
+		throw new Response(null, { status: 403 });
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -288,9 +289,11 @@ const EditAvatarModal = () => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request);
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const t = await i18next.getFixedT(request);
 

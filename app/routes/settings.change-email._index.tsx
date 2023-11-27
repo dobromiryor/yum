@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	json,
-	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
@@ -55,20 +54,22 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export const handle = NAMESPACES;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const foundUser = await prisma.user.findFirst({
 		where: { id: authData.id },
 	});
 
 	if (!foundUser) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
 	}
 
 	if (foundUser.id !== authData.id) {
-		return redirect("/403");
+		throw new Response(null, { status: 403 });
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -162,9 +163,11 @@ const EditUsernameModal = () => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const t = await i18next.getFixedT(request);
 

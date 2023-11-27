@@ -1,7 +1,6 @@
 import { Role } from "@prisma/client";
 import {
 	json,
-	redirect,
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from "@remix-run/node";
@@ -70,7 +69,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 
 	if (!foundUser) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -175,3 +174,5 @@ export const UserRecipesRoute = () => {
 };
 
 export default UserRecipesRoute;
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

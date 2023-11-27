@@ -40,9 +40,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const { recipeId, lang } = EditRecipeParamsSchema.parse(p);
 
@@ -51,11 +53,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundRecipe) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
 	}
 
 	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
-		return redirect("/403");
+		throw new Response(null, { status: 403 });
 	}
 
 	const t = await i18next.getFixedT(request);

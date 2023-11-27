@@ -51,9 +51,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request);
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const t = await i18next.getFixedT(request);
 	const title = generateMetaTitle({
@@ -168,9 +170,11 @@ const NewRecipeRoute = () => {
 };
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const { lang } = CreateRecipeSchema.parse(p);
 
@@ -204,3 +208,5 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 };
 
 export default NewRecipeRoute;
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

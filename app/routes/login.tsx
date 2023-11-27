@@ -180,3 +180,5 @@ export default function LoginRoute() {
 		</div>
 	);
 }
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

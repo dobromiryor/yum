@@ -10,9 +10,11 @@ export const sitemap = () => ({
 });
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/login",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const session = await sessionStorage.getSession(
 		request.clone().headers.get("Cookie")

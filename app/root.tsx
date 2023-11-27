@@ -158,4 +158,4 @@ export default function AppWithProviders() {
 	);
 }
 
-export { ErrorBoundary } from "~/routes/500._index";
+export { ErrorBoundary } from "~/components/common/ErrorBoundary";

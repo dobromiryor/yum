@@ -1,5 +1,5 @@
 import { Role } from "@prisma/client";
-import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import {
 	Link,
 	useLoaderData,
@@ -62,13 +62,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request);
+
 	const { recipeId } = RecipeParamsSchema.parse(p);
 	const locale = LanguageSchema.parse(await i18next.getLocale(request.clone()));
 
 	const foundRecipe = await recipeDetails({ recipeId, locale });
 
 	if (!foundRecipe) {
-		return redirect("/404", 404);
+		throw new Response(null, { status: 404 });
 	}
 
 	const name = TranslatedContentSchema.parse(foundRecipe.name);
@@ -351,3 +352,5 @@ const RecipeDetailRoute = () => {
 };
 
 export default RecipeDetailRoute;
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

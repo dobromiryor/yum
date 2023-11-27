@@ -1,5 +1,5 @@
 import { Role, Status } from "@prisma/client";
-import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import {
 	useLoaderData,
 	useRevalidator,
@@ -41,9 +41,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request, {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request);
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const { userId } = UserRecipesParamsSchema.parse(p);
 
@@ -52,11 +54,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const foundUser = await prisma.user.findFirst({ where: { id: userId } });
 
 	if (!foundUser) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
 	}
 
 	if (userId !== authData?.id || authData?.role !== Role.ADMIN) {
-		return redirect("/403");
+		throw new Response(null, { status: 403 });
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -145,3 +147,5 @@ export const UnpublishedUserRecipesRoute = () => {
 };
 
 export default UnpublishedUserRecipesRoute;
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

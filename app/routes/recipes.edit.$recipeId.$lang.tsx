@@ -7,7 +7,6 @@ import {
 } from "@prisma/client";
 import {
 	json,
-	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
@@ -85,9 +84,12 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
-	const authData = await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
+
 	const params = EditRecipeParamsSchema.parse(p);
 	const { recipeId, lang } = params;
 
@@ -128,11 +130,11 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 	});
 
 	if (!foundRecipe) {
-		return redirect("/404");
+		throw new Response(null, { status: 404 });
 	}
 
 	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
-		return redirect("/403");
+		throw new Response(null, { status: 403 });
 	}
 
 	const t = await i18next.getFixedT(request);
@@ -218,9 +220,11 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request, params: p }: ActionFunctionArgs) => {
-	await auth.isAuthenticated(request.clone(), {
-		failureRedirect: "/401",
-	});
+	const authData = await auth.isAuthenticated(request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const params = EditRecipeParamsSchema.parse(p);
 	const { recipeId } = params;
@@ -958,3 +962,5 @@ export default function EditRecipeRoute() {
 		</>
 	);
 }
+
+export { ErrorBoundaryContent as ErrorBoundary } from "~/components/common/ErrorBoundary";

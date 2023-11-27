@@ -10,9 +10,11 @@ export const sitemap = () => ({
 });
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const authData = await auth.authenticate("email-link", request.clone(), {
-		failureRedirect: "/login",
-	});
+	const authData = await auth.authenticate("email-link", request.clone());
+
+	if (!authData) {
+		throw new Response(null, { status: 401 });
+	}
 
 	const url = new URL(request.clone().url);
 	const from = url.searchParams.get("from");
