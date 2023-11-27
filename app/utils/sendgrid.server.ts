@@ -1,5 +1,5 @@
 import { type User } from "@prisma/client";
-import * as SendGrid from "@sendgrid/mail";
+import SendGrid from "@sendgrid/mail";
 import { type SendEmailFunction } from "remix-auth-email-link";
 import { type z } from "zod";
 

@@ -27,7 +27,6 @@ import { NAMESPACES } from "~/consts/namespaces.const";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18n from "~/modules/i18n";
 import i18next, { i18nCookie } from "~/modules/i18next.server";
-import tailwind from "~/styles/tailwind.css";
 import { auth } from "~/utils/auth.server";
 import { getFrom } from "~/utils/helpers/get-from.server";
 import {
@@ -41,6 +40,8 @@ import {
 	useTheme,
 } from "~/utils/providers/theme-provider";
 import { getThemeSession } from "~/utils/theme.server";
+
+import tailwind from "./styles/tailwind.css";
 
 export const handle = NAMESPACES;
 

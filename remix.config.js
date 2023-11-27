@@ -1,6 +1,5 @@
 /** @type {import('@remix-run/dev').AppConfig} */
-module.exports = {
+export default {
 	ignoredRouteFiles: ["**/.*"],
-	serverDependenciesToBundle: ["remix-i18next", "remix-hook-form"],
-	serverModuleFormat: "cjs",
+	serverDependenciesToBundle: ["remix-i18next"],
 };

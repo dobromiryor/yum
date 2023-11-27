@@ -16,7 +16,7 @@ import {
 } from "@remix-run/react";
 import clsx from "clsx";
 import { useEffect, useState, type MouseEvent } from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone } from "react-dropzone-esm";
 import { useTranslation } from "react-i18next";
 
 import { Modal } from "~/components/common/Modal";

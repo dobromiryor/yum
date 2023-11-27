@@ -17,7 +17,6 @@
 			"public/*": ["./public/*"],
 			"root/*": ["./*"]
 		},
-		"checkJs": true,
 
 		// Remix takes care of building everything in `remix build`.
 		"noEmit": true

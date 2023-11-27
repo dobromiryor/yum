@@ -1,6 +1,5 @@
+import tailwindColors from "tailwindcss/colors";
 import plugin from "tailwindcss/plugin";
-
-import tailwindColors from "./node_modules/tailwindcss/colors";
 
 import type { Config } from "tailwindcss";
 
