@@ -4,10 +4,11 @@
 	"sideEffects": false,
 	"type": "module",
 	"prisma": {
-		"seed": "ts-node --require tsconfig-paths/register prisma/seed.ts"
+		"seed": "ts-node --esm --require tsconfig-paths/register prisma/seed.ts"
 	},
 	"scripts": {
 		"build": "remix build",
+		"deploy": "fly deploy",
 		"dev": "remix dev",
 		"start": "remix-serve ./build/index.js",
 		"typecheck": "tsc"
@@ -29,7 +30,7 @@
 		"downshift": "^8.2.3",
 		"fraction.js": "^4.3.7",
 		"framer-motion": "^10.9.4",
-		"i18next": "^23.7.6",
+		"i18next": "^23.7.7",
 		"i18next-browser-languagedetector": "^7.2.0",
 		"i18next-fs-backend": "^2.3.0",
 		"i18next-http-backend": "^2.4.2",
@@ -50,10 +51,11 @@
 		"zod-i18n-map": "^2.21.0"
 	},
 	"devDependencies": {
+		"@flydotio/dockerfile": "^0.4.11",
 		"@remix-run/dev": "^2.3.1",
 		"@remix-run/eslint-config": "^2.3.1",
 		"@types/lodash.isequal": "^4.5.8",
-		"@types/react": "^18.2.38",
+		"@types/react": "^18.2.39",
 		"@types/react-dom": "^18.2.17",
 		"autoprefixer": "^10.4.16",
 		"eslint": "^8.54.0",

@@ -19,6 +19,15 @@ const seed = async () => {
 			return db.user.create({ data: user });
 		})
 	);
+
+	console.log("🌱 Database has been seeded.");
 };
 
-seed();
+seed()
+	.catch((e) => {
+		console.error(e);
+		process.exit(1);
+	})
+	.finally(async () => {
+		await db.$disconnect();
+	});
