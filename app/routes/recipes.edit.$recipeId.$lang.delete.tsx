@@ -72,6 +72,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	});
 
 	return json({
+		authData,
 		foundRecipe,
 		meta: {
 			title,
@@ -82,7 +83,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 };
 
 export const DeleteRecipeModal = () => {
-	const { foundRecipe } = useLoaderData<typeof loader>();
+	const { authData, foundRecipe } = useLoaderData<typeof loader>();
 	const { id, name: n, userId } = foundRecipe;
 
 	const actionData = useActionData<typeof action>();
@@ -96,7 +97,7 @@ export const DeleteRecipeModal = () => {
 		i18n: { language: lang },
 	} = useTranslation();
 
-	const prevPath = pathname.split("/").slice(0, -1).join("/");
+	const prevPath = `/users/${authData.id}`;
 
 	const parsedName = z
 		.string()
