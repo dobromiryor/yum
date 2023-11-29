@@ -9,6 +9,8 @@ export const sitemap = () => ({
 	exclude: true,
 });
 
+const EXPIRATION = 1_800_000; // 30 min
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone());
 
@@ -36,6 +38,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		);
 	}
 
+	if (Date.now() - EXPIRATION > foundToken.createdAt.getTime()) {
+		await prisma.emailChangeToken.deleteMany({
+			where: {
+				createdAt: {
+					lt: new Date(Date.now() - EXPIRATION),
+				},
+			},
+		});
+
+		return redirect(`/settings?success=false&message=${Message.TOKEN_EXPIRED}`);
+	}
+
 	const updatedUser = await prisma.user.update({
 		data: {
 			email: foundToken.newEmail,
@@ -57,3 +71,5 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
 	});
 };
+
+export { ErrorBoundary } from "~/components/common/ErrorBoundary";

@@ -345,6 +345,8 @@
 		},
 		"note": {
 			"EMAIL_UPDATED": "Your email address has been successfully updated.",
+			"TOKEN_EXPIRED": "Change email token expired. Please try again.",
+			"test": "",
 			"TOKEN_NOT_FOUND": "Change email token not found. Please try again.",
 			"USER_NOT_UPDATED": "User update failed. Please try again.",
 			"USER_VERIFIED": "Your account has been verified.",

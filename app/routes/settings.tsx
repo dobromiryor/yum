@@ -101,6 +101,8 @@ export default function SettingsRoute() {
 		switch (message) {
 			case Message.EMAIL_UPDATED:
 				return t("settings.note.EMAIL_UPDATED");
+			case Message.TOKEN_EXPIRED:
+				return t("settings.note.TOKEN_EXPIRED");
 			case Message.TOKEN_NOT_FOUND:
 				return t("settings.note.TOKEN_NOT_FOUND");
 			case Message.USER_NOT_UPDATED:
