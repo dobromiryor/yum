@@ -124,7 +124,7 @@ export default function LoginRoute() {
 	}, [i18n.language, setValue]);
 
 	return (
-		<div className="self-center flex flex-col gap-6 p-3 bg-secondary dark:bg-primary transition-colors rounded-2xl shadow-lg w-full max-w-lg">
+		<div className="self-center flex flex-col gap-6 p-6 bg-secondary dark:bg-primary transition-colors rounded-2xl shadow-lg w-full max-w-lg">
 			<h1 className="text-xl typography-semibold">{t("login.heading")}</h1>
 			{magicLinkSent ? (
 				<>
@@ -133,14 +133,18 @@ export default function LoginRoute() {
 							email: magicLinkEmail,
 						})}
 					</p>
-					<Button
-						className="self-start mt-4"
-						isLoading={isResetLoading}
-						variant="normal"
-						onClick={handleResetSubmit}
-					>
-						{t("common.tryAgain")}
-					</Button>
+					<p>{t("login.successNote")}</p>
+
+					<div className="self-start flex items-center mt-4">
+						<p>{t("login.wrongAddress")}</p>
+						<Button
+							isLoading={isResetLoading}
+							variant="text"
+							onClick={handleResetSubmit}
+						>
+							{t("login.tryAgain")}
+						</Button>
+					</div>
 				</>
 			) : (
 				<>

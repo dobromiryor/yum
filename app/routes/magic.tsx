@@ -45,3 +45,5 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
 	});
 };
+
+export { ErrorBoundary } from "~/components/common/ErrorBoundary";

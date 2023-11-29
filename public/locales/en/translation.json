@@ -16,7 +16,6 @@
 		"reorder": "Reorder",
 		"save": "Save",
 		"submit": "Submit",
-		"tryAgain": "Try again",
 		"units": {
 			"IMPERIAL": "Imperial",
 			"METRIC": "Metric"
@@ -67,7 +66,10 @@
 	"login": {
 		"heading": "Log in",
 		"message": "Enter an email address where we can send you a magic link 🪄",
-		"success": "Successfully sent to {{email}} ✨"
+		"success": "Successfully sent to {{email}}. ✨",
+		"successNote": "Please open the link in the email on the device that you used to log in.",
+		"wrongAddress": "Wrong email address?",
+		"tryAgain": "Try again!"
 	},
 	"nav": {
 		"authMenu": {
