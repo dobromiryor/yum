@@ -141,7 +141,7 @@ export const UserRecipesRoute = () => {
 						user: getDisplayName(foundUser),
 					})}
 				</h1>
-				{foundUnpublishedRecipesCount && (
+				{!!foundUnpublishedRecipesCount && (
 					<Button
 						className="sm:ml-auto items-center gap-1"
 						onClick={() => navigate("unpublished")}
