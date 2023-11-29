@@ -196,7 +196,7 @@ const EditAvatarModal = () => {
 						{(files[0]?.preview || photo) && (
 							<div
 								className={clsx(
-									"grow rounded-md border border-secondary dark:border-primary overflow-hidden w-full h-full max-w-64 max-h-64",
+									"grow shrink-0 rounded-md border border-secondary dark:border-primary overflow-hidden w-full h-full max-w-64 max-h-64",
 									files[0]?.preview ? "aspect-auto" : "aspect-square"
 								)}
 							>
