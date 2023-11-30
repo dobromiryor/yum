@@ -1,34 +1,162 @@
-import { json, type LoaderArgs } from "@remix-run/node";
-import { LiveReload, useLoaderData } from "@remix-run/react";
+import {
+	json,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+	type MetaFunction,
+} from "@remix-run/node";
+import {
+	Links,
+	LiveReload,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+	useLoaderData,
+} from "@remix-run/react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useChangeLanguage } from "remix-i18next";
+import { setErrorMap } from "zod";
+import { makeZodI18nMap } from "zod-i18n-map";
 
-import i18next from "./i18n.server";
+import { Layout } from "~/components/common/Layout";
+import { Menu, MenuProvider } from "~/components/common/Menu/Menu";
+import { Tooltip, TooltipProvider } from "~/components/common/Tooltip";
+import { Header } from "~/components/header/Header";
+import { NAMESPACES } from "~/consts/namespaces.const";
+import { PARSED_ENV } from "~/consts/parsed-env.const";
+import i18n from "~/modules/i18n";
+import i18next, { i18nCookie } from "~/modules/i18next.server";
+import { auth } from "~/utils/auth.server";
+import { getFrom } from "~/utils/helpers/get-from.server";
+import {
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
+} from "~/utils/helpers/meta-helpers";
+import {
+	ThemeHead,
+	ThemeProvider,
+	useTheme,
+} from "~/utils/providers/theme-provider";
+import { getThemeSession } from "~/utils/theme.server";
 
-export const loader = async ({ request }: LoaderArgs) => {
-	const locale = await i18next.getLocale(request);
+import tailwind from "./styles/tailwind.css";
 
-	return json({ locale });
+export const handle = NAMESPACES;
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return generateMetaProps(data?.meta);
 };
 
-export default function App() {
-	const { locale } = useLoaderData<typeof loader>();
+export const links: LinksFunction = () => {
+	return [
+		{
+			rel: "stylesheet",
+			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block",
+		},
+		{
+			rel: "stylesheet",
+			href: "https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap",
+		},
+		{
+			rel: "stylesheet",
+			href: tailwind,
+		},
+	];
+};
 
-	const { i18n, t } = useTranslation();
+export async function loader({ request }: LoaderFunctionArgs) {
+	const locale = (await i18next.getLocale(request)) ?? i18n.fallbackLng;
+	const themeSession = await getThemeSession(request);
+
+	const authData = await auth.isAuthenticated(request);
+
+	const from = getFrom(request);
+
+	const t = await i18next.getFixedT(request);
+
+	const title = generateMetaTitle({
+		title: PARSED_ENV.APP_NAME,
+	});
+
+	const description = generateMetaDescription({
+		description: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
+	});
+
+	return json(
+		{
+			authData,
+			locale,
+			theme: themeSession.getTheme(),
+			from,
+			ENV: {
+				APP_NAME: PARSED_ENV.APP_NAME,
+				CLOUDINARY_CLOUD_NAME: PARSED_ENV.CLOUDINARY_CLOUD_NAME,
+			},
+			meta: {
+				title,
+				description,
+				url: PARSED_ENV.DOMAIN_URL,
+			},
+		} as const,
+		{
+			headers: {
+				"set-cookie": await i18nCookie.serialize(locale),
+			},
+		}
+	);
+}
+
+function App() {
+	const { locale, theme: loaderTheme } = useLoaderData<typeof loader>();
+	const [theme] = useTheme();
+
+	const { t, i18n } = useTranslation();
 
 	useChangeLanguage(locale);
+	setErrorMap(makeZodI18nMap({ t }));
 
 	return (
-		<html dir={i18n.dir()} lang={locale}>
+		<html
+			className={clsx(theme, "h-0 min-h-full")}
+			dir={i18n.dir()}
+			lang={locale}
+		>
 			<head>
 				<meta charSet="utf-8" />
-				<meta content="width=device-width,initial-scale=1" name="viewport" />
-				<title>Yum</title>
+				<meta content="width=device-width, initial-scale=1" name="viewport" />
+				<Meta />
+				<Links />
+				<ThemeHead ssrTheme={Boolean(loaderTheme)} />
 			</head>
-			<body>
-				<h1>{t("greetings")}</h1>
-				<LiveReload />
+			<body className="flex flex-col min-h-full">
+				<Header />
+				<Layout>
+					<Outlet />
+				</Layout>
+				<Tooltip />
+				<Menu />
+				<ScrollRestoration />
+				<Scripts />
+				{process.env.NODE_ENV === "development" ? <LiveReload /> : null}
 			</body>
 		</html>
 	);
 }
+
+export default function AppWithProviders() {
+	const { theme } = useLoaderData<typeof loader>();
+
+	return (
+		<ThemeProvider specifiedTheme={theme}>
+			<TooltipProvider>
+				<MenuProvider>
+					<App />
+				</MenuProvider>
+			</TooltipProvider>
+		</ThemeProvider>
+	);
+}
+
+export { ErrorBoundary } from "~/components/common/ErrorBoundary";

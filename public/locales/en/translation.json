@@ -1,3 +1,424 @@
 {
-	"greetings": "Hello"
+	"common": {
+		"add": "Add",
+		"addSomething": "$t(common.add) {{something}}",
+		"admin": "Admin",
+		"and": "and",
+		"back": "Back",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"create": "Create",
+		"delete": "Delete",
+		"deleteSomething": "$t(common.delete) {{something}}",
+		"edit": "Edit",
+		"editSomething": "$t(common.edit) {{something}}",
+		"noOptionsAvailable": "No options available",
+		"reorder": "Reorder",
+		"save": "Save",
+		"submit": "Submit",
+		"units": {
+			"IMPERIAL": "Imperial",
+			"METRIC": "Metric"
+		},
+		"view": "View",
+		"recipe": "Recipe",
+		"searchPlaceholder": "Search...",
+		"search": "Search",
+		"clear": "Clear",
+		"dropzone": {
+			"instructions": "Drag and drop your image here, or press and select one instead. Max size 5MB.",
+			"uploadPreview": "Upload preview",
+			"uploadNote": "This action might take a few minutes depending on file size and your internet connection. Please be patient."
+		},
+		"cookingMode": "Cooking mode"
+	},
+	"email": {
+		"changeEmail": {
+			"content": {
+				"CTA": "Continue to {{appName}}",
+				"paragraph": "Please use the button below to change your email address."
+			},
+			"preheader": "A change email request has been made.",
+			"subject": "Change email address"
+		},
+		"magic": {
+			"content": {
+				"CTA": "Go to {{appName}}",
+				"paragraph": "Please use the button below to confirm you want to sign in to {{appName}}."
+			},
+			"preheader": "Confirm that you want to sign in to {{appName}}.",
+			"subject": {
+				"login": "Welcome back!",
+				"register": "Welcome!"
+			}
+		}
+	},
+	"error": {
+		"dataMissing": "Translation data missing. Please try again.",
+		"regex": "Doesn't match regex",
+		"somethingWentWrong": "Something went wrong. Please try again later.",
+		"translationMissing": "Translation missing.",
+		"file-invalid-type": "Invalid file type",
+		"file-too-large": "File is too large",
+		"file-too-small": "File is too small",
+		"too-many-files": "Too many files."
+	},
+	"login": {
+		"heading": "Log in",
+		"message": "Enter an email address where we can send you a magic link 🪄",
+		"success": "Successfully sent to {{email}}. ✨",
+		"successNote": "Please open the link in the email on the device that you used to log in.",
+		"wrongAddress": "Wrong email address?",
+		"tryAgain": "Try again!"
+	},
+	"nav": {
+		"authMenu": {
+			"logout": "Log out",
+			"settings": "Settings"
+		},
+		"home": "Home",
+		"language": {
+			"bg": "Bulgarian",
+			"bgLabel": "Bulgarian language",
+			"en": "English",
+			"enLabel": "English language",
+			"label": "Language"
+		},
+		"login": "Log in",
+		"myRecipes": "My recipes",
+		"newRecipe": "Add",
+		"recipes": "Recipes",
+		"theme": {
+			"dark": "Dark theme",
+			"label": "Theme",
+			"light": "Light theme"
+		}
+	},
+	"recipe": {
+		"card": {
+			"emptyPhoto": "No photo added yet.",
+			"emptyEquipment": "No equipment added yet.",
+			"emptyIngredients": "No ingredients added yet.",
+			"emptyRecipes": "No recipes added yet.",
+			"emptySteps": "No steps added yet.",
+			"emptySubRecipes": "No sub recipes added yet.",
+			"pressToAddSomething": "Press to add a new {{something}}."
+		},
+		"difficulty": {
+			"EASY": "Easy",
+			"HARD": "Hard",
+			"MEDIUM": "Medium"
+		},
+		"subRecipeAction": {
+			"MAKE": "Makes",
+			"USE": "Uses"
+		},
+		"errors": {
+			"emptyQuantity": "This field is required if a unit is selected",
+			"invalidQuantity": "Invalid input. Only accepts decimal numeral or fractions (e.g. 0.5, 1, 1/2).",
+			"temperature": "If the temperature field is filled you also need to choose a temperature scale.",
+			"temperatureScale": "If a temperature scale is chosen you also need to fill the temperature field.",
+			"unit": "You can't use this unit if the quantity field is filled.",
+			"dimensionOrVolume": "Enter either dimensions or volume.",
+			"dimensionMissing": "Field is required when a unit has been selected.",
+			"dimensionUnitMissing": "Unit is required when dimensions are entered.",
+			"volumeMissing": "Volume is required when a unit has been selected.",
+			"volumeUnitMissing": "Unit is required when volume is entered.",
+			"subRecipesRequired": "Sub recipe is required when an action has been selected",
+			"subRecipeActionRequired": "Action is required when a sub recipe has been selected"
+		},
+		"field": {
+			"bakeTime": "Bake",
+			"categories": "Categories",
+			"cookTime": "Cook",
+			"countServings_one": "{{count}} serving",
+			"countServings_other": "{{count}} servings",
+			"description": "Description",
+			"difficulty": "Difficulty",
+			"dimensions": "Dimensions",
+			"dimensionUnit": "Dimension unit",
+			"enableLang": "Enable {{lang}} translation",
+			"equipment": "Equipment",
+			"height": "Height",
+			"hideTranslation": "Hide translation",
+			"hours_one": "{{count}} hour",
+			"hours_other": "{{count}} hours",
+			"ingredients": "Ingredients",
+			"length": "Length",
+			"minutes_one": "{{count}} minute",
+			"minutes_other": "{{count}} minutes",
+			"name": "Name",
+			"note": "Note",
+			"prepTime": "Prep",
+			"published": "Published",
+			"quantity": "Quantity",
+			"servings": "Servings",
+			"steps": "Steps",
+			"subRecipe": "Sub recipe",
+			"subRecipes": "Sub recipes",
+			"tags": "Tags",
+			"temperature": "Temperature",
+			"temperatureScale": "Temperature scale",
+			"unit": "Unit",
+			"unpublished": "Unpublished",
+			"viewTranslation": "View translation",
+			"volume": "Volume",
+			"volumeUnit": "Volume unit",
+			"width": "Width",
+			"withMinutes": "{{field}} (minutes)",
+			"subRecipeAction": "Sub recipe action",
+			"restTime": "Rest",
+			"totalTime": "Total",
+			"lastUpdate": "Last update {{date}}",
+			"photo": "Photo",
+			"recipe": "Recipe",
+			"ingredient": "Ingredient",
+			"step": "Step"
+		},
+		"heading": {
+			"allRecipes": "All recipes",
+			"allRecipesThatContain": "All recipes that contain \"{{query}}\"",
+			"edit": "Edit recipe ({{lang}})",
+			"new": "Create recipe ({{lang}})"
+		},
+		"modal": {
+			"create": {
+				"ingredient": {
+					"title": "Add ingredient"
+				},
+				"step": {
+					"title": "Add step"
+				},
+				"subRecipe": {
+					"title": "Add sub recipe"
+				},
+				"equipment": {
+					"title": "Add equipment item"
+				}
+			},
+			"delete": {
+				"photo": {
+					"content": "This photo will be permanently deleted.",
+					"title": "Delete photo"
+				},
+				"ingredient": {
+					"content": "This ingredient will be permanently deleted.",
+					"contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.ingredient.content)",
+					"title": "Delete ingredient"
+				},
+				"recipe": {
+					"content": "This recipe will be permanently deleted.",
+					"contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.recipe.content)",
+					"title": "Delete recipe"
+				},
+				"step": {
+					"content": "This step will be permanently deleted.",
+					"contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.step.content)",
+					"title": "Delete step"
+				},
+				"subRecipe": {
+					"content": "This sub recipe will be permanently deleted.",
+					"contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.subRecipe.content)",
+					"title": "Delete sub recipe"
+				},
+				"equipment": {
+					"content": "This equipment item will be permanently deleted.",
+					"contentWithName": "Are you sure you want to delete \"{{name}}\"? $t(recipe.modal.delete.equipment.content)",
+					"title": "Delete equipment item"
+				}
+			},
+			"update": {
+				"details": {
+					"title": "Update details"
+				},
+				"photo": {
+					"title": "Update photo"
+				},
+				"ingredient": {
+					"title": "Update ingredient"
+				},
+				"step": {
+					"title": "Update step"
+				},
+				"subRecipe": {
+					"title": "Update sub recipe"
+				},
+				"equipment": {
+					"title": "Update equipment item"
+				}
+			}
+		},
+		"note": {
+			"translationMessage": "You can translate the recipe after it's created."
+		},
+		"section": {
+			"details": "Details",
+			"equipment": "Equipment",
+			"ingredients": "Ingredients",
+			"ingredientsAndEquipment": "Ingredients and equipment",
+			"mainIngredients": "Main ingredients",
+			"steps": "Steps",
+			"subRecipes": "Sub recipes"
+		},
+		"units": {
+			"mm": "mm",
+			"cm": "cm",
+			"m": "m",
+			"in_one": "in",
+			"in_other": "in",
+			"ft_one": "ft",
+			"ft_other": "ft",
+			"yd_one": "yd",
+			"yd_other": "yd",
+			"mL": "mL",
+			"L": "L",
+			"tsp": "tsp",
+			"tbsp": "tbsp",
+			"fl_oz_one": "fl oz",
+			"fl_oz_other": "fl oz",
+			"cup_one": "cup",
+			"cup_other": "cup",
+			"pt_one": "pt",
+			"pt_other": "pt",
+			"qt_one": "qt",
+			"qt_other": "qt",
+			"gal_one": "gal",
+			"gal_other": "gal",
+			"mg": "mg",
+			"g": "g",
+			"kg": "kg",
+			"lb_one": "lb",
+			"lb_other": "lb",
+			"oz_one": "oz",
+			"oz_other": "oz",
+			"to_taste": "to taste"
+		}
+	},
+	"settings": {
+		"errors": {
+			"emailExists": "Email already exists. Please try with a different email.",
+			"firstNameRequired": "If you've entered last name, you should also enter your first name. Otherwise you can use the username field.",
+			"invalidName": "Names can contain either only cyrillic or only latin characters. Dashes (-) are allowed.",
+			"invalidUsername": "Username can only contain latin characters, dashes (-), dots (.) and low dashes (_).",
+			"lastNameRequired": "If you've entered first name, you should also enter your last name. Otherwise you can use the username field.",
+			"nameRequired": "Please enter either first name/last name or username.",
+			"onlyUsername": "If you've entered a username, both first/last name fields should be empty.",
+			"usernameExists": "Username already exists. Please try with a different username."
+		},
+		"field": {
+			"account": "Account",
+			"avatar": "Avatar",
+			"email": "Email",
+			"firstName": "First name",
+			"lastName": "Last name",
+			"names": "Names",
+			"preferences": "Preferences",
+			"prefersTemperatureScale": "Preferred temperature scale",
+			"prefersUnitSystem": "Preferred unit system",
+			"publicName": "Public name",
+			"username": "Username",
+			"autoConvert": "Auto-convert"
+		},
+		"heading": {
+			"settings": "Settings"
+		},
+		"modal": {
+			"changeAvatar": {
+				"title": "Update avatar"
+			},
+			"changeEmail": {
+				"title": "Update email address"
+			},
+			"changeNames": {
+				"title": "Update names"
+			},
+			"changePreferences": {
+				"title": "Update preferences"
+			},
+			"changeUsername": {
+				"title": "Update username"
+			},
+			"delete": {
+				"content": "Are you sure you want to delete your account? Everything related to it will be permanently deleted.",
+				"title": "Delete account"
+			}
+		},
+		"note": {
+			"EMAIL_UPDATED": "Your email address has been successfully updated.",
+			"TOKEN_EXPIRED": "Change email token expired. Please try again.",
+			"test": "",
+			"TOKEN_NOT_FOUND": "Change email token not found. Please try again.",
+			"USER_NOT_UPDATED": "User update failed. Please try again.",
+			"USER_VERIFIED": "Your account has been verified.",
+			"VERIFY_ADDRESS": "Please confirm the change by following the link inside the email sent to your new address.",
+			"USER_NAMES": "Please consider updating your first and last names or username. Until then, we'll use your email address as a username."
+		}
+	},
+	"user": {
+		"profile": {
+			"heading": {
+				"userRecipes": "{{user}}'s recipes",
+				"userUnpublishedRecipes": "{{user}}'s unpublished recipes"
+			}
+		}
+	},
+	"seo": {
+		"home": {
+			"title": "Home",
+			"description": "Welcome to {{appName}}! Embark on a gastronomic adventure with our recipe app and discover the boundless joys of cooking."
+		},
+		"user": {
+			"unpublished": {
+				"prefix": "Unpublished"
+			}
+		},
+		"recipes": {
+			"title": "Recipes",
+			"description": "Explore our extensive collection of recipes, featuring customizable servings, unit conversions, detailed ingredients, step-by-step instructions, and essential equipment."
+		},
+		"searchRecipes": {
+			"title": "Results for \"{{result}}\""
+		},
+		"newRecipe": {
+			"title": "Add recipe"
+		},
+		"editRecipe": {
+			"title": "Edit recipe"
+		},
+		"login": {
+			"title": "Login"
+		},
+		"settings": {
+			"title": "Settings"
+		},
+		"notFound": {
+			"title": "Not found"
+		},
+		"unauthorized": {
+			"title": "Unauthorized"
+		},
+		"forbidden": {
+			"title": "Forbidden"
+		}
+	},
+	"errorPages": {
+		"common": {
+			"backCTA": "Back",
+			"homeCTA": "Home"
+		},
+		"401": {
+			"title": "Looks like you're not authorized to be here.",
+			"loginCTA": "Log in"
+		},
+		"403": {
+			"title": "Looks like you don't have access."
+		},
+		"404": {
+			"title": "Hmm, there's nothing here."
+		},
+		"500": {
+			"title": "Whoops! Looks like someone set the timer wrong.",
+			"refreshCTA": "Refresh"
+		}
+	}
 }

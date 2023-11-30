@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+#352F44 
+#5C5470
+#B9B4C7
+#FAF0E6
+*/
+
+@layer base {
+	html {
+		@apply transition-colors;
+	}
+
+	html.light {
+		@apply bg-light text-dark focus:outline-primary;
+	}
+
+	html.dark {
+		@apply bg-dark text-light focus:outline-secondary;
+	}
+}

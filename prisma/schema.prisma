@@ -1,0 +1,256 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String             @id @default(cuid())
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  email                   String             @unique
+  firstName               String?
+  lastName                String?
+  username                String?            @unique
+  photo                   Json? // Cloudinary UploadApiResponse
+  isVerified              Boolean            @default(false)
+  role                    Role               @default(USER)
+  autoConvert             Boolean            @default(false)
+  prefersUnitSystem       UnitSystem         @default(METRIC)
+  prefersTemperatureScale TemperatureScale   @default(C)
+  prefersDisplayName      DisplayName        @default(email)
+  comments                Comment[]
+  emailChangeTokes        EmailChangeToken[]
+  equipment               Equipment[]
+  ingredients             Ingredient[]
+  recipes                 Recipe[]
+  steps                   Step[]
+  subRecipes              SubRecipe[]
+}
+
+model EmailChangeToken {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  oldEmail  String
+  newEmail  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+}
+
+model Recipe {
+  id             String          @id @default(cuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  slug           String?         @unique
+  name           Json // { [lang]: string | null }
+  description    Json // { [lang]: string | null }
+  difficulty     Difficulty
+  servings       Int             @db.SmallInt
+  photo          Json? // Cloudinary UploadApiResponse
+  categories     String[]
+  tags           String[]
+  languages      String[]
+  status         Status          @default(UNPUBLISHED)
+  steps          Step[]
+  ingredients    Ingredient[]
+  commentThreads CommentThread[]
+  subRecipes     SubRecipe[]
+  equipment      Equipment[]
+}
+
+model Ingredient {
+  id           String     @id @default(uuid())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  position     Int        @default(autoincrement())
+  stepPosition Int        @default(autoincrement())
+  name         Json // { [lang]: string | null }
+  quantity     Decimal?
+  note         Json? // { [lang]: string | null }
+  unit         Unit?
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId     String
+  subRecipe    SubRecipe? @relation(fields: [subRecipeId], references: [id], onDelete: Cascade)
+  subRecipeId  String?
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  step         Step[]
+}
+
+model SubRecipe {
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  position     Int          @default(autoincrement())
+  stepPosition Int          @default(autoincrement())
+  name         Json // { [lang]: string | null }
+  ingredients  Ingredient[]
+  recipe       Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId     String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  step         Step[]
+  stepId       String?
+}
+
+model Equipment {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  position      Int      @default(autoincrement())
+  stepPosition  Int      @default(autoincrement())
+  name          Json // { [lang]: string | null }
+  width         Int?     @db.SmallInt
+  height        Int?     @db.SmallInt
+  length        Int?     @db.SmallInt
+  dimensionUnit Length?
+  volume        Int?     @db.SmallInt
+  volumeUnit    Volume?
+  step          Step[]
+  stepId        String?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  recipe        Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId      String
+}
+
+model Step {
+  id               String            @id @default(uuid())
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  position         Int               @default(autoincrement())
+  recipe           Recipe            @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId         String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  content          Json // { [lang]: string | null }
+  prepTime         Int?              @db.SmallInt
+  cookTime         Int?              @db.SmallInt
+  bakeTime         Int?              @db.SmallInt
+  restTime         Int?              @db.SmallInt
+  temperature      Int?              @db.SmallInt
+  temperatureScale TemperatureScale?
+  ingredients      Ingredient[]
+  equipment        Equipment[]
+  subRecipes       SubRecipe[]
+  subRecipeAction  SubRecipeAction?
+}
+
+model CommentThread {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  content   String
+  recipe    Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  String
+  comments  Comment[]
+}
+
+model Comment {
+  id              String        @id @default(uuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id])
+  userId          String
+  commentThread   CommentThread @relation(fields: [commentThreadId], references: [id], onDelete: Cascade)
+  commentThreadId String
+  content         String
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Length {
+  // # METRIC
+  mm
+  cm
+  m
+  // # IMPERIAL/US
+  in
+  ft
+  yd
+}
+
+enum Volume {
+  // # METRIC
+  mL
+  L
+  // # IMPERIAL/US
+  tsp
+  tbsp
+  fl_oz
+  cup
+  pt
+  qt
+  gal
+}
+
+enum Unit {
+  // ### VOLUME
+  // # METRIC
+  mL
+  L
+  // # IMPERIAL/US
+  tsp
+  tbsp
+  fl_oz
+  cup
+  pt
+  qt
+  gal
+
+  // ### MASS
+  // # METRIC
+  mg
+  g
+  kg
+  // # IMPERIAL/US
+  lb
+  oz
+
+  // ### MISC
+  to_taste
+}
+
+enum UnitSystem {
+  IMPERIAL
+  METRIC
+}
+
+enum TemperatureScale {
+  C
+  F
+}
+
+enum Status {
+  PUBLISHED
+  UNPUBLISHED
+}
+
+enum DisplayName {
+  email
+  username
+  names
+}
+
+enum SubRecipeAction {
+  MAKE
+  USE
+}

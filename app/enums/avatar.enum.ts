@@ -1,0 +1,31 @@
+export enum AvatarColor {
+	SLATE = "slate",
+	GRAY = "gray",
+	ZINC = "zinc",
+	STONE = "stone",
+	RED = "red",
+	ORANGE = "orange",
+	AMBER = "amber",
+	YELLOW = "yellow",
+	LIME = "lime",
+	GREEN = "green",
+	EMERALD = "emerald",
+	TEAL = "teal",
+	CYAN = "cyan",
+	SKY = "sky",
+	BLUE = "blue",
+	INDIGO = "indigo",
+	VIOLET = "violet",
+	PURPLE = "purple",
+	FUCHSIA = "fuchsia",
+	PINK = "pink",
+	ROSE = "rose",
+}
+
+export enum AvatarShade {
+	FIVE = "500",
+	SIX = "600",
+	SEVEN = "700",
+	EIGHT = "800",
+	NINE = "900",
+}
