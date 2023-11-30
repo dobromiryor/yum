@@ -223,6 +223,7 @@ export const EditIngredientModal = () => {
 					/>
 					<Input label={t("recipe.field.quantity")} name="quantity" />
 					<Textarea
+						isRequired={!validation[lang]?.note}
 						label={t("recipe.field.note")}
 						name="note"
 						translationContent={parsedNote?.[invertedLang]}
@@ -266,7 +267,83 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	}
 
 	try {
-		const { name, note, quantity, unit, subRecipeId } = data;
+		const foundIngredient = await prisma.ingredient.findUnique({
+			where: {
+				id: ingredientId,
+			},
+		});
+
+		if (!foundIngredient) {
+			throw new Response(null, { status: 404 });
+		}
+
+		const parsedNote = OptionalTranslatedContentSchema.parse(
+			foundIngredient.note
+		);
+
+		const { name, note: n, quantity, unit, subRecipeId } = data;
+
+		const note = async () => {
+			//  this is painful 🥴
+
+			if (n) {
+				// note field filled -> replace note
+
+				const content = await nullishTranslatedContent({
+					request,
+					key: "note",
+					lang,
+					value: n,
+				});
+
+				return content?.note;
+			} else {
+				// note field empty
+
+				if (parsedNote) {
+					// foundRecipe has notes
+
+					const keys = Object.keys(parsedNote);
+					if (keys.includes(lang)) {
+						// parsed note includes current lang
+
+						const values = Object.values(parsedNote).filter((item) => item);
+						if (values.length > 1) {
+							// both langs have values -> null only current lang
+
+							const content = await nullishTranslatedContent({
+								request,
+								key: "note",
+								lang,
+								value: null,
+							});
+
+							return content?.note;
+						} else {
+							// only one lang has value
+
+							if (!parsedNote[lang]) {
+								// current lang is nullish -> undefined
+
+								return undefined;
+							} else {
+								// current lang has value -> prisma null
+
+								return Prisma.JsonNull;
+							}
+						}
+					} else {
+						// parsed note doesn't include lang -> undefined
+
+						return undefined;
+					}
+				} else {
+					// foundRecipe doesn't have notes
+
+					return undefined;
+				}
+			}
+		};
 
 		await prisma.ingredient.update({
 			data: {
@@ -276,12 +353,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					lang,
 					value: name,
 				})),
-				...(await nullishTranslatedContent({
-					request,
-					lang,
-					key: "note",
-					value: note,
-				})),
+				note: await note(),
 				quantity:
 					quantity === null
 						? null

@@ -5,7 +5,6 @@ import { z } from "zod";
 import { QUANTITY_REGEX } from "~/consts/regex.const";
 import {
 	NonEmptyStringSchema,
-	OptionalStringSchema,
 	OptionalTranslatedContentSchema,
 	TranslatedContentSchema,
 } from "~/schemas/common";
@@ -28,16 +27,17 @@ export const IngredientSchema = z.object({
 export const IngredientDTOSchema = z
 	.object({
 		name: NonEmptyStringSchema,
-		note: OptionalStringSchema.transform((value) =>
-			value ? value : undefined
-		),
+		note: z
+			.string()
+			.nullish()
+			.transform((value) => (typeof value === "string" ? value : null)),
 		quantity: z.preprocess(
 			(value) =>
 				value === "" || value === "0"
 					? null
 					: value === undefined
-					? undefined
-					: value,
+					  ? undefined
+					  : value,
 			z
 				.string()
 				.regex(QUANTITY_REGEX, { message: t("recipe.errors.invalidQuantity") })
@@ -45,10 +45,11 @@ export const IngredientDTOSchema = z
 		),
 		unit: z
 			.union([z.nativeEnum(Unit), z.literal("")])
-			.nullable()
+			.nullish()
 			.transform((value) => (value !== "" ? value : null))
-			.optional(),
-		subRecipeId: z.string().nullish(),
+			.optional()
+			.default(null),
+		subRecipeId: z.string().nullish().default(null),
 	})
 	.superRefine(({ quantity, unit }, refinementContext) => {
 		// quantity is required if units other than "to taste" are selected

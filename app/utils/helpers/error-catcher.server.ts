@@ -6,11 +6,11 @@ import i18next from "~/modules/i18next.server";
 export const errorCatcher = async (request: Request, error: unknown) => {
 	const t = await i18next.getFixedT(request.clone());
 
+	console.error(error);
+
 	if (error instanceof Prisma.PrismaClientKnownRequestError) {
 		return json({ success: false, formError: error.message }, { status: 400 });
 	} else {
-		console.error(error);
-
 		return json(
 			{
 				success: false,

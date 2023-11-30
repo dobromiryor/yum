@@ -23,6 +23,7 @@ import {
 import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
@@ -32,6 +33,7 @@ import { IngredientDTOSchema } from "~/schemas/ingredient.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import {
 	generateMetaDescription,
@@ -191,6 +193,7 @@ export const CreateIngredientModal = () => {
 							/>
 						)}
 					/>
+					<FormError error={actionData?.formError} />
 				</Form>
 			</RemixFormProvider>
 		</Modal>
@@ -206,13 +209,17 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
 
-	const { errors, data } = await getValidatedFormData<FormData>(
+	const { errors, data, receivedValues } = await getValidatedFormData<FormData>(
 		request.clone(),
 		resolver
 	);
 
 	if (errors) {
-		return json({ success: false, errors });
+		return json({
+			success: false,
+			errors,
+			formError: undefined as string | undefined,
+		});
 	}
 
 	try {
@@ -227,12 +234,14 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					lang,
 					value: name,
 				})),
-				...(await nullishTranslatedContent({
-					request,
-					key: "note",
-					lang,
-					value: note,
-				})),
+				note: note
+					? await nullishTranslatedContent({
+							request,
+							key: "note",
+							lang,
+							value: note,
+					  })
+					: Prisma.JsonNull,
 				quantity:
 					quantity === null
 						? null
@@ -244,13 +253,15 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 				userId: authData.id,
 			},
 		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
+	} catch (formError) {
+		return errorCatcher(request, formError);
 	}
 
-	return json({ success: true });
+	return json({
+		success: true,
+		errors: undefined,
+		formError: undefined as string | undefined,
+	});
 };
 
 export default CreateIngredientModal;

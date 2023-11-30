@@ -32,7 +32,7 @@ export const translatedContent = async ({
 	return {
 		[key]: {
 			...translationData[key],
-			...{ [lang]: value },
+			...{ [lang]: value?.trim() ?? null },
 		},
 	};
 };
