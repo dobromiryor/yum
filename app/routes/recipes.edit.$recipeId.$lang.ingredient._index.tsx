@@ -17,8 +17,8 @@ import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
-	getValidatedFormData,
-	useRemixForm,
+	parseFormData,
+	useRemixForm
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -209,18 +209,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
 
-	const { errors, data, receivedValues } = await getValidatedFormData<FormData>(
-		request.clone(),
-		resolver
-	);
-
-	if (errors) {
-		return json({
-			success: false,
-			errors,
-			formError: undefined as string | undefined,
-		});
-	}
+	const data = await parseFormData<FormData>(request.clone());
 
 	try {
 		const { name, note, subRecipeId, quantity } = data;
@@ -259,7 +248,6 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	return json({
 		success: true,
-		errors: undefined,
 		formError: undefined as string | undefined,
 	});
 };

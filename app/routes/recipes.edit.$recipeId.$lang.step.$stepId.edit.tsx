@@ -16,11 +16,7 @@ import {
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {
-	RemixFormProvider,
-	getValidatedFormData,
-	useRemixForm,
-} from "remix-hook-form";
+import { RemixFormProvider, parseFormData, useRemixForm } from "remix-hook-form";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
@@ -397,16 +393,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const { lang, stepId } = EditRecipeStepParamsSchema.parse(p);
 
-	const { errors, data } = await getValidatedFormData<FormData>(
-		request.clone(),
-		resolver
-	);
-
-	if (errors) {
-		console.error(errors);
-
-		return json({ success: false, errors });
-	}
+	const data = await parseFormData<FormData>(request.clone());
 
 	try {
 		const {

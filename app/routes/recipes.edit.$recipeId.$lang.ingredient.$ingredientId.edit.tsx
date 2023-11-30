@@ -18,7 +18,7 @@ import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
-	getValidatedFormData,
+	parseFormData,
 	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
@@ -257,14 +257,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const { lang, ingredientId } = EditRecipeIngredientParamsSchema.parse(p);
 
-	const { errors, data } = await getValidatedFormData<FormData>(
-		request.clone(),
-		resolver
-	);
-
-	if (errors) {
-		return json({ success: false, errors });
-	}
+	const data = await parseFormData<FormData>(request.clone());
 
 	try {
 		const foundIngredient = await prisma.ingredient.findUnique({

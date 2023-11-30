@@ -18,7 +18,7 @@ import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
-	getValidatedFormData,
+	parseFormData,
 	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
@@ -249,25 +249,18 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		request.clone().headers.get("Cookie")
 	);
 
-	const { errors, data } = await getValidatedFormData<FormData>(
-		request.clone(),
-		resolver
-	);
-
-	if (errors) {
-		console.error(errors);
-
-		return json({ success: false, errors });
-	}
+	const data = await parseFormData<FormData>(request.clone());
 
 	const { displayNameToggle, ...rest } = data;
 
 	const updatedUser = await prisma.user
 		.update({
 			data: {
-				prefersDisplayName: displayNameToggle
-					? DisplayName.names
-					: DisplayName.username,
+				...(displayNameToggle && {
+					prefersDisplayName: displayNameToggle
+						? DisplayName.names
+						: DisplayName.username,
+				}),
 				...rest,
 			},
 			where: {

@@ -17,8 +17,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
-	getValidatedFormData,
-	useRemixForm,
+	parseFormData,
+	useRemixForm
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -172,16 +172,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 	const t = await i18next.getFixedT(request.clone());
 
-	const { errors, data } = await getValidatedFormData<FormData>(
-		request.clone(),
-		resolver
-	);
-
-	if (errors) {
-		console.error(errors);
-
-		return json({ success: false, errors, formError: undefined });
-	}
+	const data = await parseFormData<FormData>(request.clone());
 
 	const { username, prefersDisplayName } = data;
 

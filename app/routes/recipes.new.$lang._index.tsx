@@ -13,8 +13,8 @@ import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
-	getValidatedFormData,
-	useRemixForm,
+	parseFormData,
+	useRemixForm
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -178,14 +178,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const { lang } = CreateRecipeSchema.parse(p);
 
-	const { errors, data } = await getValidatedFormData<FormData>(
-		request.clone(),
-		resolver
-	);
-
-	if (errors) {
-		return json({ ok: false, errors });
-	}
+	const data = await parseFormData<FormData>(request.clone());
 
 	const createdRecipe = await prisma.recipe.create({
 		data: {
