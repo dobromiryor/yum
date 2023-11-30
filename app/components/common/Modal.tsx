@@ -116,7 +116,7 @@ export const Modal = ({
 										variant={CTAVariant}
 										onClick={handleCTA}
 									>
-										{CTALabel ?? t("common.submit")}
+										{CTALabel ?? t("common.save")}
 									</Button>
 								)}
 								<Button
