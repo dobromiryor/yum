@@ -57,7 +57,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 404 });
 	}
 
-	if (userId !== authData?.id || authData?.role !== Role.ADMIN) {
+	if (userId !== authData.id && authData.role !== Role.ADMIN) {
 		throw new Response(null, { status: 403 });
 	}
 
