@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
 	parseFormData,
-	useRemixForm
+	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -24,6 +24,7 @@ import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { Section } from "~/components/recipes/crud/Section";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import i18next from "~/modules/i18next.server";
 import { DifficultySchema, LanguageSchema } from "~/schemas/common";
@@ -100,13 +101,18 @@ const NewRecipeRoute = () => {
 		[t]
 	);
 
+	const { onValid } = useFilteredValues<FormData>();
 	const form = useRemixForm<FormData>({
 		resolver,
-		submitConfig: {
-			method: "post",
+		submitHandlers: {
+			onValid,
 		},
 	});
-	const { control, handleSubmit } = form;
+	const {
+		control,
+		handleSubmit,
+		formState: { dirtyFields },
+	} = form;
 
 	return (
 		<Section
@@ -159,7 +165,11 @@ const NewRecipeRoute = () => {
 						type="number"
 					/>
 					<div className="flex justify-end pt-4">
-						<Button isLoading={isLoading} type="submit">
+						<Button
+							isDisabled={!Object.keys(dirtyFields).length}
+							isLoading={isLoading}
+							type="submit"
+						>
 							{t("common.create")}
 						</Button>
 					</div>

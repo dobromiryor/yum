@@ -16,15 +16,21 @@ import {
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { RemixFormProvider, parseFormData, useRemixForm } from "remix-hook-form";
+import {
+	RemixFormProvider,
+	parseFormData,
+	useRemixForm,
+} from "remix-hook-form";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Multiselect } from "~/components/common/UI/Multiselect";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { TranslatedContentSchema } from "~/schemas/common";
 import { OptionsSchema } from "~/schemas/option.schema";
@@ -225,6 +231,9 @@ export const EditStepModal = () => {
 		[foundEquipment, invertedLang, lang, t]
 	);
 
+	const { onValid } = useFilteredValues<FormData>({
+		submitOptions: { method: "PATCH" },
+	});
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
@@ -240,22 +249,22 @@ export const EditStepModal = () => {
 			prepTime: prepTime ?? undefined,
 			restTime: restTime ?? undefined,
 		},
-		submitConfig: {
-			method: "patch",
+		submitHandlers: {
+			onValid,
 		},
 	});
 	const {
 		reset,
 		handleSubmit,
 		control,
-		formState: { isDirty },
+		formState: { dirtyFields },
 	} = form;
 
 	return (
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -380,6 +389,13 @@ export const EditStepModal = () => {
 					/>
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -395,17 +411,19 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const data = await parseFormData<FormData>(request.clone());
 
-	try {
-		const {
-			content,
-			equipment,
-			subRecipeAction,
-			subRecipes,
-			ingredients,
-			...rest
-		} = data;
+	let success = true;
 
-		await prisma.step.update({
+	const {
+		content,
+		equipment,
+		subRecipeAction,
+		subRecipes,
+		ingredients,
+		...rest
+	} = data;
+
+	return await prisma.step
+		.update({
 			data: {
 				...rest,
 				...(await nullishTranslatedContent({
@@ -443,14 +461,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 			where: {
 				id: stepId,
 			},
-		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default EditStepModal;

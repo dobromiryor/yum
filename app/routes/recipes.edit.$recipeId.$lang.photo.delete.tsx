@@ -111,7 +111,13 @@ const DeletePhotoModal = () => {
 			title={t("recipe.modal.delete.photo.title")}
 		>
 			{t("recipe.modal.delete.photo.content")}
-			<FormError error={actionData?.formError} />
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -147,16 +153,17 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		return errorCatcher(clonedRequest, t("error.somethingWentWrong"));
 	}
 
-	await prisma.recipe
+	let success = true;
+
+	return await prisma.recipe
 		.update({
 			data: { photo: Prisma.JsonNull },
 			where: {
 				id: recipeId,
 			},
 		})
-		.catch((formError) => errorCatcher(request, formError));
-
-	return json({ success: true, formError: undefined as string | undefined });
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default DeletePhotoModal;

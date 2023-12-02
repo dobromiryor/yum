@@ -1,24 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DisplayName } from "@prisma/client";
 import {
-	json,
-	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
-	type MetaFunction,
+    json,
+    type ActionFunctionArgs,
+    type LoaderFunctionArgs,
+    type MetaFunction,
 } from "@remix-run/node";
 import {
-	Form,
-	useActionData,
-	useLoaderData,
-	useLocation,
-	useNavigation,
+    Form,
+    useActionData,
+    useLoaderData,
+    useLocation,
+    useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-	RemixFormProvider,
-	parseFormData,
-	useRemixForm
+    RemixFormProvider,
+    parseFormData,
+    useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -29,11 +29,10 @@ import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { UsernameSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
-import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import {
-	generateMetaDescription,
-	generateMetaProps,
-	generateMetaTitle,
+    generateMetaDescription,
+    generateMetaProps,
+    generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
@@ -117,7 +116,7 @@ const EditUsernameModal = () => {
 	});
 
 	const {
-		formState: { isDirty },
+		formState: { dirtyFields },
 		handleSubmit,
 		reset,
 	} = form;
@@ -126,7 +125,7 @@ const EditUsernameModal = () => {
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -152,9 +151,15 @@ const EditUsernameModal = () => {
 						name="prefersDisplayName"
 						value={prefersDisplayName}
 					/>
-					<FormError error={actionData?.formError} />
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -187,7 +192,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		});
 	}
 
-	const updatedUser = await prisma.user
+	let success = true;
+
+	return await prisma.user
 		.update({
 			data: {
 				username,
@@ -200,17 +207,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 				id: authData.id,
 			},
 		})
-		.catch((formError) => errorCatcher(request, formError));
+		.catch(() => (success = false))
+		.then(async (data) => {
+			if (success) {
+				session.set(auth.sessionKey, data);
 
-	session.set(auth.sessionKey, updatedUser);
-
-	return json(
-		{
-			success: true,
-			formError: undefined as string | undefined,
-		},
-		{ headers: { "Set-Cookie": await sessionStorage.commitSession(session) } }
-	);
+				return json(
+					{
+						success,
+					},
+					{
+						headers: {
+							"Set-Cookie": await sessionStorage.commitSession(session),
+						},
+					}
+				);
+			}
+		});
 };
 
 export default EditUsernameModal;

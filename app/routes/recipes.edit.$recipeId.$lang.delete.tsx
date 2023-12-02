@@ -5,17 +5,13 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from "@remix-run/node";
-import {
-	useActionData,
-	useLoaderData,
-	useLocation,
-	useSubmit,
-} from "@remix-run/react";
+import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
@@ -91,7 +87,6 @@ export const DeleteRecipeModal = () => {
 	const [isOpen, setIsOpen] = useState(true);
 
 	const submit = useSubmit();
-	const { pathname } = useLocation();
 	const {
 		t,
 		i18n: { language: lang },
@@ -126,6 +121,13 @@ export const DeleteRecipeModal = () => {
 					: "recipe.modal.delete.recipe.content",
 				{ name }
 			)}
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -149,15 +151,13 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		redirect("/403");
 	}
 
-	try {
-		await prisma.recipe.delete({ where: { id: recipeId } });
-	} catch (error) {
-		console.error(error);
+	let success = true;
 
-		return json({ success: false, error });
-	}
+	await prisma.recipe
+		.delete({ where: { id: recipeId } })
+		.catch(() => (success = false));
 
-	return json({ success: true });
+	return json({ success });
 };
 
 export default DeleteRecipeModal;

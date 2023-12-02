@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-	json,
-	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
-	type MetaFunction,
+    json,
+    type ActionFunctionArgs,
+    type LoaderFunctionArgs,
+    type MetaFunction,
 } from "@remix-run/node";
 import { Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { useEffect } from "react";
@@ -22,9 +22,9 @@ import { LoginDTOSchema, LoginIntentSchema } from "~/schemas/login.schema";
 import { auth } from "~/utils/auth.server";
 import { getFrom } from "~/utils/helpers/get-from.server";
 import {
-	generateMetaDescription,
-	generateMetaProps,
-	generateMetaTitle,
+    generateMetaDescription,
+    generateMetaProps,
+    generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { sessionStorage } from "~/utils/session.server";
 
@@ -111,7 +111,7 @@ export default function LoginRoute() {
 
 	const {
 		handleSubmit,
-		formState: { isDirty },
+		formState: { dirtyFields },
 		setValue,
 	} = form;
 
@@ -170,7 +170,7 @@ export default function LoginRoute() {
 
 							<Button
 								className="self-end mt-4"
-								isDisabled={!isDirty}
+								isDisabled={!Object.keys(dirtyFields).length}
 								isLoading={isLoginLoading}
 								type="submit"
 								variant="normal"

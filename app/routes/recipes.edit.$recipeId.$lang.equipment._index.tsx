@@ -18,14 +18,16 @@ import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
 	parseFormData,
-	useRemixForm
+	useRemixForm,
 } from "remix-hook-form";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
@@ -101,17 +103,18 @@ const CreateEquipmentModal = () => {
 
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
 
+	const { onValid } = useFilteredValues<FormData>();
 	const form = useRemixForm<FormData>({
 		resolver,
-		submitConfig: {
-			method: "post",
+		submitHandlers: {
+			onValid,
 		},
 	});
 	const {
 		control,
 		reset,
 		handleSubmit,
-		formState: { isDirty },
+		formState: { dirtyFields },
 	} = form;
 
 	const dimensionUnitOptions = useMemo(
@@ -147,7 +150,7 @@ const CreateEquipmentModal = () => {
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -200,6 +203,13 @@ const CreateEquipmentModal = () => {
 					/>
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -214,9 +224,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
 
 	const data = await parseFormData<FormData>(request.clone());
+	let success = true;
 
-	try {
-		await prisma.equipment.create({
+	return await prisma.equipment
+		.create({
 			data: {
 				...data,
 				...(await translatedContent({
@@ -228,14 +239,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 				recipeId,
 				userId: authData.id,
 			},
-		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default CreateEquipmentModal;

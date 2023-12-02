@@ -274,16 +274,18 @@ const EditAvatarModal = () => {
 						</div>
 					</div>
 				</Form>
-				<FormError
-					error={
-						fileRejections.length > 0
-							? t(
-									`error.${fileRejections[0]?.errors[0]?.code}` as unknown as TemplateStringsArray
-							  )
-							: actionData?.formError
-					}
-				/>
 			</div>
+			<FormError
+				error={
+					fileRejections.length > 0
+						? t(
+								`error.${fileRejections[0]?.errors[0]?.code}` as unknown as TemplateStringsArray
+						  )
+						: typeof actionData?.success === "boolean" && !actionData?.success
+						  ? t("error.somethingWentWrong")
+						  : undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -301,6 +303,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		request.headers.get("Cookie")
 	);
 
+	let success = true;
+
 	switch (request.method) {
 		case "DELETE":
 			{
@@ -313,29 +317,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 					return errorCatcher(clonedRequest, t("error.somethingWentWrong"));
 				}
 
-				const updatedUser = await prisma.user
+				await prisma.user
 					.update({
 						data: { photo: Prisma.JsonNull },
 						where: {
 							id: authData.id,
 						},
 					})
-					.catch((formError) => errorCatcher(request, formError));
-
-				session.set(auth.sessionKey, updatedUser);
+					.catch(() => (success = false))
+					.then(async (data) => {
+						if (success) {
+							session.set(auth.sessionKey, data);
+						}
+					});
 			}
 
-			return json(
-				{
-					success: true,
-					formError: undefined as string | undefined,
-				},
-				{
-					headers: {
-						"Set-Cookie": await sessionStorage.commitSession(session),
-					},
-				}
-			);
+			break;
 		case "POST":
 			{
 				const uploadHandler = unstable_composeUploadHandlers(
@@ -372,32 +369,36 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 				const cloudinaryData =
 					CloudinaryUploadApiResponseWithBlurHashSchema.parse(cloudinaryObject);
 
-				const updatedUser = await prisma.user
+				await prisma.user
 					.update({
 						data: { photo: cloudinaryData },
 						where: {
 							id: authData.id,
 						},
 					})
-					.catch((formError) => errorCatcher(request, formError));
-
-				session.set(auth.sessionKey, updatedUser);
+					.catch(() => (success = false))
+					.then(async (data) => {
+						if (success) {
+							session.set(auth.sessionKey, data);
+						}
+					});
 			}
 
-			return json(
-				{
-					success: true,
-					formError: undefined as string | undefined,
-				},
-				{
-					headers: {
-						"Set-Cookie": await sessionStorage.commitSession(session),
-					},
-				}
-			);
+			break;
 	}
 
-	return errorCatcher(request, t("error.somethingWentWrong"));
+	return json(
+		{ success },
+		{
+			...(success
+				? {
+						headers: {
+							"Set-Cookie": await sessionStorage.commitSession(session),
+						},
+				  }
+				: undefined),
+		}
+	);
 };
 
 export default EditAvatarModal;

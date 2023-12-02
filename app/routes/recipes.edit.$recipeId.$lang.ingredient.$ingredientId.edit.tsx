@@ -24,10 +24,12 @@ import {
 import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import {
 	OptionalTranslatedContentSchema,
@@ -162,6 +164,9 @@ export const EditIngredientModal = () => {
 	const parsedNote = OptionalTranslatedContentSchema.parse(note);
 	const invertedLang = getInvertedLang(lang);
 
+	const { onValid } = useFilteredValues<FormData>({
+		submitOptions: { method: "PATCH" },
+	});
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
@@ -170,22 +175,22 @@ export const EditIngredientModal = () => {
 			quantity: quantity ?? undefined,
 			unit: unit ?? undefined,
 		},
-		submitConfig: {
-			method: "patch",
+		submitHandlers: {
+			onValid,
 		},
 	});
 	const {
 		reset,
 		handleSubmit,
 		control,
-		formState: { isDirty },
+		formState: { dirtyFields },
 	} = form;
 
 	return (
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -244,6 +249,13 @@ export const EditIngredientModal = () => {
 					/>
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -259,86 +271,90 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const data = await parseFormData<FormData>(request.clone());
 
-	try {
-		const foundIngredient = await prisma.ingredient.findUnique({
-			where: {
-				id: ingredientId,
-			},
-		});
+	const foundIngredient = await prisma.ingredient.findUnique({
+		where: {
+			id: ingredientId,
+		},
+	});
 
-		if (!foundIngredient) {
-			throw new Response(null, { status: 404 });
-		}
+	if (!foundIngredient) {
+		throw new Response(null, { status: 404 });
+	}
 
-		const parsedNote = OptionalTranslatedContentSchema.parse(
-			foundIngredient.note
-		);
+	const parsedNote = OptionalTranslatedContentSchema.parse(
+		foundIngredient.note
+	);
 
-		const { name, note: n, quantity, unit, subRecipeId } = data;
+	const { name, note: n, quantity, unit, subRecipeId } = data;
 
-		const note = async () => {
-			//  this is painful 🥴
+	const note = async () => {
+		//  this is painful 🥴
 
-			if (n) {
-				// note field filled -> replace note
+		if (n) {
+			// note field filled -> replace note
 
-				const content = await nullishTranslatedContent({
-					request,
-					key: "note",
-					lang,
-					value: n,
-				});
+			const content = await nullishTranslatedContent({
+				request,
+				key: "note",
+				lang,
+				value: n,
+			});
 
-				return content?.note;
-			} else {
-				// note field empty
+			return content?.note;
+		} else {
+			// note field empty
 
-				if (parsedNote) {
-					// foundRecipe has notes
+			if (parsedNote) {
+				// foundRecipe has notes
 
-					const keys = Object.keys(parsedNote);
-					if (keys.includes(lang)) {
-						// parsed note includes current lang
+				const keys = Object.keys(parsedNote);
 
-						const values = Object.values(parsedNote).filter((item) => item);
-						if (values.length > 1) {
-							// both langs have values -> null only current lang
+				if (keys.includes(lang)) {
+					// parsed note includes current lang
 
-							const content = await nullishTranslatedContent({
-								request,
-								key: "note",
-								lang,
-								value: null,
-							});
+					const values = Object.values(parsedNote).filter((item) => item);
 
-							return content?.note;
-						} else {
-							// only one lang has value
+					if (values.length > 1) {
+						// both langs have values -> null only current lang
 
-							if (!parsedNote[lang]) {
-								// current lang is nullish -> undefined
+						const content = await nullishTranslatedContent({
+							request,
+							key: "note",
+							lang,
+							value: null,
+						});
 
-								return undefined;
-							} else {
-								// current lang has value -> prisma null
-
-								return Prisma.JsonNull;
-							}
-						}
+						return content?.note;
 					} else {
-						// parsed note doesn't include lang -> undefined
+						// only one lang has value
 
-						return undefined;
+						if (!parsedNote[lang]) {
+							// current lang is nullish -> undefined
+
+							return undefined;
+						} else {
+							// current lang has value -> prisma null
+
+							return Prisma.JsonNull;
+						}
 					}
 				} else {
-					// foundRecipe doesn't have notes
+					// parsed note doesn't include lang -> undefined
 
 					return undefined;
 				}
-			}
-		};
+			} else {
+				// foundRecipe doesn't have notes
 
-		await prisma.ingredient.update({
+				return undefined;
+			}
+		}
+	};
+
+	let success = true;
+
+	return await prisma.ingredient
+		.update({
 			data: {
 				...(await translatedContent({
 					request,
@@ -359,14 +375,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 			where: {
 				id: ingredientId,
 			},
-		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default EditIngredientModal;

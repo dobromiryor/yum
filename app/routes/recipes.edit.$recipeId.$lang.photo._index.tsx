@@ -243,7 +243,9 @@ const AddPhotoModal = () => {
 							? t(
 									`error.${fileRejections[0]?.errors[0]?.code}` as unknown as TemplateStringsArray
 							  )
-							: actionData?.formError
+							: typeof actionData?.success === "boolean" && !actionData?.success
+							  ? t("error.somethingWentWrong")
+							  : undefined
 					}
 				/>
 			</div>
@@ -295,19 +297,17 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const cloudinaryData =
 		CloudinaryUploadApiResponseWithBlurHashSchema.parse(cloudinaryObject);
 
-	await prisma.recipe
+	let success = true;
+
+	return await prisma.recipe
 		.update({
 			data: { photo: cloudinaryData },
 			where: {
 				id: recipeId,
 			},
 		})
-		.catch((formError) => errorCatcher(request, formError));
-
-	return json({
-		success: true,
-		formError: undefined as string | undefined,
-	});
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default AddPhotoModal;
