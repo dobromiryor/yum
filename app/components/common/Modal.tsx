@@ -10,6 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { Button, type ButtonVariant } from "~/components/common/UI/Button";
+import { useIsLoading } from "~/hooks/useIsLoading";
 
 interface ModalProps {
 	children: ReactNode;
@@ -46,6 +47,7 @@ export const Modal = ({
 }: ModalProps) => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
+	const [isSubmitting] = useIsLoading({ state: "submitting" });
 
 	const handleCTA = () => {
 		if (CTAFn && typeof CTAFn !== "string") {
@@ -86,7 +88,7 @@ export const Modal = ({
 					exit={{ opacity: 0 }}
 					initial={{ opacity: 0 }}
 					transition={{ duration: 0.3 }}
-					onMouseDown={() => !isLoading && handleDismiss()}
+					onMouseDown={() => !(isLoading || isSubmitting) && handleDismiss()}
 				>
 					{isOpen && (
 						<motion.div
@@ -105,13 +107,16 @@ export const Modal = ({
 						>
 							<h1 className="text-2xl typography-semibold px-6">{title}</h1>
 
-							<div className="overflow-y-auto scroll-p-1 px-6">{children}</div>
+							<div className="flex flex-col gap-2 overflow-y-auto scroll-p-1 px-6">
+								{children}
+							</div>
 
 							<div className="flex justify-end items-start gap-2 px-6">
 								{CTAFn && (
 									<Button
 										form={typeof CTAFn === "string" ? CTAFn : undefined}
-										isDisabled={isCTADisabled || isLoading}
+										isDisabled={isCTADisabled || isLoading || isSubmitting}
+										isLoading={isLoading || isSubmitting}
 										type={typeof CTAFn === "string" ? "submit" : "button"}
 										variant={CTAVariant}
 										onClick={handleCTA}
@@ -120,9 +125,12 @@ export const Modal = ({
 									</Button>
 								)}
 								<Button
-									isDisabled={isLoading}
+									isDisabled={isLoading || isSubmitting}
+									isLoading={isLoading || isSubmitting}
 									variant={dismissVariant}
-									onClick={() => !isLoading && handleDismiss()}
+									onClick={() =>
+										!(isLoading || isSubmitting) && handleDismiss()
+									}
 								>
 									{dismissLabel ?? t("common.cancel")}
 								</Button>

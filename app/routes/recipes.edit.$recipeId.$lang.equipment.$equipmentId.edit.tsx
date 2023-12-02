@@ -24,9 +24,11 @@ import {
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { TranslatedContentSchema } from "~/schemas/common";
 import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
@@ -138,6 +140,9 @@ const EditEquipmentModal = () => {
 	} = foundEquipment;
 	const name = TranslatedContentSchema.parse(n);
 
+	const { onValid } = useFilteredValues<FormData>({
+		submitOptions: { method: "PATCH" },
+	});
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
@@ -149,8 +154,8 @@ const EditEquipmentModal = () => {
 			volume,
 			volumeUnit,
 		},
-		submitConfig: {
-			method: "patch",
+		submitHandlers: {
+			onValid,
 		},
 	});
 
@@ -158,7 +163,7 @@ const EditEquipmentModal = () => {
 		control,
 		reset,
 		handleSubmit,
-		formState: { isDirty },
+		formState: { dirtyFields },
 	} = form;
 
 	const dimensionUnitOptions = useMemo(
@@ -194,7 +199,7 @@ const EditEquipmentModal = () => {
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -249,6 +254,13 @@ const EditEquipmentModal = () => {
 					/>
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -263,9 +275,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const { lang, equipmentId } = EditRecipeEquipmentParamsSchema.parse(p);
 
 	const data = await parseFormData<FormData>(request.clone());
+	let success = true;
 
-	try {
-		await prisma.equipment.update({
+	return await prisma.equipment
+		.update({
 			data: {
 				...data,
 				...(await translatedContent({
@@ -278,14 +291,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 			where: {
 				id: equipmentId,
 			},
-		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default EditEquipmentModal;

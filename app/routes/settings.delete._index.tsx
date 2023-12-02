@@ -4,6 +4,7 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
+	type TypedResponse,
 } from "@remix-run/node";
 import {
 	useActionData,
@@ -15,6 +16,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { auth } from "~/utils/auth.server";
@@ -99,11 +101,25 @@ export const DeleteUserModal = () => {
 			title={t("settings.modal.delete.title")}
 		>
 			{t("settings.modal.delete.content")}
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({
+	request,
+}: ActionFunctionArgs): Promise<
+	| TypedResponse<{
+			success: true;
+	  }>
+	| undefined
+> => {
 	const authData = await auth.isAuthenticated(request.clone());
 
 	if (!authData) {
@@ -117,15 +133,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 403 });
 	}
 
-	try {
-		await prisma.user.delete({ where: { id } });
-	} catch (error) {
-		console.error(error);
+	let success = true;
 
-		return json({ success: false, error });
-	}
+	return await prisma.user
+		.delete({ where: { id } })
+		.catch(() => {
+			success = false;
 
-	return redirect("/logout");
+			return json({ success });
+		})
+		.then(() => {
+			if (success) {
+				return redirect("/logout");
+			}
+		});
 };
 
 export default DeleteUserModal;

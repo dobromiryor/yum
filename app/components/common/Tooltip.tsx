@@ -153,6 +153,14 @@ export const Tooltip = () => {
 		return () => window.removeEventListener("scroll", hideTooltip);
 	}, [setIsShowing]);
 
+	useEffect(() => {
+		const hideTooltip = () => setIsShowing(false);
+
+		window.addEventListener("hashchange", hideTooltip);
+
+		return () => window.removeEventListener("hashchange", hideTooltip);
+	}, [setIsShowing]);
+
 	return (
 		<AnimatePresence initial={false}>
 			{isShowing && content && (

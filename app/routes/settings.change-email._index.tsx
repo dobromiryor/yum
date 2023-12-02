@@ -1,24 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-	json,
-	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
-	type MetaFunction,
+    json,
+    type ActionFunctionArgs,
+    type LoaderFunctionArgs,
+    type MetaFunction,
 } from "@remix-run/node";
 import {
-	Form,
-	useActionData,
-	useLoaderData,
-	useLocation,
-	useNavigate,
-	useNavigation,
+    Form,
+    useActionData,
+    useLoaderData,
+    useLocation,
+    useNavigate,
+    useNavigation,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-	RemixFormProvider,
-	parseFormData,
-	useRemixForm
+    RemixFormProvider,
+    parseFormData,
+    useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -31,11 +31,10 @@ import { Message } from "~/enums/message.enum";
 import i18next from "~/modules/i18next.server";
 import { EmailSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
-import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import {
-	generateMetaDescription,
-	generateMetaProps,
-	generateMetaTitle,
+    generateMetaDescription,
+    generateMetaProps,
+    generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sendChangeEmail } from "~/utils/sendgrid.server";
@@ -121,7 +120,7 @@ const EditUsernameModal = () => {
 	});
 
 	const {
-		formState: { isDirty },
+		formState: { dirtyFields },
 		handleSubmit,
 		reset,
 	} = form;
@@ -136,7 +135,7 @@ const EditUsernameModal = () => {
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -155,9 +154,15 @@ const EditUsernameModal = () => {
 						label={t("settings.field.email")}
 						name="email"
 					/>
-					<FormError error={actionData?.formError} />
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -194,14 +199,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		},
 	});
 
-	await sendChangeEmail(request, createdToken.id, email).catch((error) =>
-		errorCatcher(request, error)
-	);
+	let success = true;
 
-	return json({
-		success: true,
-		formError: undefined as string | undefined,
-	});
+	return await sendChangeEmail(request, createdToken.id, email)
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default EditUsernameModal;

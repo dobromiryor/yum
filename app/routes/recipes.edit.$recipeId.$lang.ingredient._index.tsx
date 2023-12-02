@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
 	parseFormData,
-	useRemixForm
+	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -28,12 +28,12 @@ import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { IngredientDTOSchema } from "~/schemas/ingredient.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
-import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import {
 	generateMetaDescription,
@@ -134,18 +134,25 @@ export const CreateIngredientModal = () => {
 
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
 
+	const { onValid } = useFilteredValues<FormData>();
 	const form = useRemixForm<FormData>({
 		resolver,
-		submitConfig: {
-			method: "post",
+		submitHandlers: {
+			onValid,
 		},
 	});
-	const { reset, handleSubmit, control } = form;
+	const {
+		reset,
+		handleSubmit,
+		control,
+		formState: { dirtyFields },
+	} = form;
 
 	return (
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isOpen={isOpen}
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
@@ -193,9 +200,15 @@ export const CreateIngredientModal = () => {
 							/>
 						)}
 					/>
-					<FormError error={actionData?.formError} />
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -211,10 +224,11 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const data = await parseFormData<FormData>(request.clone());
 
-	try {
-		const { name, note, subRecipeId, quantity } = data;
+	let success = true;
+	const { name, note, subRecipeId, quantity } = data;
 
-		await prisma.ingredient.create({
+	return await prisma.ingredient
+		.create({
 			data: {
 				...data,
 				...(await translatedContent({
@@ -241,15 +255,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 				recipeId,
 				userId: authData.id,
 			},
-		});
-	} catch (formError) {
-		return errorCatcher(request, formError);
-	}
-
-	return json({
-		success: true,
-		formError: undefined as string | undefined,
-	});
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default CreateIngredientModal;

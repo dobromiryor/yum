@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
@@ -121,6 +122,13 @@ const DeleteEquipmentModal = () => {
 					: "recipe.modal.delete.equipment.content",
 				{ name }
 			)}
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -147,15 +155,12 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 403 });
 	}
 
-	try {
-		await prisma.equipment.delete({ where: { id: equipmentId } });
-	} catch (error) {
-		console.error(error);
+	let success = true;
 
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+	return await prisma.equipment
+		.delete({ where: { id: equipmentId } })
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default DeleteEquipmentModal;

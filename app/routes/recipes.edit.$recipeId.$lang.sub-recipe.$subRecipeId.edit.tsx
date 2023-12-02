@@ -22,8 +22,10 @@ import {
 import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { TranslatedContentSchema } from "~/schemas/common";
 import { EditRecipeSubRecipeParamsSchema } from "~/schemas/params.schema";
@@ -127,27 +129,30 @@ const EditSubRecipeModal = () => {
 	const { name: n } = foundSubRecipe;
 	const name = TranslatedContentSchema.parse(n);
 
+	const { onValid } = useFilteredValues<FormData>({
+		submitOptions: { method: "PATCH" },
+	});
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
 			name: name?.[lang] ?? undefined,
 		},
-		submitConfig: {
-			method: "patch",
+		submitHandlers: {
+			onValid,
 		},
 	});
 
 	const {
 		reset,
 		handleSubmit,
-		formState: { isDirty },
+		formState: { dirtyFields },
 	} = form;
 
 	return (
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -172,6 +177,13 @@ const EditSubRecipeModal = () => {
 					/>
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -185,8 +197,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const data = await parseFormData<FormData>(request.clone());
 
-	try {
-		await prisma.subRecipe.update({
+	let success = true;
+
+	return await prisma.subRecipe
+		.update({
 			data: {
 				...(await translatedContent({
 					request,
@@ -198,14 +212,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 			where: {
 				id: subRecipeId,
 			},
-		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default EditSubRecipeModal;

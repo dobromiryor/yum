@@ -23,11 +23,13 @@ import {
 import { z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Multiselect } from "~/components/common/UI/Multiselect";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
@@ -131,13 +133,19 @@ export const CreateStepModal = () => {
 
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
 
+	const { onValid } = useFilteredValues<FormData>();
 	const form = useRemixForm<FormData>({
 		resolver,
-		submitConfig: {
-			method: "post",
+		submitHandlers: {
+			onValid,
 		},
 	});
-	const { reset, handleSubmit, control } = form;
+	const {
+		reset,
+		handleSubmit,
+		control,
+		formState: { dirtyFields },
+	} = form;
 
 	const invertedLang = getInvertedLang(lang);
 
@@ -197,6 +205,7 @@ export const CreateStepModal = () => {
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isOpen={isOpen}
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
@@ -310,6 +319,13 @@ export const CreateStepModal = () => {
 					/>
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -325,11 +341,11 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const data = await parseFormData<FormData>(request.clone());
 
-	try {
-		const { ingredients, equipment, subRecipes, subRecipeAction, ...rest } =
-			data;
+	let success = true;
+	const { ingredients, equipment, subRecipes, subRecipeAction, ...rest } = data;
 
-		await prisma.step.create({
+	return await prisma.step
+		.create({
 			data: {
 				...rest,
 				...(await translatedContent({
@@ -363,14 +379,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 				recipeId,
 				userId: authData.id,
 			},
-		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default CreateStepModal;

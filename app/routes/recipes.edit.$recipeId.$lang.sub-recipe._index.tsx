@@ -16,8 +16,10 @@ import {
 import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { SubRecipeDTOSchema } from "~/schemas/sub-recipe.schema";
@@ -92,18 +94,24 @@ const CreateSubRecipeModal = () => {
 
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
 
+	const { onValid } = useFilteredValues<FormData>();
 	const form = useRemixForm<FormData>({
 		resolver,
-		submitConfig: {
-			method: "post",
+		submitHandlers: {
+			onValid,
 		},
 	});
-	const { reset, handleSubmit } = form;
+	const {
+		reset,
+		handleSubmit,
+		formState: { dirtyFields },
+	} = form;
 
 	return (
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isOpen={isOpen}
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
@@ -125,6 +133,13 @@ const CreateSubRecipeModal = () => {
 					/>
 				</Form>
 			</RemixFormProvider>
+			<FormError
+				error={
+					typeof actionData?.success === "boolean" && !actionData?.success
+						? t("error.somethingWentWrong")
+						: undefined
+				}
+			/>
 		</Modal>
 	);
 };
@@ -140,8 +155,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const data = await parseFormData<FormData>(request.clone());
 
-	try {
-		await prisma.subRecipe.create({
+	let success = true;
+
+	return await prisma.subRecipe
+		.create({
 			data: {
 				...data,
 				...(await translatedContent({
@@ -153,14 +170,9 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 				recipeId,
 				userId: authData.id,
 			},
-		});
-	} catch (error) {
-		console.error(error);
-
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+		})
+		.catch(() => (success = false))
+		.then(() => json({ success }));
 };
 
 export default CreateSubRecipeModal;

@@ -19,15 +19,17 @@ import { useTranslation } from "react-i18next";
 import {
 	RemixFormProvider,
 	parseFormData,
-	useRemixForm
+	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
 import { Modal } from "~/components/common/Modal";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
+import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { DifficultySchema, TranslatedContentSchema } from "~/schemas/common";
 import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
@@ -151,6 +153,9 @@ export const EditRecipeDetailsModal = () => {
 	const parsedDescription = TranslatedContentSchema.parse(description);
 	const invertedLang = getInvertedLang(lang);
 
+	const { onValid } = useFilteredValues<FormData>({
+		submitOptions: { method: "PATCH" },
+	});
 	const form = useRemixForm<FormData>({
 		resolver,
 		defaultValues: {
@@ -159,22 +164,22 @@ export const EditRecipeDetailsModal = () => {
 			difficulty: difficulty,
 			servings: servings ?? undefined,
 		},
-		submitConfig: {
-			method: "patch",
+		submitHandlers: {
+			onValid,
 		},
 	});
 	const {
 		reset,
 		handleSubmit,
 		control,
-		formState: { isDirty },
+		formState: { dirtyFields },
 	} = form;
 
 	return (
 		<Modal
 			CTAFn={handleSubmit}
 			dismissFn={reset}
-			isCTADisabled={!isDirty}
+			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
 			isOpen={isOpen}
 			prevPath={prevPath}
@@ -226,6 +231,13 @@ export const EditRecipeDetailsModal = () => {
 						name="servings"
 						type="number"
 					/>
+					<FormError
+						error={
+							typeof actionData?.success === "boolean" && !actionData?.success
+								? t("error.somethingWentWrong")
+								: undefined
+						}
+					/>
 				</Form>
 			</RemixFormProvider>
 		</Modal>
@@ -242,9 +254,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const { recipeId, lang } = EditRecipeParamsSchema.parse(p);
 
 	const data = await parseFormData<FormData>(request.clone());
+	let success = true;
 
-	try {
-		await prisma.recipe.update({
+	await prisma.recipe
+		.update({
 			data: {
 				...data,
 				...(await translatedContent({
@@ -263,14 +276,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 			where: {
 				id: recipeId,
 			},
-		});
-	} catch (error) {
-		console.error(error);
+		})
+		.catch(() => (success = false));
 
-		return json({ success: false, error });
-	}
-
-	return json({ success: true });
+	return json({ success });
 };
 
 export default EditRecipeDetailsModal;
