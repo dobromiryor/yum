@@ -35,3 +35,7 @@ export const EditRecipeStepParamsSchema = EditRecipeParamsSchema.extend({
 export const UserRecipesParamsSchema = z.object({
 	userId: NonEmptyStringSchema,
 });
+
+export const AdminDashboardDeleteUserParamsSchema = z.object({
+	userId: NonEmptyStringSchema,
+});

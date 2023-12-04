@@ -13,7 +13,7 @@ export const getPaginationArr = (page: number, totalPages: number) => {
 
 	// 1, 2, 3
 	if (pageItems >= totalPages) {
-		return range(0, totalPages);
+		return range(0, totalPages - 1);
 	}
 
 	const leftSiblingIndex = Math.max(page - 1 - SIBLING_SIZE, 1);

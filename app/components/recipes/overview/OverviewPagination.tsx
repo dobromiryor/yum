@@ -20,7 +20,7 @@ export const OverviewPagination = ({
 		return null;
 	}
 
-	const paginationArr = getPaginationArr(page, count / limit);
+	const paginationArr = getPaginationArr(page, Math.ceil(count / limit));
 
 	return (
 		<div className="flex justify-center items-center">

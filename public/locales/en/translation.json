@@ -30,7 +30,10 @@
 			"uploadPreview": "Upload preview",
 			"uploadNote": "This action might take a few minutes depending on file size and your internet connection. Please be patient."
 		},
-		"cookingMode": "Cooking mode"
+		"cookingMode": "Cooking mode",
+		"noData": "No data.",
+		"total": "Total",
+		"limit": "Limit"
 	},
 	"email": {
 		"changeEmail": {
@@ -74,7 +77,8 @@
 	"nav": {
 		"authMenu": {
 			"logout": "Log out",
-			"settings": "Settings"
+			"settings": "Settings",
+			"adminDashboard": "Admin dashboard"
 		},
 		"home": "Home",
 		"language": {
@@ -346,7 +350,6 @@
 		"note": {
 			"EMAIL_UPDATED": "Your email address has been successfully updated.",
 			"TOKEN_EXPIRED": "Change email token expired. Please try again.",
-			"test": "",
 			"TOKEN_NOT_FOUND": "Change email token not found. Please try again.",
 			"USER_NOT_UPDATED": "User update failed. Please try again.",
 			"USER_VERIFIED": "Your account has been verified.",
@@ -419,6 +422,32 @@
 		"500": {
 			"title": "Whoops! Looks like someone set the timer wrong.",
 			"refreshCTA": "Refresh"
+		}
+	},
+	"admin": {
+		"nav": {
+			"users": "Users"
+		},
+		"table": {
+			"user": {
+				"id": "ID",
+				"firstName": "First name",
+				"lastName": "Last name",
+				"username": "Username",
+				"avatar": "Avatar",
+				"email": "Email",
+				"isVerified": "Verified",
+				"actions": "Actions",
+				"recipes": "Recipes",
+				"user": "User",
+				"createdAt": "Created at"
+			}
+		},
+		"modal": {
+			"delete": {
+				"title": "Delete account",
+				"content": "Are you sure you want to delete {{name}}'s account? Everything related to it will be permanently deleted."
+			}
 		}
 	}
 }

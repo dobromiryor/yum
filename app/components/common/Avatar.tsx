@@ -6,14 +6,13 @@ import { useTranslation } from "react-i18next";
 
 import { Image } from "~/components/common/UI/Image";
 import { AvatarColor, AvatarShade } from "~/enums/avatar.enum";
-import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 
 interface AvatarProps {
 	layout?: "fixed" | "fill";
 	size?: "initial" | "20" | "32";
 	variant?: "square" | "circle";
-	user?: SerializeFrom<User>;
+	user: SerializeFrom<User>;
 	className?: string;
 }
 
@@ -24,10 +23,9 @@ export const Avatar = ({
 	user,
 	className,
 }: AvatarProps) => {
-	const { authData } = useTypedRouteLoaderData("root");
 	const { t } = useTranslation();
 
-	const p = user?.photo ?? authData?.photo;
+	const p = user?.photo;
 	const photo =
 		CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(p);
 
@@ -122,18 +120,15 @@ export const Avatar = ({
 				sizeStyles[size],
 				layoutStyles[layout],
 				variantStyles[variant],
-				getAvatarColors(user ?? authData).background,
+				getAvatarColors(user).background,
 				className
 			)}
 		>
 			<span
 				aria-hidden
-				className={clsx(
-					"typography-bold",
-					getAvatarColors(user ?? authData).text
-				)}
+				className={clsx("typography-bold", getAvatarColors(user).text)}
 			>
-				{getInitials(user ?? authData)}
+				{getInitials(user)}
 			</span>
 		</div>
 	);
