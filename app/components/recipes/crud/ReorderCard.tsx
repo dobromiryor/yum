@@ -27,11 +27,7 @@ export const ReorderCard = <T extends object>({
 }: CardProps<T>) => {
 	const controls = useDragControls();
 
-	// TODO: Check if fixed
-	// Inconsistent ordering behaviour with 10.16.4 - downgrade to 10.9.4
-	// https://github.com/framer/motion/issues/2347
-	// https://github.com/framer/motion/issues/2351
-
+	/* ### */
 	// TODO: Check if fixed
 	// Reorder touch trigger fix
 	// https://github.com/framer/motion/issues/1597
