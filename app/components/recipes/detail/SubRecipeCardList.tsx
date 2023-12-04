@@ -34,6 +34,10 @@ export const SubRecipeCardList = ({
 			{subRecipes.map((subRecipe, index) => {
 				const { id, name: n, ingredients } = subRecipe;
 
+				if (ingredients.length === 0) {
+					return null;
+				}
+
 				const name = TranslatedContentSchema.parse(n);
 
 				return (
