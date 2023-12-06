@@ -31,7 +31,7 @@ export const Avatar = ({
 
 	const sizeStyles = {
 		initial: "",
-		"20": "w-5 h-5",
+		"20": "w-5 h-5 text-xs",
 		"32": "w-8 h-8",
 	};
 
@@ -116,7 +116,7 @@ export const Avatar = ({
 		<div
 			aria-label={t("settings.field.avatar")}
 			className={clsx(
-				"flex justify-center items-center shadow-md select-none",
+				"flex justify-center items-center shadow-md select-none overflow-hidden",
 				sizeStyles[size],
 				layoutStyles[layout],
 				variantStyles[variant],
