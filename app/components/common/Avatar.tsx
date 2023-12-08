@@ -103,7 +103,7 @@ export const Avatar = ({
 	return photo ? (
 		<Image
 			className={clsx(
-				"shadow-md overflow-hidden select-none",
+				"overflow-hidden select-none",
 				sizeStyles[size],
 				layoutStyles[layout],
 				variantStyles[variant],
@@ -116,7 +116,7 @@ export const Avatar = ({
 		<div
 			aria-label={t("settings.field.avatar")}
 			className={clsx(
-				"flex justify-center items-center shadow-md select-none overflow-hidden",
+				"flex justify-center items-center select-none overflow-hidden",
 				sizeStyles[size],
 				layoutStyles[layout],
 				variantStyles[variant],

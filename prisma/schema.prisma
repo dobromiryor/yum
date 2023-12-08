@@ -57,7 +57,7 @@ model Recipe {
   difficulty     Difficulty
   servings       Int             @db.SmallInt
   photo          Json? // Cloudinary UploadApiResponse
-  categories     String[]
+  categories     Category[]
   tags           String[]
   languages      String[]
   status         Status          @default(UNPUBLISHED)
@@ -66,6 +66,18 @@ model Recipe {
   commentThreads CommentThread[]
   subRecipes     SubRecipe[]
   equipment      Equipment[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        Json // { [lang]: string }
+  description Json? // { [lang]: string }
+  slug        String   @unique
+  status      Status   @default(UNPUBLISHED)
+  recipes     Recipe[]
+  visitCount  Int      @default(0)
 }
 
 model Ingredient {

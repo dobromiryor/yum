@@ -3,6 +3,10 @@ import { redirect, type LoaderFunctionArgs } from "@remix-run/node";
 
 import { auth } from "~/utils/auth.server";
 
+export const sitemap = () => ({
+	exclude: true,
+});
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request);
 

@@ -1,3 +1,4 @@
+import { useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -84,6 +85,7 @@ export const Tooltip = () => {
 	);
 
 	const [{ isShowing, rect, content }, { setIsShowing }] = useTooltip();
+	const { location, state } = useNavigation();
 
 	const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -145,21 +147,25 @@ export const Tooltip = () => {
 		};
 	}, [rect]);
 
+	/* close on resize/scroll */
 	useEffect(() => {
 		const hideTooltip = () => setIsShowing(false);
 
+		window.addEventListener("resize", hideTooltip);
 		window.addEventListener("scroll", hideTooltip);
 
-		return () => window.removeEventListener("scroll", hideTooltip);
+		return () => {
+			window.removeEventListener("resize", hideTooltip);
+			window.removeEventListener("scroll", hideTooltip);
+		};
 	}, [setIsShowing]);
 
+	/* close on location/state change */
 	useEffect(() => {
-		const hideTooltip = () => setIsShowing(false);
-
-		window.addEventListener("hashchange", hideTooltip);
-
-		return () => window.removeEventListener("hashchange", hideTooltip);
-	}, [setIsShowing]);
+		if (location || state !== "idle") {
+			setIsShowing(false);
+		}
+	}, [location, setIsShowing, state]);
 
 	return (
 		<AnimatePresence initial={false}>

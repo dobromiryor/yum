@@ -6,6 +6,7 @@ import {
 } from "@remix-run/node";
 import { Link, Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
 import clsx from "clsx";
+import isEqual from "lodash.isequal";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -25,6 +26,7 @@ import {
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+import { sessionStorage } from "~/utils/session.server";
 
 export const sitemap = () => ({
 	exclude: true,
@@ -69,20 +71,47 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		(!foundUser.firstName || !foundUser.lastName) &&
 		!foundUser.username
 	) {
-		await prisma.user.update({
+		updatedUser = await prisma.user.update({
 			data: { prefersDisplayName: DisplayName.email },
 			where: { id: authData.id },
 		});
 	}
 
-	return json({
-		foundUser: updatedUser ?? foundUser,
-		meta: {
-			title,
-			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/settings`,
+	const session = await sessionStorage.getSession(
+		request.clone().headers.get("Cookie")
+	);
+
+	const { createdAt, updatedAt, lastLogin, ...restAuthData } = authData;
+	const {
+		createdAt: _cA,
+		updatedAt: _uA,
+		lastLogin: _lL,
+		...restUserData
+	} = updatedUser ?? foundUser;
+
+	const isAuthDataStale = !isEqual(restAuthData, restUserData);
+
+	if (isAuthDataStale) {
+		session.set(auth.sessionKey, updatedUser ?? foundUser);
+	}
+
+	return json(
+		{
+			foundUser: updatedUser ?? foundUser,
+			meta: {
+				title,
+				description,
+				url: `${PARSED_ENV.DOMAIN_URL}/settings`,
+			},
 		},
-	});
+		isAuthDataStale
+			? {
+					headers: {
+						"Set-Cookie": await sessionStorage.commitSession(session),
+					},
+			  }
+			: {}
+	);
 };
 
 export default function SettingsRoute() {

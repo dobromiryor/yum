@@ -12,12 +12,12 @@ export const useFilteredValues = <T extends FieldValues>(
 	const submit = useSubmit();
 
 	const onValid = (data: T) => {
-		const filtered = Object.fromEntries(
+		const noUndefined = Object.fromEntries(
 			Object.entries(data).filter(([, value]) => typeof value !== "undefined")
 		);
 
 		submit(
-			createFormData<Partial<FormData>>(filtered),
+			createFormData<Partial<FormData>>(noUndefined),
 			props?.submitOptions ?? { method: "POST" }
 		);
 	};

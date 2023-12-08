@@ -14,12 +14,14 @@ import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
 import {
 	EditRecipeParamsSchema,
 	RecipeParamsSchema,
 } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import { deleteImage } from "~/utils/cloudinary.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
@@ -80,7 +82,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 export const DeleteRecipeModal = () => {
 	const { authData, foundRecipe } = useLoaderData<typeof loader>();
-	const { id, name: n, userId } = foundRecipe;
+	const { id, name: n, userId, photo: p } = foundRecipe;
 
 	const actionData = useActionData<typeof action>();
 
@@ -104,9 +106,16 @@ export const DeleteRecipeModal = () => {
 			? parsedName.substring(0, 47) + "..."
 			: parsedName;
 
+	const photo = p && CloudinaryUploadApiResponseWithBlurHashSchema.parse(p);
+
 	return (
 		<Modal
-			CTAFn={() => submit({ id, userId }, { method: "delete" })}
+			CTAFn={() =>
+				submit(
+					{ id, userId, ...(photo && { photo: photo.public_id }) },
+					{ method: "delete" }
+				)
+			}
 			CTALabel={t("common.confirm")}
 			CTAVariant="danger"
 			isOpen={isOpen}
@@ -143,6 +152,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const id = formData.get("id")?.toString();
 	const userId = formData.get("userId")?.toString();
+	const photo = formData.get("photo")?.toString();
 
 	if (
 		id !== recipeId ||
@@ -153,9 +163,10 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	let success = true;
 
-	await prisma.recipe
-		.delete({ where: { id: recipeId } })
-		.catch(() => (success = false));
+	await Promise.all([
+		photo && (await deleteImage(photo)),
+		await prisma.recipe.delete({ where: { id: recipeId } }),
+	]).catch(() => (success = false));
 
 	return json({ success });
 };

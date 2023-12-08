@@ -13,6 +13,7 @@
 		"edit": "Промени",
 		"editSomething": "$t(common.edit) {{something}}",
 		"noOptionsAvailable": "Няма налични опции",
+		"open": "Отвори",
 		"reorder": "Пренареди",
 		"save": "Съхрани",
 		"submit": "Изпрати",
@@ -78,7 +79,8 @@
 		"authMenu": {
 			"logout": "Изход",
 			"settings": "Настройки",
-			"adminDashboard": "Администраторско табло"
+			"adminDashboard": "Администраторско табло",
+			"myRecipes": "Моите рецепти"
 		},
 		"home": "Начало",
 		"language": {
@@ -89,9 +91,9 @@
 			"label": "Език"
 		},
 		"login": "Вход",
-		"myRecipes": "Моите рецепти",
 		"newRecipe": "Добави",
 		"recipes": "Рецепти",
+		"categories": "Категории",
 		"theme": {
 			"dark": "Тъмна тема",
 			"label": "Тема",
@@ -402,6 +404,14 @@
 		},
 		"forbidden": {
 			"title": "Забранен"
+		},
+		"admin": {
+			"users": {
+				"title": "Потребители"
+			},
+			"categories": {
+				"title": "Категории"
+			}
 		}
 	},
 	"errorPages": {
@@ -426,10 +436,11 @@
 	},
 	"admin": {
 		"nav": {
-			"users": "Потребители"
+			"users": "Потребители",
+			"categories": "Категории"
 		},
-		"table": {
-			"user": {
+		"user": {
+			"table": {
 				"id": "ИН",
 				"firstName": "Име",
 				"lastName": "Фамилия",
@@ -440,14 +451,48 @@
 				"actions": "Действия",
 				"recipes": "Рецепти",
 				"user": "Потребител",
-				"createdAt": "Създаден на"
+				"createdAt": "Създаден на",
+				"lastLogin": "Последен вход"
+			},
+			"modal": {
+				"delete": {
+					"title": "Изтрий акаунта",
+					"content": "Сигурни ли сте, че искате да изтриете акаунта на {{name}}? Всичко свързано с него ще бъде изтрито перманентно."
+				}
 			}
-		}
-	},
-	"modal": {
-		"delete": {
-			"title": "Изтрий акаунта",
-			"content": "Сигурни ли сте, че искате да изтриете акаунта на {{name}}? Всичко свързано с него ще бъде изтрито перманентно."
+		},
+		"category": {
+			"table": {
+				"slug": "Псевдоним",
+				"createdAt": "Създадена на",
+				"updatedAt": "Обновена на",
+				"name": "Име",
+				"description": "Описание",
+				"status": "Статус",
+				"visitCount": "Посетено",
+				"recipesCount": "Рецепти",
+				"category_one": "Категория",
+				"category_many": "Категории",
+				"actions": "Действия",
+				"published": "Публикувано",
+				"unpublished": "Непубликувано"
+			},
+			"modal": {
+				"create": {
+					"title": "Добави нова категория"
+				},
+				"delete": {
+					"title": "Изтрий категория",
+					"content": "Сигурни ли сте, че искате да изтриете  \"{{name}}\"?"
+				},
+				"update": {
+					"title": "Промени категория"
+				}
+			},
+			"error": {
+				"descriptionRequired": "Моля добавете описание на всички езици, или изтрийте описанието.",
+				"slugExists": "Псевдонима вече съществува."
+			}
 		}
 	}
 }

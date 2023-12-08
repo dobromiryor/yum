@@ -26,7 +26,6 @@ import {
 } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { deleteImage } from "~/utils/cloudinary.server";
-import { errorCatcher } from "~/utils/helpers/error-catcher.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
@@ -129,8 +128,6 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const t = await i18next.getFixedT(request);
-
 	const { recipeId } = RecipeParamsSchema.parse(p);
 	const foundRecipe = await prisma.recipe.findUnique({
 		where: { id: recipeId },
@@ -144,24 +141,19 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 403 });
 	}
 
-	const clonedRequest = request.clone();
 	const photo = z.string().parse((await request.formData()).get("photo"));
-
-	const isImageDeleted = await deleteImage(photo);
-
-	if (!isImageDeleted) {
-		return errorCatcher(clonedRequest, t("error.somethingWentWrong"));
-	}
 
 	let success = true;
 
-	return await prisma.recipe
-		.update({
+	return await Promise.all([
+		await deleteImage(photo),
+		await prisma.recipe.update({
 			data: { photo: Prisma.JsonNull },
 			where: {
 				id: recipeId,
 			},
-		})
+		}),
+	])
 		.catch(() => (success = false))
 		.then(() => json({ success }));
 };

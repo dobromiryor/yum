@@ -19,7 +19,7 @@ type ButtonSize = "small" | "medium" | "large" | "smallSquare" | "mediumSquare";
 
 type ButtonRounded = "full" | "default" | "large";
 
-interface ButtonProps
+export interface ButtonProps
 	extends DetailedHTMLProps<
 		ButtonHTMLAttributes<HTMLButtonElement>,
 		HTMLButtonElement
@@ -29,6 +29,7 @@ interface ButtonProps
 	rounded?: ButtonRounded;
 	isDisabled?: boolean;
 	isLoading?: boolean;
+	align?: "start" | "center" | "end";
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -42,6 +43,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 			rounded = "default",
 			isDisabled = false,
 			isLoading = false,
+			align = "center",
 			...rest
 		} = props;
 
@@ -70,6 +72,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 			large: "px-2 py-1 rounded-lg",
 		};
 
+		const alignStyles = {
+			start: "justify-start",
+			center: "justify-center",
+			end: "justify-end",
+		};
+
 		return (
 			<button
 				ref={ref}
@@ -77,7 +85,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 					variantStyles[variant],
 					sizeStyles[size],
 					roundedStyles[rounded],
-					"flex justify-center items-center select-none transition-all",
+					alignStyles[align],
+					"flex items-center select-none transition-all",
 					"active:brightness-75",
 					"hover:brightness-90",
 					isDisabled

@@ -71,7 +71,7 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 	}
 
 	if (description) {
-		metaArr.push({ description });
+		metaArr.push({ name: "description", content: description });
 		metaArr.push({ "og:description": description });
 		metaArr.push({ "twitter:description": description });
 	}

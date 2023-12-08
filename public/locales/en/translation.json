@@ -13,6 +13,7 @@
 		"edit": "Edit",
 		"editSomething": "$t(common.edit) {{something}}",
 		"noOptionsAvailable": "No options available",
+		"open": "Open",
 		"reorder": "Reorder",
 		"save": "Save",
 		"submit": "Submit",
@@ -78,7 +79,8 @@
 		"authMenu": {
 			"logout": "Log out",
 			"settings": "Settings",
-			"adminDashboard": "Admin dashboard"
+			"adminDashboard": "Admin dashboard",
+			"myRecipes": "My recipes"
 		},
 		"home": "Home",
 		"language": {
@@ -89,9 +91,9 @@
 			"label": "Language"
 		},
 		"login": "Log in",
-		"myRecipes": "My recipes",
 		"newRecipe": "Add",
 		"recipes": "Recipes",
+		"categories": "Categories",
 		"theme": {
 			"dark": "Dark theme",
 			"label": "Theme",
@@ -402,6 +404,14 @@
 		},
 		"forbidden": {
 			"title": "Forbidden"
+		},
+		"admin": {
+			"users": {
+				"title": "Users"
+			},
+			"categories": {
+				"title": "Categories"
+			}
 		}
 	},
 	"errorPages": {
@@ -426,10 +436,11 @@
 	},
 	"admin": {
 		"nav": {
-			"users": "Users"
+			"users": "Users",
+			"categories": "Categories"
 		},
-		"table": {
-			"user": {
+		"user": {
+			"table": {
 				"id": "ID",
 				"firstName": "First name",
 				"lastName": "Last name",
@@ -440,13 +451,47 @@
 				"actions": "Actions",
 				"recipes": "Recipes",
 				"user": "User",
-				"createdAt": "Created at"
+				"createdAt": "Created at",
+				"lastLogin": "Last login"
+			},
+			"modal": {
+				"delete": {
+					"title": "Delete account",
+					"content": "Are you sure you want to delete {{name}}'s account? Everything related to it will be permanently deleted."
+				}
 			}
 		},
-		"modal": {
-			"delete": {
-				"title": "Delete account",
-				"content": "Are you sure you want to delete {{name}}'s account? Everything related to it will be permanently deleted."
+		"category": {
+			"table": {
+				"slug": "Slug",
+				"createdAt": "Created at",
+				"updatedAt": "Updated at",
+				"name": "Name",
+				"description": "Description",
+				"status": "Status",
+				"visitCount": "Visited",
+				"recipesCount": "Recipes",
+				"category_one": "Category",
+				"category_many": "Categories",
+				"actions": "Actions",
+				"published": "Published",
+				"unpublished": "Unpublished"
+			},
+			"modal": {
+				"create": {
+					"title": "Add new category"
+				},
+				"delete": {
+					"title": "Delete category",
+					"content": "Are you sure you want to delete \"{{name}}\"?"
+				},
+				"update": {
+					"title": "Update category"
+				}
+			},
+			"error": {
+				"descriptionRequired": "Please add a description in all languages, or delete the description.",
+				"slugExists": "Slug already exists."
 			}
 		}
 	}

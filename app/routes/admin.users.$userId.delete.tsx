@@ -19,8 +19,10 @@ import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { AdminDashboardDeleteUserParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
+import { deleteImage } from "~/utils/cloudinary.server";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
 import {
 	generateMetaDescription,
@@ -100,9 +102,11 @@ export const DeleteUserModal = () => {
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("admin.modal.delete.title")}
+			title={t("admin.user.modal.delete.title")}
 		>
-			{t("admin.modal.delete.content", { name: getDisplayName(foundUser) })}
+			{t("admin.user.modal.delete.content", {
+				name: getDisplayName(foundUser),
+			})}
 			<FormError
 				error={
 					typeof actionData?.success === "boolean" && !actionData?.success
@@ -135,10 +139,16 @@ export const action = async ({
 	const formData = await request.formData();
 	const id = formData.get("id")?.toString();
 
+	const photo =
+		authData.photo &&
+		CloudinaryUploadApiResponseWithBlurHashSchema.parse(authData.photo);
+
 	let success = true;
 
-	return await prisma.user
-		.delete({ where: { id } })
+	return await Promise.all([
+		photo && (await deleteImage(photo.public_id)),
+		await prisma.user.delete({ where: { id } }),
+	])
 		.catch(() => {
 			success = false;
 

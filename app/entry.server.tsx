@@ -3,7 +3,7 @@ import {
 	type EntryContext,
 } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
-import { createInstance } from "i18next";
+import { createInstance, type i18n as I18N } from "i18next";
 import Backend from "i18next-fs-backend";
 import isbot from "isbot";
 import { StrictMode } from "react";
@@ -71,7 +71,8 @@ export default async function handleRequest(
 
 		const { pipe, abort } = renderToPipeableStream(
 			<StrictMode>
-				<I18nextProvider i18n={instance}>
+				{/* https://github.com/i18next/react-i18next/issues/1693 */}
+				<I18nextProvider i18n={instance as I18N}>
 					<RemixServer context={remixContext} url={request.url} />
 				</I18nextProvider>
 			</StrictMode>,

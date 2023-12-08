@@ -29,13 +29,6 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 					<span className="typography-bold">{getDisplayName(authData)}</span>
 					<span className="text-sm typography-light">{authData.email}</span>
 				</div>,
-				<NavigationLink
-					key="Settings__Link"
-					buttonClassName="flex-1"
-					to="/settings"
-				>
-					{t("nav.authMenu.settings")}
-				</NavigationLink>,
 				...(authData.role === Role.ADMIN
 					? [
 							<NavigationLink
@@ -47,6 +40,24 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 							</NavigationLink>,
 					  ]
 					: []),
+				...(authData?.isVerified
+					? [
+							<NavigationLink
+								key="My_Recipes_Link"
+								buttonClassName="flex-1"
+								to={`/users/${authData?.id}`}
+							>
+								{t("nav.authMenu.myRecipes")}
+							</NavigationLink>,
+					  ]
+					: []),
+				<NavigationLink
+					key="Settings__Link"
+					buttonClassName="flex-1"
+					to="/settings"
+				>
+					{t("nav.authMenu.settings")}
+				</NavigationLink>,
 				<NavigationLink
 					key="Logout__Link"
 					buttonClassName="flex-1"

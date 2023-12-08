@@ -13,15 +13,16 @@ import { NavMenuButton } from "~/components/header/NavMenuButton";
 import { NavigationLink } from "~/components/header/NavigationLink";
 import { SearchInput } from "~/components/header/SearchInput";
 import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
+import { CategoryMenu } from "~/routes/resources.categories";
 import { Theme, useTheme } from "~/utils/providers/theme-provider";
 
 export const Header = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
-	const { authData, ENV } = useTypedRouteLoaderData("root");
+	const [theme] = useTheme();
 	const { t } = useTranslation();
 	const { location } = useNavigation();
-	const [theme] = useTheme();
+	const { authData, ENV } = useTypedRouteLoaderData("root");
 
 	useEffect(() => {
 		if (isOpen) {
@@ -53,7 +54,9 @@ export const Header = () => {
 								aria-hidden
 								alt=""
 								className="max-h-8"
+								height={31.98}
 								src={theme === Theme.LIGHT ? logo_light : logo_dark}
+								width={68.81}
 							/>
 							<span className="sr-only">{ENV.APP_NAME}</span>
 						</NavLink>
@@ -61,11 +64,9 @@ export const Header = () => {
 							<NavigationLink end to={"/recipes"}>
 								{t("nav.recipes")}
 							</NavigationLink>
-							{authData?.isVerified && (
-								<NavigationLink to={`/users/${authData?.id}`}>
-									{t("nav.myRecipes")}
-								</NavigationLink>
-							)}
+
+							<CategoryMenu />
+
 							{authData?.isVerified && (
 								<NavigationLink to={`/recipes/new`}>
 									{t("nav.newRecipe")}

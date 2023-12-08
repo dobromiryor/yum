@@ -9,7 +9,7 @@
 	"scripts": {
 		"build": "remix build",
 		"deploy": "fly deploy",
-		"dev": "remix dev",
+		"dev": "remix dev --manual",
 		"start": "remix-serve ./build/index.js",
 		"typecheck": "tsc"
 	},

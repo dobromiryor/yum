@@ -1,6 +1,6 @@
+import { Role } from "@prisma/client";
 import {
 	json,
-	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
@@ -19,9 +19,12 @@ import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
-import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
+import {
+	LanguageSchema,
+	NonNullTranslatedContentSchema,
+} from "~/schemas/common";
+import { AdminDashboardCategoryParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
-import { deleteImage } from "~/utils/cloudinary.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
@@ -37,29 +40,31 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request.clone());
 
 	if (!authData) {
 		throw new Response(null, { status: 401 });
 	}
 
-	const foundUser = await prisma.user.findFirst({
-		where: { id: authData.id },
-	});
-
-	if (!foundUser) {
-		throw new Response(null, { status: 404 });
+	if (authData.role !== Role.ADMIN) {
+		throw new Response(null, { status: 403 });
 	}
 
-	if (foundUser.id !== authData.id) {
-		throw new Response(null, { status: 403 });
+	const { categoryId } = AdminDashboardCategoryParamsSchema.parse(params);
+
+	const foundCategory = await prisma.category.findFirst({
+		where: { id: categoryId },
+	});
+
+	if (!foundCategory) {
+		throw new Response(null, { status: 404 });
 	}
 
 	const t = await i18next.getFixedT(request);
 	const title = generateMetaTitle({
 		title: t("common.deleteSomething", {
-			something: `${t("settings.field.account")}`.toLowerCase(),
+			something: `${t("admin.category.table.category_one")}`.toLowerCase(),
 		}),
 		postfix: PARSED_ENV.APP_NAME,
 	});
@@ -68,41 +73,47 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	return json({
-		authData,
+		foundCategory,
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/settings/delete`,
+			url: `${PARSED_ENV.DOMAIN_URL}/admin/categories/${categoryId}/delete`,
 		},
 	});
 };
 
-export const DeleteUserModal = () => {
+export const DeleteCategoryModal = () => {
 	const [isOpen, setIsOpen] = useState(true);
 
-	const {
-		authData: { id },
-	} = useLoaderData<typeof loader>();
+	const { foundCategory } = useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 
 	const submit = useSubmit();
-	const { t } = useTranslation();
+	const {
+		t,
+		i18n: { language },
+	} = useTranslation();
 	const { pathname } = useLocation();
 
-	const prevPath = pathname.split("/").slice(0, -1).join("/");
+	const prevPath = pathname.split("/").slice(0, -2).join("/");
+
+	const name = NonNullTranslatedContentSchema.parse(foundCategory.name);
+	const lang = LanguageSchema.parse(language);
 
 	return (
 		<Modal
-			CTAFn={() => submit({ id }, { method: "delete" })}
+			CTAFn={() => submit({ id: foundCategory.id }, { method: "delete" })}
 			CTALabel={t("common.confirm")}
 			CTAVariant="danger"
 			isOpen={isOpen}
 			prevPath={prevPath}
 			setIsOpen={setIsOpen}
 			success={actionData?.success}
-			title={t("settings.modal.delete.title")}
+			title={t("admin.category.modal.delete.title")}
 		>
-			{t("settings.modal.delete.content")}
+			{t("admin.category.modal.delete.content", {
+				name: name[lang],
+			})}
 			<FormError
 				error={
 					typeof actionData?.success === "boolean" && !actionData?.success
@@ -128,23 +139,17 @@ export const action = async ({
 		throw new Response(null, { status: 401 });
 	}
 
-	const formData = await request.formData();
-	const id = formData.get("id")?.toString();
-
-	if (authData.id !== id) {
+	if (authData.role !== Role.ADMIN) {
 		throw new Response(null, { status: 403 });
 	}
 
-	const photo =
-		authData.photo &&
-		CloudinaryUploadApiResponseWithBlurHashSchema.parse(authData.photo);
+	const formData = await request.formData();
+	const id = formData.get("id")?.toString();
 
 	let success = true;
 
-	return await Promise.all([
-		photo && (await deleteImage(photo.public_id)),
-		await prisma.user.delete({ where: { id } }),
-	])
+	return await prisma.category
+		.delete({ where: { id } })
 		.catch(() => {
 			success = false;
 
@@ -152,9 +157,9 @@ export const action = async ({
 		})
 		.then(() => {
 			if (success) {
-				return redirect("/logout");
+				return json({ success });
 			}
 		});
 };
 
-export default DeleteUserModal;
+export default DeleteCategoryModal;

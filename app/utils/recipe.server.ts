@@ -28,6 +28,12 @@ interface UnpublishedRecipesCountProps {
 	userId: string;
 }
 
+interface RecipesCategoryOverviewProps {
+	pagination?: z.infer<typeof PaginationSchema>;
+	request: Request;
+	slug: string;
+}
+
 interface ComputeTimesProps<T> {
 	recipe: T;
 }
@@ -173,6 +179,7 @@ export const recipeDetails = async ({
 					},
 				},
 			},
+			categories: true,
 		},
 	});
 
@@ -291,4 +298,69 @@ export const unpublishedRecipesCount = async ({
 			userId,
 		},
 	});
+};
+
+export const recipesCategoryOverview = async ({
+	pagination = { page: PAGE_FALLBACK, limit: LIMIT_FALLBACK },
+	request,
+	slug,
+}: RecipesCategoryOverviewProps) => {
+	const locale = LanguageSchema.parse(await i18next.getLocale(request.clone()));
+
+	const where = {
+		AND: [
+			{
+				status: Status.PUBLISHED,
+			},
+			{
+				...(locale && {
+					languages: {
+						has: locale,
+					},
+				}),
+			},
+			{
+				categories: {
+					some: { slug },
+				},
+			},
+		],
+	};
+
+	const count = await prisma.recipe.count({ where });
+
+	if (count <= 0) {
+		return {
+			items: [],
+			pagination: { page: PAGE_FALLBACK, limit: LIMIT_FALLBACK, count: 0 },
+		};
+	}
+
+	const { page, limit } = await isPageGreaterThanPageCount(
+		pagination,
+		count,
+		request
+	);
+
+	const foundRecipes = await prisma.recipe.findMany({
+		where,
+		include: {
+			steps: {
+				orderBy: {
+					position: "asc",
+				},
+			},
+		},
+		skip: (page - 1) * limit,
+		take: limit,
+	});
+
+	return {
+		items: foundRecipes.map((recipe) => computeTimes({ recipe })),
+		pagination: {
+			page,
+			limit,
+			count,
+		},
+	};
 };

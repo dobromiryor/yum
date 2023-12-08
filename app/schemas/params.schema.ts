@@ -10,6 +10,10 @@ export const RecipeParamsSchema = z.object({
 	recipeId: NonEmptyStringSchema,
 });
 
+export const RecipeCategoryParamsSchema = z.object({
+	slug: z.string(),
+});
+
 export const RecipeParamsWithLanguageSchema = RecipeParamsSchema.extend({
 	lang: LanguageSchema,
 });
@@ -38,4 +42,8 @@ export const UserRecipesParamsSchema = z.object({
 
 export const AdminDashboardDeleteUserParamsSchema = z.object({
 	userId: NonEmptyStringSchema,
+});
+
+export const AdminDashboardCategoryParamsSchema = z.object({
+	categoryId: NonEmptyStringSchema,
 });

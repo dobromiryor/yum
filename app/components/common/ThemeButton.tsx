@@ -18,10 +18,10 @@ export const ThemeSwitch = () => {
 	return (
 		<div className="inline-flex items-center gap-2">
 			<button
-				aria-details={t(isLight ? "nav.theme.light" : "nav.theme.dark")}
-				aria-label={t("nav.theme.label")}
+				aria-describedby={t("nav.theme.label")}
+				aria-label={t(isLight ? "nav.theme.light" : "nav.theme.dark")}
 				className={clsx(
-					"relative flex justify-center item-center bg-light dark:bg-dark w-8 h-8 rounded-full shadow-md transition-colors duration-500"
+					"relative flex justify-center item-center bg-light dark:bg-dark w-8 h-8 rounded-full transition-colors duration-500"
 				)}
 				onClick={toggleTheme}
 			>
@@ -39,7 +39,6 @@ export const ThemeSwitch = () => {
 					)}
 				/>
 			</button>
-			{/* <span>{t("nav.theme.label")}</span> */}
 		</div>
 	);
 };

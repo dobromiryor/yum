@@ -16,7 +16,14 @@ export const Error = ({
 }: ErrorProps) => {
 	const { t } = useTranslation();
 	const { formState } = useRemixFormContext();
-	const formError = formState.errors[name];
+
+	const formError = // object path from string
+		name
+			.split(".")
+			.reduce(
+				(acc, key) => acc?.[key] as typeof formState.errors,
+				formState.errors
+			);
 
 	const error = useMemo(
 		() =>

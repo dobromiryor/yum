@@ -28,9 +28,9 @@ import { useFilteredValues } from "~/hooks/useFilteredValues";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import i18next from "~/modules/i18next.server";
 import { DifficultySchema, LanguageSchema } from "~/schemas/common";
-import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { CreateRecipeSchema } from "~/schemas/params.schema";
+import { NewRecipeSchema } from "~/schemas/recipe.schema";
 import { auth } from "~/utils/auth.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import {

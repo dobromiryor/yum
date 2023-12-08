@@ -51,6 +51,7 @@ import { useIsLoading } from "~/hooks/useIsLoading";
 import i18next from "~/modules/i18next.server";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import {
+	NonNullTranslatedContentSchema,
 	OptionalTranslatedContentSchema,
 	SessionDataStorageSchema,
 	TranslatedContentSchema,
@@ -122,6 +123,7 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 				equipment: true,
 			},
 		},
+		categories: true,
 	} satisfies Prisma.RecipeInclude;
 
 	let foundRecipe = await prisma.recipe.findFirst({
@@ -357,6 +359,7 @@ export default function EditRecipeRoute() {
 		languages,
 		status,
 		photo: p,
+		categories,
 	} = foundRecipe;
 	const name = TranslatedContentSchema.parse(n);
 	const description = TranslatedContentSchema.parse(d);
@@ -598,6 +601,19 @@ export default function EditRecipeRoute() {
 								<span>{servings}</span>
 							</Figure>
 						)}
+						<Figure isInline label={t("recipe.field.categories")}>
+							<span>
+								{categories
+									.map((category) => {
+										const name = NonNullTranslatedContentSchema.parse(
+											category.name
+										);
+
+										return name[lang];
+									})
+									.join(", ")}
+							</span>
+						</Figure>
 					</Card>
 				</div>
 			</Section>

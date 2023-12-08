@@ -7,30 +7,36 @@ import { type ButtonVariant } from "~/components/common/UI/Button";
 interface NavigationLinkProps extends NavLinkProps {
 	children: ReactNode;
 	variant?: ButtonVariant;
-	buttonClassName?: string;
+	size?: "xl" | "4xl";
 }
 
 export const MobileNavigationLink = ({
 	children,
 	className,
 	variant,
-	buttonClassName,
+	size = "4xl",
 	...rest
 }: NavigationLinkProps) => {
+	const sizeStyles = {
+		xl: "text-xl",
+		"4xl": "text-4xl",
+	};
+
 	return (
 		<NavLink
 			className={clsx("flex justify-stretch py-0.5", className)}
 			{...rest}
 		>
 			{({ isPending }) => (
-				<span
+				<div
 					className={clsx(
-						"text-dark dark:text-light text-4xl typography-bold",
+						"flex justify-center items-center gap-1 text-dark dark:text-light typography-bold",
+						sizeStyles[size],
 						isPending && "animate-pulse"
 					)}
 				>
 					{children}
-				</span>
+				</div>
 			)}
 		</NavLink>
 	);

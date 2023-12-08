@@ -82,7 +82,7 @@ export const Table = <T extends object>({
 												<td
 													key={cell.id}
 													className={clsx(
-														"bg-light dark:bg-dark p-2 border-b border-r border-secondary dark:border-primary",
+														"bg-light dark:bg-dark p-2 border-b border-r border-secondary dark:border-primary whitespace-nowrap",
 														"first:border-l",
 														"group-last:first:rounded-bl-xl",
 														"group-last:last:rounded-br-xl"
@@ -102,7 +102,7 @@ export const Table = <T extends object>({
 							<tr>
 								<td
 									className={clsx(
-										" p-2 border-l border-b border-r border-primary dark:border-secondary rounded-b-xl"
+										"bg-light dark:bg-dark p-2 border-l border-b border-r border-secondary dark:border-primary rounded-b-xl"
 									)}
 									colSpan={1000}
 								>

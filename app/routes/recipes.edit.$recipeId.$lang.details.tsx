@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Difficulty } from "@prisma/client";
+import { Difficulty, Status } from "@prisma/client";
 import {
 	json,
 	type ActionFunctionArgs,
@@ -26,15 +26,20 @@ import { type z } from "zod";
 import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
+import { Multiselect } from "~/components/common/UI/Multiselect";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
-import { DifficultySchema, TranslatedContentSchema } from "~/schemas/common";
-import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
+import {
+	DifficultySchema,
+	NonNullTranslatedContentSchema,
+	TranslatedContentSchema,
+} from "~/schemas/common";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeSchema } from "~/schemas/recipe.schema";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
@@ -47,8 +52,8 @@ import {
 import { translatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
 
-type FormData = z.infer<typeof NewRecipeSchema>;
-const resolver = zodResolver(NewRecipeSchema);
+type FormData = z.infer<typeof EditRecipeSchema>;
+const resolver = zodResolver(EditRecipeSchema);
 
 export const sitemap = () => ({
 	exclude: true,
@@ -69,6 +74,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 
 	const foundRecipe = await prisma.recipe.findFirst({
 		where: { id: recipeId },
+		include: { categories: true },
 	});
 
 	if (!foundRecipe) {
@@ -78,6 +84,10 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	if (foundRecipe.userId !== authData.id && authData.role !== "ADMIN") {
 		throw new Response(null, { status: 403 });
 	}
+
+	const foundCategories = await prisma.category.findMany({
+		where: { status: Status.PUBLISHED },
+	});
 
 	const { name, description, languages } = foundRecipe;
 	const { setData, commit } = await getDataSession(request);
@@ -101,6 +111,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		{
 			authData,
 			foundRecipe,
+			foundCategories,
 			lang,
 			validation,
 			meta: {
@@ -116,7 +127,8 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 export const EditRecipeDetailsModal = () => {
 	const [isOpen, setIsOpen] = useState(true);
 
-	const { foundRecipe, lang, validation } = useLoaderData<typeof loader>();
+	const { foundRecipe, foundCategories, lang, validation } =
+		useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 
 	const { state } = useNavigation();
@@ -140,12 +152,27 @@ export const EditRecipeDetailsModal = () => {
 		[t]
 	);
 
+	const categoryOptions = useMemo(
+		() =>
+			OptionsSchema.parse(
+				foundCategories.map((category) => {
+					const name = NonNullTranslatedContentSchema.parse(category.name);
+
+					return {
+						label: name[lang],
+						value: category.id,
+					};
+				})
+			),
+		[foundCategories, lang]
+	);
+
 	const {
 		name,
 		description,
 		difficulty,
 		servings,
-		// categories, // TODO
+		categories,
 		// tags, // TODO
 	} = foundRecipe;
 
@@ -163,6 +190,7 @@ export const EditRecipeDetailsModal = () => {
 			description: description?.[lang as keyof typeof description],
 			difficulty: difficulty,
 			servings: servings ?? undefined,
+			categories: categories.map(({ id }) => id) ?? undefined,
 		},
 		submitHandlers: {
 			onValid,
@@ -231,6 +259,19 @@ export const EditRecipeDetailsModal = () => {
 						name="servings"
 						type="number"
 					/>
+					<Controller
+						control={control}
+						name="categories"
+						render={({ field: { onChange, value, name } }) => (
+							<Multiselect
+								label={t("recipe.field.categories")}
+								name={name}
+								options={categoryOptions}
+								selected={value}
+								onChange={onChange}
+							/>
+						)}
+					/>
 					<FormError
 						error={
 							typeof actionData?.success === "boolean" && !actionData?.success
@@ -253,25 +294,34 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const { recipeId, lang } = EditRecipeParamsSchema.parse(p);
 
-	const data = await parseFormData<FormData>(request.clone());
+	const { name, description, categories, ...rest } =
+		await parseFormData<FormData>(request.clone());
 	let success = true;
 
 	await prisma.recipe
 		.update({
 			data: {
-				...data,
 				...(await translatedContent({
 					request,
 					key: "name",
 					lang,
-					value: data.name,
+					value: name,
 				})),
 				...(await translatedContent({
 					request,
 					key: "description",
 					lang,
-					value: data.description,
+					value: description,
 				})),
+				...(categories && {
+					categories: {
+						set: [],
+						connect: categories.map((item) => ({
+							id: item,
+						})),
+					},
+				}),
+				...rest,
 			},
 			where: {
 				id: recipeId,

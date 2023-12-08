@@ -25,7 +25,11 @@ import { SubRecipeCardList } from "~/components/recipes/detail/SubRecipeCardList
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
-import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
+import {
+	LanguageSchema,
+	NonNullTranslatedContentSchema,
+	TranslatedContentSchema,
+} from "~/schemas/common";
 import { RecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { formatTime } from "~/utils/helpers/format-time";
@@ -121,6 +125,7 @@ const RecipeDetailRoute = () => {
 			languages,
 			servings,
 			photo: p,
+			categories,
 		},
 		locale,
 	} = useLoaderData<typeof loader>();
@@ -251,7 +256,22 @@ const RecipeDetailRoute = () => {
 								tooltip={t("recipe.field.restTime")}
 							/>
 						)}
-						{languages.length > 0 &&
+						{categories.length > 0 &&
+							categories.map((category) => {
+								const name = NonNullTranslatedContentSchema.parse(
+									category.name
+								);
+
+								return (
+									<Pill
+										key={`Category__Pill__${category.id}`}
+										icon="category"
+										label={name[lang]}
+										tooltip={t("admin.category.table.category_one")}
+									/>
+								);
+							})}
+						{languages.length > 1 &&
 							languages.map((item) => {
 								const parsedLang = LanguageSchema.parse(item);
 

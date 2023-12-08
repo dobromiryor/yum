@@ -20,13 +20,21 @@ export const NullishNumber = z
 			value === "" || Number.isNaN(value)
 				? null
 				: value === 0
-				? 0
-				: value
-				? value
-				: undefined,
+				  ? 0
+				  : value
+				    ? value
+				    : undefined,
 		z.number().nullish()
 	)
 	.nullish();
+
+export const NonNullTranslatedContentSchema = z.record(
+	z.nativeEnum(Language),
+	z.string()
+);
+
+export const OptionalNonNullTranslatedContentSchema =
+	NonNullTranslatedContentSchema.nullable();
 
 export const TranslatedContentSchema = z.record(
 	z.nativeEnum(Language),

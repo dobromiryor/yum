@@ -2,6 +2,8 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
+import { useHydrated } from "~/hooks/useHydrated";
+
 type IconSize = "14" | "16" | "20" | "24" | "36";
 
 interface IconProps {
@@ -13,6 +15,7 @@ interface IconProps {
 
 export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
+	const isHydrated = useHydrated();
 	const placeholderStyles = {
 		"14": "h-[7px] w-[7px]",
 		"16": "h-2 w-2",
@@ -53,7 +56,7 @@ export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 			className="flex justify-center items-center"
 		>
 			<AnimatePresence mode="popLayout">
-				{isLoaded ? (
+				{isLoaded && isHydrated ? (
 					<motion.span
 						aria-hidden
 						animate={{
