@@ -36,7 +36,7 @@ import {
 	CloudinaryUploadApiResponseSchema,
 	CloudinaryUploadApiResponseWithBlurHashSchema,
 } from "~/schemas/cloudinary.schema";
-import { RecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { uploadImage } from "~/utils/cloudinary.server";
 import { errorCatcher } from "~/utils/helpers/error-catcher.server";
@@ -63,7 +63,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { recipeId } = RecipeParamsSchema.parse(p);
+	const { recipeId } = EditRecipeParamsSchema.parse(p);
 
 	const foundRecipe = await prisma.recipe.findUnique({
 		where: { id: recipeId },
@@ -260,7 +260,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { recipeId } = RecipeParamsSchema.parse(p);
+	const { recipeId } = EditRecipeParamsSchema.parse(p);
 	const t = await i18next.getFixedT(request);
 
 	const uploadHandler = unstable_composeUploadHandlers(

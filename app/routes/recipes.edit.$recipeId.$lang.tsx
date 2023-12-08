@@ -56,7 +56,7 @@ import {
 	SessionDataStorageSchema,
 	TranslatedContentSchema,
 } from "~/schemas/common";
-import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
 import {
 	EditRecipeIntentDTOSchema,
 	EditRecipeIntentSchema,
@@ -91,7 +91,7 @@ export const loader = async ({ params: p, request }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const params = EditRecipeParamsSchema.parse(p);
+	const params = EditRecipeWithLangParamsSchema.parse(p);
 	const { recipeId, lang } = params;
 
 	const include = {
@@ -228,7 +228,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const params = EditRecipeParamsSchema.parse(p);
+	const params = EditRecipeWithLangParamsSchema.parse(p);
 	const { recipeId } = params;
 
 	const formData = EditRecipeIntentDTOSchema.parse(
@@ -360,6 +360,7 @@ export default function EditRecipeRoute() {
 		status,
 		photo: p,
 		categories,
+		slug,
 	} = foundRecipe;
 	const name = TranslatedContentSchema.parse(n);
 	const description = TranslatedContentSchema.parse(d);
@@ -566,7 +567,11 @@ export default function EditRecipeRoute() {
 						buttons={
 							<>
 								{status === Status.PUBLISHED && languagesIncludesLocale && (
-									<Link preventScrollReset tabIndex={-1} to={`/recipes/${id}`}>
+									<Link
+										preventScrollReset
+										tabIndex={-1}
+										to={`/recipes/${slug}`}
+									>
 										<Button className="flex items-center gap-1">
 											<span>{t("common.view")}</span>
 										</Button>
@@ -586,6 +591,9 @@ export default function EditRecipeRoute() {
 						className="col-span-3 sm:col-span-2"
 						title={name[lang] ?? `[ ${t("error.translationMissing")} ]`}
 					>
+						<Figure isInline label={t("recipe.field.slug")}>
+							<span>{slug}</span>
+						</Figure>
 						<Figure
 							className="flex flex-col gap-2"
 							label={t("recipe.field.description")}

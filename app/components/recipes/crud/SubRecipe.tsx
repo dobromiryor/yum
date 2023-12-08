@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { Figure } from "~/components/recipes/crud/Figure";
 import { OptionalTranslatedContentSchema } from "~/schemas/common";
-import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
 
 interface SubRecipeProps {
 	subRecipe: SerializeFrom<SubRecipeType>;
@@ -27,7 +27,7 @@ export const SubRecipe = ({ subRecipe, as = "span" }: SubRecipeProps) => {
 	const { t } = useTranslation();
 	const params = useParams();
 
-	const { lang } = EditRecipeParamsSchema.parse(params);
+	const { lang } = EditRecipeWithLangParamsSchema.parse(params);
 
 	const name = OptionalTranslatedContentSchema.parse(subRecipe.name);
 

@@ -1,24 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DisplayName } from "@prisma/client";
 import {
-    json,
-    type ActionFunctionArgs,
-    type LoaderFunctionArgs,
-    type MetaFunction,
+	json,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
-    Form,
-    useActionData,
-    useLoaderData,
-    useLocation,
-    useNavigation,
+	Form,
+	useActionData,
+	useLoaderData,
+	useLocation,
+	useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    RemixFormProvider,
-    parseFormData,
-    useRemixForm,
+	RemixFormProvider,
+	parseFormData,
+	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -30,9 +30,9 @@ import i18next from "~/modules/i18next.server";
 import { UsernameSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
 import {
-    generateMetaDescription,
-    generateMetaProps,
-    generateMetaTitle,
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
@@ -142,6 +142,8 @@ const EditUsernameModal = () => {
 					<Input
 						autoFocus
 						autoComplete="username"
+						explanation={t("explanation.username")}
+						explanationIcon="regular_expression"
 						label={t("settings.field.username")}
 						name="username"
 					/>

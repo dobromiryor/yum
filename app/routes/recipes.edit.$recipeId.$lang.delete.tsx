@@ -18,7 +18,7 @@ import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudin
 import { LanguageSchema, TranslatedContentSchema } from "~/schemas/common";
 import {
 	EditRecipeParamsSchema,
-	RecipeParamsSchema,
+	EditRecipeWithLangParamsSchema,
 } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { deleteImage } from "~/utils/cloudinary.server";
@@ -44,7 +44,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { recipeId, lang } = EditRecipeParamsSchema.parse(p);
+	const { recipeId, lang } = EditRecipeWithLangParamsSchema.parse(p);
 
 	const foundRecipe = await prisma.recipe.findFirst({
 		where: { id: recipeId },
@@ -148,7 +148,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 
 	const formData = await request.formData();
 
-	const { recipeId } = RecipeParamsSchema.parse(p);
+	const { recipeId } = EditRecipeParamsSchema.parse(p);
 
 	const id = formData.get("id")?.toString();
 	const userId = formData.get("userId")?.toString();

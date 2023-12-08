@@ -46,7 +46,7 @@ export const sitemap: SitemapFunction = async () => {
 	const recipes = await prisma.recipe.findMany();
 
 	return recipes.map((recipe) => ({
-		loc: `/recipes/${recipe.id}`,
+		loc: `/recipes/${recipe.slug}`,
 		lastmod: recipe.updatedAt.toISOString(),
 		exclude: recipe.status === "UNPUBLISHED",
 		...(recipe.photo && {
@@ -67,14 +67,21 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const authData = await auth.isAuthenticated(request);
 
-	const { recipeId } = RecipeParamsSchema.parse(p);
+	const { slug } = RecipeParamsSchema.parse(p);
 	const locale = LanguageSchema.parse(await i18next.getLocale(request.clone()));
 
-	const foundRecipe = await recipeDetails({ recipeId, locale });
+	const foundRecipe = await recipeDetails({ slug, locale });
 
 	if (!foundRecipe) {
 		throw new Response(null, { status: 404 });
 	}
+
+	foundRecipe.visitCount++;
+
+	await prisma.recipe.update({
+		data: { visitCount: foundRecipe.visitCount },
+		where: { id: foundRecipe.id },
+	});
 
 	const name = TranslatedContentSchema.parse(foundRecipe.name);
 
@@ -95,7 +102,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}`,
+			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${slug}`,
 			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
 				foundRecipe.photo
 			)?.secure_url,

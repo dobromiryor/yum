@@ -1,6 +1,7 @@
 import { Difficulty, Status } from "@prisma/client";
 import { z } from "zod";
 
+import { SLUG_REGEX } from "~/consts/regex.const";
 import { LanguageSchema, NonEmptyStringSchema } from "~/schemas/common";
 import { IngredientSchema } from "~/schemas/ingredient.schema";
 import { StepSchema } from "~/schemas/step.schema";
@@ -28,6 +29,7 @@ export const EditRecipeIntentDTOSchema = z.object({
 
 export const NewRecipeSchema = z.object({
 	name: NonEmptyStringSchema,
+	slug: z.string().min(3).max(80).regex(SLUG_REGEX),
 	description: NonEmptyStringSchema,
 	difficulty: z.nativeEnum(Difficulty),
 	servings: z.coerce.number().gt(0).lte(20),

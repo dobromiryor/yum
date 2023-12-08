@@ -65,7 +65,14 @@
 		"file-invalid-type": "Invalid file type",
 		"file-too-large": "File is too large",
 		"file-too-small": "File is too small",
-		"too-many-files": "Too many files."
+		"too-many-files": "Too many files.",
+		"slugExists": "Slug already exists."
+	},
+	"explanation": {
+		"slug": "Lowercase letters, numbers and \"-\"",
+		"names": "Cyrillic or latin letters",
+		"username": "Latin letters, numbers, \".\", \"_\" or \"-\"",
+		"quantity": "Decimal numeral or fractions"
 	},
 	"login": {
 		"heading": "Log in",
@@ -179,7 +186,8 @@
 			"photo": "Photo",
 			"recipe": "Recipe",
 			"ingredient": "Ingredient",
-			"step": "Step"
+			"step": "Step",
+			"slug": "Slug"
 		},
 		"heading": {
 			"allRecipes": "All recipes",
@@ -490,8 +498,7 @@
 				}
 			},
 			"error": {
-				"descriptionRequired": "Please add a description in all languages, or delete the description.",
-				"slugExists": "Slug already exists."
+				"descriptionRequired": "Please add a description in all languages, or delete the description."
 			}
 		}
 	}

@@ -12,7 +12,7 @@ import { isPageGreaterThanPageCount } from "~/utils/helpers/set-pagination.serve
 import { prisma } from "~/utils/prisma.server";
 
 interface RecipeDetailProps {
-	recipeId: string;
+	slug: string;
 	locale: Language;
 }
 
@@ -118,13 +118,10 @@ export const publishValidation = async (recipeId: string) => {
 	return true;
 };
 
-export const recipeDetails = async ({
-	recipeId,
-	locale,
-}: RecipeDetailProps) => {
+export const recipeDetails = async ({ slug, locale }: RecipeDetailProps) => {
 	const foundRecipe = await prisma.recipe.findFirst({
 		where: {
-			id: recipeId,
+			slug,
 			status: Status.PUBLISHED,
 			languages: {
 				has: locale,

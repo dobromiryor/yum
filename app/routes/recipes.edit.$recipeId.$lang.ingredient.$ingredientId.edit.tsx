@@ -226,7 +226,12 @@ export const EditIngredientModal = () => {
 							/>
 						)}
 					/>
-					<Input label={t("recipe.field.quantity")} name="quantity" />
+					<Input
+						explanation={t("explanation.quantity")}
+						explanationIcon="regular_expression"
+						label={t("recipe.field.quantity")}
+						name="quantity"
+					/>
 					<Textarea
 						isRequired={!validation[lang]?.note}
 						label={t("recipe.field.note")}

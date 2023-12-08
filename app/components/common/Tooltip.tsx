@@ -177,7 +177,7 @@ export const Tooltip = () => {
 						translateX,
 						translateY,
 					}}
-					className="fixed drop-shadow-md backdrop-blur bg-primary/40 dark:bg-primary/75 backdrop-brightness-110 dark:backdrop-brightness-125 text-dark dark:text-light py-1 px-2 rounded-lg pointer-events-none"
+					className="fixed drop-shadow-md backdrop-blur bg-primary/40 dark:bg-primary/75 backdrop-brightness-110 dark:backdrop-brightness-125 text-dark dark:text-light py-1 px-2 rounded-lg pointer-events-none z-50"
 					exit={{
 						opacity: 0,
 						translateX,

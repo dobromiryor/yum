@@ -169,6 +169,8 @@ const AdminDashboardCategoryUpdateModal = () => {
 					))}
 					<Input
 						isRequired
+						explanation={t("explanation.slug")}
+						explanationIcon="regular_expression"
 						label={t("admin.category.table.slug")}
 						name="slug"
 					/>
@@ -225,7 +227,7 @@ export const action = async ({
 
 		return json({
 			success: false,
-			message: t("admin.category.error.slugExists"),
+			message: t("error.slugExists"),
 		});
 	}
 

@@ -7,34 +7,42 @@ export const CreateRecipeSchema = z.object({
 });
 
 export const RecipeParamsSchema = z.object({
-	recipeId: NonEmptyStringSchema,
+	slug: z.string(),
 });
 
 export const RecipeCategoryParamsSchema = z.object({
 	slug: z.string(),
 });
 
-export const RecipeParamsWithLanguageSchema = RecipeParamsSchema.extend({
+export const EditRecipeParamsSchema = z.object({
+	recipeId: NonEmptyStringSchema,
+});
+
+export const EditRecipeWithLangParamsSchema = EditRecipeParamsSchema.extend({
+	recipeId: NonEmptyStringSchema,
 	lang: LanguageSchema,
 });
 
-export const EditRecipeParamsSchema = RecipeParamsWithLanguageSchema;
+export const EditRecipeSubRecipeParamsSchema =
+	EditRecipeWithLangParamsSchema.extend({
+		subRecipeId: NonEmptyStringSchema,
+	});
 
-export const EditRecipeSubRecipeParamsSchema = EditRecipeParamsSchema.extend({
-	subRecipeId: NonEmptyStringSchema,
-});
+export const EditRecipeIngredientParamsSchema =
+	EditRecipeWithLangParamsSchema.extend({
+		ingredientId: NonEmptyStringSchema,
+	});
 
-export const EditRecipeIngredientParamsSchema = EditRecipeParamsSchema.extend({
-	ingredientId: NonEmptyStringSchema,
-});
+export const EditRecipeEquipmentParamsSchema =
+	EditRecipeWithLangParamsSchema.extend({
+		equipmentId: NonEmptyStringSchema,
+	});
 
-export const EditRecipeEquipmentParamsSchema = EditRecipeParamsSchema.extend({
-	equipmentId: NonEmptyStringSchema,
-});
-
-export const EditRecipeStepParamsSchema = EditRecipeParamsSchema.extend({
-	stepId: NonEmptyStringSchema,
-});
+export const EditRecipeStepParamsSchema = EditRecipeWithLangParamsSchema.extend(
+	{
+		stepId: NonEmptyStringSchema,
+	}
+);
 
 export const UserRecipesParamsSchema = z.object({
 	userId: NonEmptyStringSchema,
