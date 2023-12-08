@@ -19,9 +19,15 @@ interface ImageProps {
 	className?: string;
 	photo: z.infer<typeof CloudinaryUploadApiResponseWithBlurHashSchema>;
 	transformation?: string;
+	alt?: string;
 }
 
-export const Image = ({ className, photo, transformation }: ImageProps) => {
+export const Image = ({
+	className,
+	photo,
+	transformation,
+	alt = "",
+}: ImageProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const { ENV } = useTypedRouteLoaderData("root");
 	const ref = useRef<AdvancedImage>(null);
@@ -71,7 +77,12 @@ export const Image = ({ className, photo, transformation }: ImageProps) => {
 				className={clsx("w-full", !transformation && "aspect-square")}
 				initial={{ opacity: 0 }}
 			>
-				<AdvancedImage ref={ref} cldImg={cldImg} plugins={[lazyload()]} />
+				<AdvancedImage
+					ref={ref}
+					alt={alt}
+					cldImg={cldImg}
+					plugins={[lazyload()]}
+				/>
 			</motion.div>
 		</div>
 	);

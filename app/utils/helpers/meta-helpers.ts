@@ -1,5 +1,3 @@
-import logo_dark from "public/images/logo/logo_square_dark.png";
-
 const MAX_TITLE_LENGTH = 70;
 const MAX_DESCRIPTION_LENGTH = 155;
 const ELLIPSIS = "...";
@@ -61,7 +59,7 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 		title,
 		description,
 		url,
-		image = logo_dark, // TODO: prefers-color-scheme?
+		image = "https://res.cloudinary.com/dsa9klpxl/image/upload/f_auto,q_auto/v1/resources/ys5n4wb4fidxpdb7b6an",
 	} = props;
 
 	if (title) {

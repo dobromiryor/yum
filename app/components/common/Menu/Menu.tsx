@@ -51,6 +51,7 @@ interface MenuWrapperProps {
 	x?: PositionX;
 	y?: PositionY;
 	className?: string;
+	ariaLabel: string;
 }
 
 const MenuContext = createContext<MenuContextType | undefined>(undefined);
@@ -259,6 +260,7 @@ export const MenuWrapper = ({
 	x = "center",
 	y = "bottom",
 	className,
+	ariaLabel,
 }: MenuWrapperProps) => {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const [
@@ -329,6 +331,7 @@ export const MenuWrapper = ({
 		cloneElement(customButton as ReactElement, {
 			ref: buttonRef as RefObject<HTMLAnchorElement | HTMLButtonElement>,
 			"aria-haspopup": true,
+			"aria-label": { ariaLabel },
 			className: clsx("relative", className),
 			onClick: handleClick,
 			onKeyDown: handleKeyDown,
@@ -337,6 +340,7 @@ export const MenuWrapper = ({
 		<button
 			ref={buttonRef as RefObject<HTMLButtonElement>}
 			aria-haspopup
+			aria-label={ariaLabel}
 			className={clsx("relative rounded-full", className)}
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}

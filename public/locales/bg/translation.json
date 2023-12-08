@@ -85,6 +85,7 @@
 	},
 	"nav": {
 		"authMenu": {
+			"userMenu": "Потребителско меню",
 			"logout": "Изход",
 			"settings": "Настройки",
 			"adminDashboard": "Администраторско табло",
@@ -106,7 +107,8 @@
 			"dark": "Тъмна тема",
 			"label": "Тема",
 			"light": "Светла тема"
-		}
+		},
+		"mainMenu": "Меню"
 	},
 	"recipe": {
 		"card": {

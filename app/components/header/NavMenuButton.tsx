@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { type Dispatch, type SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 
 interface MenuButtonProps {
 	isOpen: boolean;
@@ -8,11 +9,14 @@ interface MenuButtonProps {
 }
 
 export const NavMenuButton = ({ isOpen, setIsOpen }: MenuButtonProps) => {
+	const { t } = useTranslation();
+
 	const lineStyles =
 		"absolute min-w-5 min-h-0.5 bg-dark dark:bg-light transition-colors";
 
 	return (
 		<motion.button
+			aria-label={t("nav.mainMenu")}
 			className="relative flex flex-col justify-center items-center md:hidden min-w-8 min-h-8 cursor-pointer"
 			onClick={() => setIsOpen((prev) => !prev)}
 		>
