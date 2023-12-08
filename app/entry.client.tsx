@@ -1,3 +1,4 @@
+import { loadServiceWorker } from "@remix-pwa/sw";
 import { RemixBrowser } from "@remix-run/react";
 import i18next from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
@@ -49,3 +50,5 @@ if (window.requestIdleCallback) {
 	// https://caniuse.com/requestidlecallback
 	window.setTimeout(hydrate, 1);
 }
+
+loadServiceWorker();
