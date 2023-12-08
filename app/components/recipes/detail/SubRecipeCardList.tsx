@@ -3,7 +3,7 @@ import { type SerializeFrom } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import { IngredientCard } from "~/components/recipes/detail/Ingredient";
-import { type loader } from "~/routes/recipes.$recipeId._index";
+import { type loader } from "~/routes/recipes.$slug._index";
 import { TranslatedContentSchema } from "~/schemas/common";
 
 interface SubRecipeCardListProps {
@@ -33,6 +33,10 @@ export const SubRecipeCardList = ({
 		<>
 			{subRecipes.map((subRecipe, index) => {
 				const { id, name: n, ingredients } = subRecipe;
+
+				if (ingredients.length === 0) {
+					return null;
+				}
 
 				const name = TranslatedContentSchema.parse(n);
 

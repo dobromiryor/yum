@@ -25,7 +25,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	if (authData.isVerified === false) {
 		const updatedUser = await prisma.user.update({
-			data: { isVerified: true },
+			data: { isVerified: true, lastLogin: new Date() },
 			where: { id: authData.id },
 		});
 
@@ -37,13 +37,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 				headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
 			}
 		);
+	} else {
+		const updatedUser = await prisma.user.update({
+			data: { lastLogin: new Date() },
+			where: { id: authData.id },
+		});
+
+		session.set(auth.sessionKey, updatedUser);
+
+		return redirect(from ?? "/settings", {
+			headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
+		});
 	}
-
-	session.set(auth.sessionKey, authData);
-
-	return redirect(from ?? "/settings", {
-		headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
-	});
 };
 
 export { ErrorBoundary } from "~/components/common/ErrorBoundary";

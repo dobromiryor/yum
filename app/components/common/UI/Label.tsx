@@ -1,5 +1,8 @@
 import clsx from "clsx";
 
+import { TooltipWrapper } from "~/components/common/Tooltip";
+import { Icon } from "~/components/common/UI/Icon";
+
 export type LabelWeight = "normal" | "medium";
 
 interface LabelProps {
@@ -7,6 +10,8 @@ interface LabelProps {
 	label?: string;
 	isRequired?: boolean;
 	weight?: LabelWeight;
+	explanation?: string;
+	explanationIcon?: string;
 }
 
 export const Label = ({
@@ -14,6 +19,8 @@ export const Label = ({
 	name,
 	isRequired = false,
 	weight = "medium",
+	explanation,
+	explanationIcon = "help",
 }: LabelProps) => {
 	if (!label) {
 		return null;
@@ -25,10 +32,18 @@ export const Label = ({
 	};
 
 	return (
-		<label className={clsx(weightStyles[weight])} htmlFor={name}>
+		<label
+			className={clsx("inline-flex items-center gap-1", weightStyles[weight])}
+			htmlFor={name}
+		>
 			{label}
 			{isRequired && (
-				<span className="typography-normal text-red-500">{" *"}</span>
+				<span className="typography-normal text-red-500">{"*"}</span>
+			)}
+			{explanation && (
+				<TooltipWrapper content={explanation}>
+					<Icon name={explanationIcon} size="16" />
+				</TooltipWrapper>
 			)}
 		</label>
 	);

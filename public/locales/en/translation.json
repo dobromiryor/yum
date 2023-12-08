@@ -13,6 +13,7 @@
 		"edit": "Edit",
 		"editSomething": "$t(common.edit) {{something}}",
 		"noOptionsAvailable": "No options available",
+		"open": "Open",
 		"reorder": "Reorder",
 		"save": "Save",
 		"submit": "Submit",
@@ -30,7 +31,10 @@
 			"uploadPreview": "Upload preview",
 			"uploadNote": "This action might take a few minutes depending on file size and your internet connection. Please be patient."
 		},
-		"cookingMode": "Cooking mode"
+		"cookingMode": "Cooking mode",
+		"noData": "No data.",
+		"total": "Total",
+		"limit": "Limit"
 	},
 	"email": {
 		"changeEmail": {
@@ -61,7 +65,14 @@
 		"file-invalid-type": "Invalid file type",
 		"file-too-large": "File is too large",
 		"file-too-small": "File is too small",
-		"too-many-files": "Too many files."
+		"too-many-files": "Too many files.",
+		"slugExists": "Slug already exists."
+	},
+	"explanation": {
+		"slug": "Lowercase letters, numbers and \"-\"",
+		"names": "Cyrillic or latin letters",
+		"username": "Latin letters, numbers, \".\", \"_\" or \"-\"",
+		"quantity": "Decimal numeral or fractions"
 	},
 	"login": {
 		"heading": "Log in",
@@ -74,7 +85,9 @@
 	"nav": {
 		"authMenu": {
 			"logout": "Log out",
-			"settings": "Settings"
+			"settings": "Settings",
+			"adminDashboard": "Admin dashboard",
+			"myRecipes": "My recipes"
 		},
 		"home": "Home",
 		"language": {
@@ -85,9 +98,9 @@
 			"label": "Language"
 		},
 		"login": "Log in",
-		"myRecipes": "My recipes",
 		"newRecipe": "Add",
 		"recipes": "Recipes",
+		"categories": "Categories",
 		"theme": {
 			"dark": "Dark theme",
 			"label": "Theme",
@@ -173,7 +186,8 @@
 			"photo": "Photo",
 			"recipe": "Recipe",
 			"ingredient": "Ingredient",
-			"step": "Step"
+			"step": "Step",
+			"slug": "Slug"
 		},
 		"heading": {
 			"allRecipes": "All recipes",
@@ -346,7 +360,6 @@
 		"note": {
 			"EMAIL_UPDATED": "Your email address has been successfully updated.",
 			"TOKEN_EXPIRED": "Change email token expired. Please try again.",
-			"test": "",
 			"TOKEN_NOT_FOUND": "Change email token not found. Please try again.",
 			"USER_NOT_UPDATED": "User update failed. Please try again.",
 			"USER_VERIFIED": "Your account has been verified.",
@@ -399,6 +412,14 @@
 		},
 		"forbidden": {
 			"title": "Forbidden"
+		},
+		"admin": {
+			"users": {
+				"title": "Users"
+			},
+			"categories": {
+				"title": "Categories"
+			}
 		}
 	},
 	"errorPages": {
@@ -419,6 +440,66 @@
 		"500": {
 			"title": "Whoops! Looks like someone set the timer wrong.",
 			"refreshCTA": "Refresh"
+		}
+	},
+	"admin": {
+		"nav": {
+			"users": "Users",
+			"categories": "Categories"
+		},
+		"user": {
+			"table": {
+				"id": "ID",
+				"firstName": "First name",
+				"lastName": "Last name",
+				"username": "Username",
+				"avatar": "Avatar",
+				"email": "Email",
+				"isVerified": "Verified",
+				"actions": "Actions",
+				"recipes": "Recipes",
+				"user": "User",
+				"createdAt": "Created at",
+				"lastLogin": "Last login"
+			},
+			"modal": {
+				"delete": {
+					"title": "Delete account",
+					"content": "Are you sure you want to delete {{name}}'s account? Everything related to it will be permanently deleted."
+				}
+			}
+		},
+		"category": {
+			"table": {
+				"slug": "Slug",
+				"createdAt": "Created at",
+				"updatedAt": "Updated at",
+				"name": "Name",
+				"description": "Description",
+				"status": "Status",
+				"visitCount": "Visited",
+				"recipesCount": "Recipes",
+				"category_one": "Category",
+				"category_many": "Categories",
+				"actions": "Actions",
+				"published": "Published",
+				"unpublished": "Unpublished"
+			},
+			"modal": {
+				"create": {
+					"title": "Add new category"
+				},
+				"delete": {
+					"title": "Delete category",
+					"content": "Are you sure you want to delete \"{{name}}\"?"
+				},
+				"update": {
+					"title": "Update category"
+				}
+			},
+			"error": {
+				"descriptionRequired": "Please add a description in all languages, or delete the description."
+			}
 		}
 	}
 }

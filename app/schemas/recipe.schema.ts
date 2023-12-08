@@ -1,7 +1,8 @@
-import { Status } from "@prisma/client";
+import { Difficulty, Status } from "@prisma/client";
 import { z } from "zod";
 
-import { LanguageSchema } from "~/schemas/common";
+import { SLUG_REGEX } from "~/consts/regex.const";
+import { LanguageSchema, NonEmptyStringSchema } from "~/schemas/common";
 import { IngredientSchema } from "~/schemas/ingredient.schema";
 import { StepSchema } from "~/schemas/step.schema";
 
@@ -24,4 +25,16 @@ export const EditRecipeIntentDTOSchema = z.object({
 		.optional(),
 	publishedStatus: z.nativeEnum(Status).optional(),
 	languages: LanguageSchema.optional(),
+});
+
+export const NewRecipeSchema = z.object({
+	name: NonEmptyStringSchema,
+	slug: z.string().min(3).max(80).regex(SLUG_REGEX),
+	description: NonEmptyStringSchema,
+	difficulty: z.nativeEnum(Difficulty),
+	servings: z.coerce.number().gt(0).lte(20),
+});
+
+export const EditRecipeSchema = NewRecipeSchema.extend({
+	categories: z.string().cuid().array().nullish(),
 });

@@ -30,7 +30,7 @@ import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
-import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import {
 	generateMetaDescription,
@@ -58,7 +58,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeWithLangParamsSchema.parse(p);
 
 	const foundRecipe = await prisma.recipe.findUnique({
 		where: { id: recipeId },
@@ -221,7 +221,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeWithLangParamsSchema.parse(p);
 
 	const data = await parseFormData<FormData>(request.clone());
 	let success = true;

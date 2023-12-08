@@ -32,7 +32,7 @@ import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { IngredientDTOSchema } from "~/schemas/ingredient.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
-import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
 import { auth } from "~/utils/auth.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import {
@@ -72,7 +72,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeWithLangParamsSchema.parse(p);
 
 	const foundRecipe = await prisma.recipe.findUnique({
 		where: { id: recipeId },
@@ -172,7 +172,12 @@ export const CreateIngredientModal = () => {
 						label={t("recipe.field.name")}
 						name="name"
 					/>
-					<Input label={t("recipe.field.quantity")} name="quantity" />
+					<Input
+						explanation={t("explanation.quantity")}
+						explanationIcon="regular_expression"
+						label={t("recipe.field.quantity")}
+						name="quantity"
+					/>
 					<Controller
 						control={control}
 						name="unit"
@@ -220,7 +225,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeWithLangParamsSchema.parse(p);
 
 	const data = await parseFormData<FormData>(request.clone());
 

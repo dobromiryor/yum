@@ -25,10 +25,10 @@ export const StepDTOSchema = z
 					value === "" || Number.isNaN(value)
 						? null
 						: value === 0
-						? 0
-						: value
-						? value
-						: undefined,
+						  ? 0
+						  : value
+						    ? value
+						    : undefined,
 				z.number().nullish()
 			)
 			.nullish(),

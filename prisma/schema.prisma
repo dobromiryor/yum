@@ -14,6 +14,7 @@ model User {
   id                      String             @id @default(cuid())
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
+  lastLogin               DateTime?
   email                   String             @unique
   firstName               String?
   lastName                String?
@@ -48,23 +49,36 @@ model Recipe {
   id             String          @id @default(cuid())
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  visitCount     Int             @default(0)
+  slug           String          @unique
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  slug           String?         @unique
   name           Json // { [lang]: string | null }
   description    Json // { [lang]: string | null }
   difficulty     Difficulty
   servings       Int             @db.SmallInt
   photo          Json? // Cloudinary UploadApiResponse
-  categories     String[]
   tags           String[]
   languages      String[]
   status         Status          @default(UNPUBLISHED)
+  categories     Category[]
   steps          Step[]
   ingredients    Ingredient[]
   commentThreads CommentThread[]
   subRecipes     SubRecipe[]
   equipment      Equipment[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        Json // { [lang]: string }
+  description Json? // { [lang]: string }
+  slug        String   @unique
+  status      Status   @default(UNPUBLISHED)
+  recipes     Recipe[]
+  visitCount  Int      @default(0)
 }
 
 model Ingredient {

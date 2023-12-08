@@ -2,7 +2,9 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-type IconSize = "14" | "16" | "20" | "36";
+import { useHydrated } from "~/hooks/useHydrated";
+
+type IconSize = "14" | "16" | "20" | "24" | "36";
 
 interface IconProps {
 	name: string;
@@ -13,16 +15,19 @@ interface IconProps {
 
 export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
+	const isHydrated = useHydrated();
 	const placeholderStyles = {
 		"14": "h-[7px] w-[7px]",
 		"16": "h-2 w-2",
 		"20": "h-2.5 w-2.5",
+		"24": "h-3 w-3",
 		"36": "h-[18px] w-[18px]",
 	};
 	const sizeStyles = {
 		"14": "text-sm leading-[14px] h-[14px] w-[14px]",
 		"16": "text-base leading-4 h-4 w-4",
 		"20": "text-xl leading-5 h-5 w-5",
+		"24": "text-2xl leading-6 h-6 w-6",
 		"36": "text-4xl leading-9 h-9 w-9",
 	};
 
@@ -51,17 +56,19 @@ export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 			className="flex justify-center items-center"
 		>
 			<AnimatePresence mode="popLayout">
-				{isLoaded ? (
+				{isLoaded && isHydrated ? (
 					<motion.span
 						aria-hidden
-						animate={{ opacity: 1, filter: "blur(0px)" }}
+						animate={{
+							opacity: 1,
+							filter: "blur(0px)",
+						}}
 						className={clsx(
 							sizeStyles[size],
 							"material-symbols-rounded select-none transition-opacity duration-500",
 							className
 						)}
-						exit={{ opacity: 0 }}
-						initial={{ opacity: 0, filter: "blur(4px)" }}
+						style={{ opacity: 0, filter: "blur(4px)" }}
 					>
 						{name}
 					</motion.span>

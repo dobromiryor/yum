@@ -10,6 +10,7 @@ import { LanguageMenu } from "~/components/common/Menu/LanguageMenu";
 import { ThemeSwitch } from "~/components/common/ThemeButton";
 import { MobileNavigationLink } from "~/components/header/MobileNavigationLink";
 import { SearchInput } from "~/components/header/SearchInput";
+import { CategoryMenuMobile } from "~/routes/resources.categories";
 
 interface MobileNavigationProps {
 	authData: SerializeFrom<User> | null;
@@ -106,11 +107,7 @@ export const MobileNavigation = ({
 										<MobileNavigationLink end to={"/recipes"}>
 											{t("nav.recipes")}
 										</MobileNavigationLink>
-										{authData?.isVerified && (
-											<MobileNavigationLink to={`/users/${authData?.id}`}>
-												{t("nav.myRecipes")}
-											</MobileNavigationLink>
-										)}
+										<CategoryMenuMobile />
 										{authData?.isVerified && (
 											<MobileNavigationLink to={`/recipes/new`}>
 												{t("nav.newRecipe")}
@@ -124,7 +121,7 @@ export const MobileNavigation = ({
 									</div>
 									<div className="flex justify-end gap-2">
 										<ThemeSwitch />
-										<LanguageMenu isMobile />
+										<LanguageMenu isMobile isNotAuthenticated={!authData} />
 										{authData && <AuthMenu isMobile />}
 									</div>
 								</motion.nav>

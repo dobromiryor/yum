@@ -16,6 +16,8 @@ interface InputProps
 	name: string;
 	translationContent?: string | null;
 	translationValidation?: boolean;
+	explanation?: string;
+	explanationIcon?: string;
 }
 
 export const Input = ({
@@ -26,6 +28,8 @@ export const Input = ({
 	type,
 	translationContent,
 	translationValidation,
+	explanation,
+	explanationIcon,
 	...rest
 }: InputProps) => {
 	const {
@@ -36,7 +40,13 @@ export const Input = ({
 	return (
 		<div className="flex flex-col gap-2">
 			<TranslationHelper content={translationContent}>
-				<Label isRequired={isRequired} label={label} name={name} />
+				<Label
+					explanation={explanation}
+					explanationIcon={explanationIcon}
+					isRequired={isRequired}
+					label={label}
+					name={name}
+				/>
 			</TranslationHelper>
 			<input
 				className={clsx(

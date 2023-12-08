@@ -1,8 +1,10 @@
-import { useNavigation } from "@remix-run/react";
+import { NavLink, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import logo_dark from "public/images/logo/logo_dark_200.png";
+import logo_light from "public/images/logo/logo_light_200.png";
 import { AuthMenu } from "~/components/common/Menu/AuthMenu";
 import { LanguageMenu } from "~/components/common/Menu/LanguageMenu";
 import { ThemeSwitch } from "~/components/common/ThemeButton";
@@ -11,13 +13,16 @@ import { NavMenuButton } from "~/components/header/NavMenuButton";
 import { NavigationLink } from "~/components/header/NavigationLink";
 import { SearchInput } from "~/components/header/SearchInput";
 import { useTypedRouteLoaderData } from "~/hooks/useTypedRouteLoaderData";
+import { CategoryMenu } from "~/routes/resources.categories";
+import { Theme, useTheme } from "~/utils/providers/theme-provider";
 
 export const Header = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
-	const { authData, ENV } = useTypedRouteLoaderData("root");
+	const [theme] = useTheme();
 	const { t } = useTranslation();
 	const { location } = useNavigation();
+	const { authData, ENV } = useTypedRouteLoaderData("root");
 
 	useEffect(() => {
 		if (isOpen) {
@@ -44,19 +49,24 @@ export const Header = () => {
 			>
 				<nav className={clsx("flex justify-between items-center", "px-5 h-16")}>
 					<div className="flex gap-2 items-center">
-						<NavigationLink to={"/"}>
-							<span aria-hidden>{ENV.APP_NAME}</span>
+						<NavLink to={"/"}>
+							<img
+								aria-hidden
+								alt=""
+								className="max-h-8"
+								height={31.98}
+								src={theme === Theme.LIGHT ? logo_light : logo_dark}
+								width={68.81}
+							/>
 							<span className="sr-only">{ENV.APP_NAME}</span>
-						</NavigationLink>
+						</NavLink>
 						<div className="hidden md:flex gap-2 items-center">
 							<NavigationLink end to={"/recipes"}>
 								{t("nav.recipes")}
 							</NavigationLink>
-							{authData?.isVerified && (
-								<NavigationLink to={`/users/${authData?.id}`}>
-									{t("nav.myRecipes")}
-								</NavigationLink>
-							)}
+
+							<CategoryMenu />
+
 							{authData?.isVerified && (
 								<NavigationLink to={`/recipes/new`}>
 									{t("nav.newRecipe")}

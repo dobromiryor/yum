@@ -44,7 +44,7 @@ export const OverviewCard = ({
 			to={
 				linkTo === "edit"
 					? `/recipes/edit/${recipe.id}/${lang}`
-					: `/recipes/${recipe.id}`
+					: `/recipes/${recipe.slug}`
 			}
 		>
 			<div

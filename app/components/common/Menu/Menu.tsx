@@ -1,4 +1,5 @@
 import { useNavigation } from "@remix-run/react";
+import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import {
 	Children,
@@ -44,10 +45,12 @@ type MenuContextType = [
 ];
 
 interface MenuWrapperProps {
-	children: ReactNode;
+	children?: ReactNode;
+	customButton?: ReactNode;
 	menuChildren: ReactNode[];
 	x?: PositionX;
 	y?: PositionY;
+	className?: string;
 }
 
 const MenuContext = createContext<MenuContextType | undefined>(undefined);
@@ -150,6 +153,22 @@ export const Menu = () => {
 		}
 	};
 
+	const renderChildren = useCallback(() => {
+		if (!children || children.length === 0) {
+			return null;
+		}
+
+		return Children.map(children, (child, index) => {
+			const clonedElement = cloneElement(child as ReactElement, {
+				role: "menuitem",
+				tabIndex: 0,
+				ref: index === 0 ? firstMenuItemRef : null,
+			});
+
+			return clonedElement;
+		});
+	}, [children]);
+
 	/* close on Escape and focus on last buttonRef */
 	useEffect(() => {
 		if (isOpen && menuRef.current) {
@@ -198,9 +217,13 @@ export const Menu = () => {
 		}
 	}, [isOpen]);
 
+	if (!children?.length) {
+		return null;
+	}
+
 	return (
 		<AnimatePresence initial={false}>
-			{isOpen && children && (
+			{isOpen && (
 				<motion.div
 					ref={menuRef as RefObject<HTMLDivElement>}
 					animate={{
@@ -222,15 +245,7 @@ export const Menu = () => {
 					role="menu"
 					onBlur={handleBlur}
 				>
-					{Children.map(children, (child, index) => {
-						const clonedElement = cloneElement(child as ReactElement, {
-							role: "menuitem",
-							tabIndex: 0,
-							ref: index === 0 ? firstMenuItemRef : null,
-						});
-
-						return clonedElement;
-					})}
+					{renderChildren()}
 				</motion.div>
 			)}
 		</AnimatePresence>
@@ -239,9 +254,11 @@ export const Menu = () => {
 
 export const MenuWrapper = ({
 	menuChildren,
+	customButton,
 	children,
 	x = "center",
 	y = "bottom",
+	className,
 }: MenuWrapperProps) => {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const [
@@ -289,6 +306,8 @@ export const MenuWrapper = ({
 	}, [isOpen, setIsOpen]);
 
 	const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+
 		if (!isOpen) {
 			open(e);
 		}
@@ -302,11 +321,23 @@ export const MenuWrapper = ({
 		}
 	};
 
-	return (
+	if (!customButton && !children) {
+		return null;
+	}
+
+	return !!customButton && !children ? (
+		cloneElement(customButton as ReactElement, {
+			ref: buttonRef as RefObject<HTMLAnchorElement | HTMLButtonElement>,
+			"aria-haspopup": true,
+			className: clsx("relative", className),
+			onClick: handleClick,
+			onKeyDown: handleKeyDown,
+		})
+	) : (
 		<button
 			ref={buttonRef as RefObject<HTMLButtonElement>}
 			aria-haspopup
-			className="relative rounded-full"
+			className={clsx("relative rounded-full", className)}
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}
 		>

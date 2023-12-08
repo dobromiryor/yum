@@ -4,3 +4,5 @@ export const QUANTITY_REGEX =
 export const USERNAME_REGEX = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/;
 
 export const NAME_REGEX = /^[а-яА-Я]+$|^[a-zA-Z]+$/;
+
+export const SLUG_REGEX = /^(([a-z0-9])+[-]?([a-z0-9])+)+[-]?([a-z0-9])+$/;

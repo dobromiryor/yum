@@ -13,9 +13,13 @@ const ACTION_URL = "/action/change-language";
 
 interface LanguageMenuProps {
 	isMobile?: boolean;
+	isNotAuthenticated?: boolean;
 }
 
-export const LanguageMenu = ({ isMobile = false }: LanguageMenuProps) => {
+export const LanguageMenu = ({
+	isMobile = false,
+	isNotAuthenticated = false,
+}: LanguageMenuProps) => {
 	const submit = useSubmit();
 	const { pathname } = useLocation();
 	const [isLoading] = useIsLoading({ formAction: ACTION_URL });
@@ -44,11 +48,12 @@ export const LanguageMenu = ({ isMobile = false }: LanguageMenuProps) => {
 					{t(`nav.language.${lang}`)}
 				</Button>
 			))}
+			x={isNotAuthenticated ? "right" : "center"}
 			y={isMobile ? "top" : "bottom"}
 		>
 			<div
 				className={clsx(
-					"flex justify-center items-center w-8 h-8 bg-light dark:bg-dark rounded-full shadow-md select-none transition-colors duration-500 cursor-pointer"
+					"flex justify-center items-center w-8 h-8 bg-light dark:bg-dark rounded-full select-none transition-colors duration-500 cursor-pointer"
 				)}
 			>
 				<Icon

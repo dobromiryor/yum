@@ -19,7 +19,9 @@ import { Modal } from "~/components/common/Modal";
 import { FormError } from "~/components/common/UI/FormError";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
+import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { auth } from "~/utils/auth.server";
+import { deleteImage } from "~/utils/cloudinary.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
@@ -133,10 +135,16 @@ export const action = async ({
 		throw new Response(null, { status: 403 });
 	}
 
+	const photo =
+		authData.photo &&
+		CloudinaryUploadApiResponseWithBlurHashSchema.parse(authData.photo);
+
 	let success = true;
 
-	return await prisma.user
-		.delete({ where: { id } })
+	return await Promise.all([
+		photo && (await deleteImage(photo.public_id)),
+		await prisma.user.delete({ where: { id } }),
+	])
 		.catch(() => {
 			success = false;
 

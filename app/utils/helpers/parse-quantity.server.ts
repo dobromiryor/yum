@@ -19,5 +19,5 @@ export const parseQuantity = (string: string): number => {
 	const mapToNumbers = stringArr.map((item) => Number(item));
 	const reduced = mapToNumbers.reduce((prev, curr) => prev / curr);
 
-	return reduced;
+	return Number(reduced.toFixed(2));
 };

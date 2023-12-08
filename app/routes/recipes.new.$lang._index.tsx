@@ -6,8 +6,9 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
+	type TypedResponse,
 } from "@remix-run/node";
-import { Form, Link, useParams } from "@remix-run/react";
+import { Form, Link, useActionData, useParams } from "@remix-run/react";
 import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -19,6 +20,7 @@ import {
 import { type z } from "zod";
 
 import { Button } from "~/components/common/UI/Button";
+import { FormError } from "~/components/common/UI/FormError";
 import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
@@ -28,9 +30,9 @@ import { useFilteredValues } from "~/hooks/useFilteredValues";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import i18next from "~/modules/i18next.server";
 import { DifficultySchema, LanguageSchema } from "~/schemas/common";
-import { NewRecipeSchema } from "~/schemas/new-recipe.schema";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { CreateRecipeSchema } from "~/schemas/params.schema";
+import { NewRecipeSchema } from "~/schemas/recipe.schema";
 import { auth } from "~/utils/auth.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import {
@@ -80,6 +82,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 };
 
 const NewRecipeRoute = () => {
+	const actionData = useActionData<typeof action>();
+
 	const { t } = useTranslation();
 	const [isLoading] = useIsLoading();
 	const params = useParams();
@@ -137,6 +141,13 @@ const NewRecipeRoute = () => {
 						label={t("recipe.field.name")}
 						name="name"
 					/>
+					<Input
+						isRequired
+						explanation={t("explanation.slug")}
+						explanationIcon="regular_expression"
+						label={t("recipe.field.slug")}
+						name="slug"
+					/>
 					<Textarea
 						isRequired
 						label={t("recipe.field.description")}
@@ -164,6 +175,15 @@ const NewRecipeRoute = () => {
 						name="servings"
 						type="number"
 					/>
+					<FormError
+						error={
+							typeof actionData?.success === "boolean" && !actionData?.success
+								? typeof actionData?.message === "string"
+									? actionData.message
+									: t("error.somethingWentWrong")
+								: undefined
+						}
+					/>
 					<div className="flex justify-end pt-4">
 						<Button
 							isDisabled={!Object.keys(dirtyFields).length}
@@ -179,7 +199,15 @@ const NewRecipeRoute = () => {
 	);
 };
 
-export const action = async ({ request, params: p }: ActionFunctionArgs) => {
+export const action = async ({
+	request,
+	params: p,
+}: ActionFunctionArgs): Promise<
+	TypedResponse<{
+		success: boolean;
+		message?: string;
+	}>
+> => {
 	const authData = await auth.isAuthenticated(request.clone());
 
 	if (!authData) {
@@ -189,6 +217,19 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 	const { lang } = CreateRecipeSchema.parse(p);
 
 	const data = await parseFormData<FormData>(request.clone());
+
+	const foundRecipes = await prisma.recipe.findMany({
+		select: { slug: true },
+	});
+
+	if (foundRecipes.find((item) => item.slug === data.slug)) {
+		const t = await i18next.getFixedT(request);
+
+		return json({
+			success: false,
+			message: t("error.slugExists"),
+		});
+	}
 
 	const createdRecipe = await prisma.recipe.create({
 		data: {

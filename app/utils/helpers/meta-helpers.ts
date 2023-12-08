@@ -1,3 +1,5 @@
+import logo_dark from "public/images/logo/logo_square_dark.png";
+
 const MAX_TITLE_LENGTH = 70;
 const MAX_DESCRIPTION_LENGTH = 155;
 const ELLIPSIS = "...";
@@ -59,7 +61,7 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 		title,
 		description,
 		url,
-		image, // TODO: Add image placeholder
+		image = logo_dark, // TODO: prefers-color-scheme?
 	} = props;
 
 	if (title) {
@@ -69,7 +71,7 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 	}
 
 	if (description) {
-		metaArr.push({ description });
+		metaArr.push({ name: "description", content: description });
 		metaArr.push({ "og:description": description });
 		metaArr.push({ "twitter:description": description });
 	}

@@ -18,7 +18,3 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export const loader = async () => redirect("/");
-
-export default function Component() {
-	return null;
-}

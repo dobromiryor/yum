@@ -21,7 +21,7 @@ import { Input } from "~/components/common/UI/Input";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
-import { EditRecipeParamsSchema } from "~/schemas/params.schema";
+import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
 import { SubRecipeDTOSchema } from "~/schemas/sub-recipe.schema";
 import { auth } from "~/utils/auth.server";
 import {
@@ -50,7 +50,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeWithLangParamsSchema.parse(p);
 
 	const foundRecipe = await prisma.recipe.findUnique({
 		where: { id: recipeId },
@@ -151,7 +151,7 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const { lang, recipeId } = EditRecipeParamsSchema.parse(p);
+	const { lang, recipeId } = EditRecipeWithLangParamsSchema.parse(p);
 
 	const data = await parseFormData<FormData>(request.clone());
 

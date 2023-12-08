@@ -54,7 +54,7 @@ export const usePagination = (
 		}
 
 		if (searchParams.get("limit")) {
-			if (toNumber(searchParams.get("limit"))! < 1) {
+			if (toNumber(searchParams.get("limit"))! < LIMIT_FALLBACK) {
 				set("limit", LIMIT_FALLBACK, true);
 			} else if (
 				toNumber(searchParams.get("limit"))! > LIMIT_ARR[LIMIT_ARR.length - 1]

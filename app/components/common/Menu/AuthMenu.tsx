@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "~/components/common/Avatar";
@@ -28,6 +29,28 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 					<span className="typography-bold">{getDisplayName(authData)}</span>
 					<span className="text-sm typography-light">{authData.email}</span>
 				</div>,
+				...(authData.role === Role.ADMIN
+					? [
+							<NavigationLink
+								key="Admin__Dashboard__Link"
+								buttonClassName="flex-1"
+								to="/admin"
+							>
+								{t("nav.authMenu.adminDashboard")}
+							</NavigationLink>,
+					  ]
+					: []),
+				...(authData?.isVerified
+					? [
+							<NavigationLink
+								key="My_Recipes_Link"
+								buttonClassName="flex-1"
+								to={`/users/${authData?.id}`}
+							>
+								{t("nav.authMenu.myRecipes")}
+							</NavigationLink>,
+					  ]
+					: []),
 				<NavigationLink
 					key="Settings__Link"
 					buttonClassName="flex-1"
@@ -51,6 +74,7 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 				className="cursor-pointer"
 				layout="fixed"
 				size="32"
+				user={authData}
 				variant="circle"
 			/>
 		</MenuWrapper>
