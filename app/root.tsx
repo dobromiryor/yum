@@ -1,3 +1,4 @@
+import { LiveReload, useSWEffect } from "@remix-pwa/sw";
 import {
 	json,
 	type LinksFunction,
@@ -6,7 +7,6 @@ import {
 } from "@remix-run/node";
 import {
 	Links,
-	LiveReload,
 	Meta,
 	Outlet,
 	Scripts,
@@ -109,6 +109,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 function App() {
+	useSWEffect();
 	const { locale, theme: loaderTheme } = useLoaderData<typeof loader>();
 	const [theme] = useTheme();
 
@@ -139,7 +140,7 @@ function App() {
 				<Menu />
 				<ScrollRestoration />
 				<Scripts />
-				{process.env.NODE_ENV === "development" ? <LiveReload /> : null}
+				<LiveReload />
 			</body>
 		</html>
 	);

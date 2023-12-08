@@ -21,6 +21,7 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 
 	return (
 		<MenuWrapper
+			ariaLabel={t("nav.authMenu.userMenu")}
 			menuChildren={[
 				<div
 					key="User__Info"

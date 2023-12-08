@@ -84,6 +84,7 @@
 	},
 	"nav": {
 		"authMenu": {
+			"userMenu": "User menu",
 			"logout": "Log out",
 			"settings": "Settings",
 			"adminDashboard": "Admin dashboard",
@@ -105,7 +106,8 @@
 			"dark": "Dark theme",
 			"label": "Theme",
 			"light": "Light theme"
-		}
+		},
+		"mainMenu": "Menu"
 	},
 	"recipe": {
 		"card": {
