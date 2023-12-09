@@ -32,6 +32,7 @@ for (const color in tailwindColors) {
 		}
 	}
 }
+
 /** @type {import('tailwindcss').Config} */
 
 export default {

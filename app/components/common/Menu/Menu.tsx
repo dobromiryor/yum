@@ -51,6 +51,15 @@ interface MenuWrapperProps {
 	x?: PositionX;
 	y?: PositionY;
 	className?: string;
+	ariaLabel?: string;
+}
+interface MenuWrapperWithCustomButtonProps {
+	children?: ReactNode;
+	customButton: ReactNode;
+	menuChildren: ReactNode[];
+	x?: PositionX;
+	y?: PositionY;
+	className?: string;
 	ariaLabel: string;
 }
 
@@ -261,7 +270,7 @@ export const MenuWrapper = ({
 	y = "bottom",
 	className,
 	ariaLabel,
-}: MenuWrapperProps) => {
+}: MenuWrapperProps | MenuWrapperWithCustomButtonProps) => {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const [
 		{ isOpen, menuRef },

@@ -47,6 +47,7 @@ import {
 } from "~/utils/helpers/meta-helpers";
 import { nullishTranslatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = Partial<z.infer<typeof StepDTOSchema>>;
 const resolver = zodResolver(StepDTOSchema);
@@ -135,7 +136,9 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 			meta: {
 				title,
 				description,
-				url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/step/${stepId}/edit`,
+				url: `${PARSED_ENV.DOMAIN_URL}`,
+				path: `/recipes/edit/${recipeId}/${lang}/step/${stepId}/edit`,
+				theme: (await getThemeSession(request)).getTheme(),
 			},
 		},
 		{ headers: { "Set-Cookie": await commit() } }

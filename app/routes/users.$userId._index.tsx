@@ -36,6 +36,7 @@ import {
 	recipesOverview,
 	unpublishedRecipesCount,
 } from "~/utils/recipe.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const sitemap: SitemapFunction = async () => {
 	const users = await prisma.user.findMany();
@@ -101,10 +102,12 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/users/${userId}`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/users/${userId}`,
 			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
 				foundUser.photo
 			)?.secure_url,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

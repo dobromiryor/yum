@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    json,
-    type ActionFunctionArgs,
-    type LoaderFunctionArgs,
-    type MetaFunction,
+	json,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import { Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { useEffect } from "react";
@@ -22,11 +22,12 @@ import { LoginDTOSchema, LoginIntentSchema } from "~/schemas/login.schema";
 import { auth } from "~/utils/auth.server";
 import { getFrom } from "~/utils/helpers/get-from.server";
 import {
-    generateMetaDescription,
-    generateMetaProps,
-    generateMetaTitle,
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { sessionStorage } from "~/utils/session.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof LoginDTOSchema>;
 const resolver = zodResolver(LoginDTOSchema);
@@ -65,7 +66,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/login`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/login`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

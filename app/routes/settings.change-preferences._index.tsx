@@ -1,25 +1,25 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DisplayName, TemperatureScale, UnitSystem } from "@prisma/client";
 import {
-    json,
-    type ActionFunctionArgs,
-    type LoaderFunctionArgs,
-    type MetaFunction,
+	json,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
-    Form,
-    useActionData,
-    useLoaderData,
-    useLocation,
-    useNavigation,
+	Form,
+	useActionData,
+	useLoaderData,
+	useLocation,
+	useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-    RemixFormProvider,
-    parseFormData,
-    useRemixForm,
+	RemixFormProvider,
+	parseFormData,
+	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -33,12 +33,13 @@ import { OptionsSchema } from "~/schemas/option.schema";
 import { PreferencesSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
 import {
-    generateMetaDescription,
-    generateMetaProps,
-    generateMetaTitle,
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof PreferencesSchema>;
 const resolver = zodResolver(PreferencesSchema);
@@ -87,7 +88,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/settings/change-preferences`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/settings/change-preferences`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

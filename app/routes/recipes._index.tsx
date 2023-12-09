@@ -25,6 +25,7 @@ import {
 } from "~/utils/helpers/meta-helpers";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { recipesOverview } from "~/utils/recipe.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const sitemap = () => ({
 	priority: 1.0,
@@ -54,15 +55,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	const foundRecipes = await recipesOverview({ pagination, request });
 
-	return json({
-		foundRecipes,
-		locale,
-		meta: {
-			title,
-			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes${result ? `?q=${result}` : ""}`,
+	return json(
+		{
+			foundRecipes,
+			locale,
+			meta: {
+				title,
+				description,
+				url: `${PARSED_ENV.DOMAIN_URL}`,
+				path: `/recipes${result ? `?q=${result}` : ""}`,
+				theme: (await getThemeSession(request)).getTheme(),
+			},
 		},
-	});
+		{
+			headers: { "Cache-Control": "private, max-age=10" },
+		}
+	);
 };
 
 export default function RecipesRoute() {

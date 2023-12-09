@@ -52,6 +52,7 @@ import {
 } from "~/utils/helpers/meta-helpers";
 import { translatedContent } from "~/utils/helpers/translated-content.server";
 import { prisma } from "~/utils/prisma.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof EditRecipeSchema>;
 const resolver = zodResolver(EditRecipeSchema);
@@ -118,7 +119,9 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 			meta: {
 				title,
 				description: metaDescription,
-				url: `${PARSED_ENV.DOMAIN_URL}/recipes/edit/${recipeId}/${lang}/details`,
+				url: `${PARSED_ENV.DOMAIN_URL}`,
+				path: `/recipes/edit/${recipeId}/${lang}/details`,
+				theme: (await getThemeSession(request)).getTheme(),
 			},
 		},
 		{ headers: { "Set-Cookie": await commit() } }

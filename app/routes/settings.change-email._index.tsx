@@ -1,24 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    json,
-    type ActionFunctionArgs,
-    type LoaderFunctionArgs,
-    type MetaFunction,
+	json,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type MetaFunction,
 } from "@remix-run/node";
 import {
-    Form,
-    useActionData,
-    useLoaderData,
-    useLocation,
-    useNavigate,
-    useNavigation,
+	Form,
+	useActionData,
+	useLoaderData,
+	useLocation,
+	useNavigate,
+	useNavigation,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    RemixFormProvider,
-    parseFormData,
-    useRemixForm,
+	RemixFormProvider,
+	parseFormData,
+	useRemixForm,
 } from "remix-hook-form";
 import { type z } from "zod";
 
@@ -32,12 +32,13 @@ import i18next from "~/modules/i18next.server";
 import { EmailSchema } from "~/schemas/settings.schema";
 import { auth } from "~/utils/auth.server";
 import {
-    generateMetaDescription,
-    generateMetaProps,
-    generateMetaTitle,
+	generateMetaDescription,
+	generateMetaProps,
+	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sendChangeEmail } from "~/utils/sendgrid.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof EmailSchema>;
 const resolver = zodResolver(EmailSchema);
@@ -88,7 +89,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/settings/change-email`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/settings/change-email`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

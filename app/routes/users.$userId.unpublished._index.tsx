@@ -31,6 +31,7 @@ import {
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 import { recipesOverview } from "~/utils/recipe.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const sitemap = () => ({
 	exclude: true,
@@ -86,10 +87,12 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/users/${userId}/unpublished`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/users/${userId}/unpublished`,
 			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
 				foundUser.photo
 			)?.secure_url,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };
