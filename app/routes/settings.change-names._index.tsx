@@ -36,6 +36,7 @@ import {
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof NamesSchema>;
 const resolver = zodResolver(NamesSchema);
@@ -84,7 +85,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/settings/change-names`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/settings/change-names`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

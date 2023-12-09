@@ -13,6 +13,7 @@ import {
 	generateMetaProps,
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const sitemap = () => ({
 	exclude: true,
@@ -31,7 +32,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		postfix: PARSED_ENV.APP_NAME,
 	});
 
-	return json({ from, meta: { title } }, { status: 404 });
+	return json(
+		{
+			from,
+			meta: {
+				title,
+				url: PARSED_ENV.DOMAIN_URL,
+				path: "/404",
+				theme: (await getThemeSession(request)).getTheme(),
+			},
+		},
+		{ status: 404 }
+	);
 };
 
 export const NotFoundRoute = () => {

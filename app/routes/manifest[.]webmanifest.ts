@@ -1,5 +1,6 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 
+import { DARK, LIGHT } from "~/consts/color.const";
 import { Theme } from "~/utils/providers/theme-provider";
 import { getThemeSession } from "~/utils/theme.server";
 
@@ -13,23 +14,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 			name: "Yum",
 			start_url: "/",
 			display: "standalone",
-			background_color: theme === Theme.LIGHT ? "#FAF0E6" : "#352F44",
-			theme_color: theme === Theme.LIGHT ? "#FAF0E6" : "#352F44",
-			shortcuts: [
-				{
-					name: "Yum",
-					url: "/",
-					icons: [
-						{
-							src: "/icons/android-icon-96x96.png",
-							sizes: "96x96",
-							type: "image/png",
-							purpose: "any monochrome",
-						},
-					],
-				},
-			],
+			background_color: theme === Theme.LIGHT ? LIGHT : DARK,
+			theme_color: theme === Theme.LIGHT ? LIGHT : DARK,
 			icons: [
+				{
+					src: "/favicon.ico",
+					sizes: "48x48",
+					type: "image/x-icon",
+				},
 				{
 					src: "/icons/android-icon-36x36.png",
 					sizes: "36x36",
@@ -64,11 +56,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 					src: "/icons/android-chrome-192x192.png",
 					sizes: "192x192",
 					type: "image/png",
+					purpose: "maskable",
 				},
 				{
 					src: "/icons/android-chrome-256x256.png",
 					sizes: "256x256",
 					type: "image/png",
+					purpose: "maskable",
+				},
+				{
+					src: "/icons/android-chrome-512x512.png",
+					sizes: "512x512",
+					type: "image/png",
+					purpose: "maskable",
 				},
 			],
 		},

@@ -163,6 +163,7 @@ module.exports = {
 		"!.*",
 		"src/generated/",
 		"**/*.d.ts",
+		"public/entry.worker.js",
 	],
 	settings: {
 		react: {

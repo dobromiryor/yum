@@ -25,6 +25,7 @@ import {
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
+import { getThemeSession } from "~/utils/theme.server";
 import { usersOverview } from "~/utils/user.server";
 
 export const sitemap = () => ({
@@ -64,7 +65,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/admin/users`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/admin/users`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

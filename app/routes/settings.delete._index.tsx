@@ -28,6 +28,7 @@ import {
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const sitemap = () => ({
 	exclude: true,
@@ -72,7 +73,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/settings/delete`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/settings/delete`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

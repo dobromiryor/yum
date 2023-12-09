@@ -41,6 +41,7 @@ import {
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof NewRecipeSchema>;
 const resolver = zodResolver(NewRecipeSchema);
@@ -74,9 +75,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/new/${LanguageSchema.parse(
-				params.lang
-			)}`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/recipes/new/${LanguageSchema.parse(params.lang)}`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };

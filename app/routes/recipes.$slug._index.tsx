@@ -41,6 +41,7 @@ import {
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
 import { recipeDetails } from "~/utils/recipe.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const sitemap: SitemapFunction = async () => {
 	const recipes = await prisma.recipe.findMany();
@@ -95,19 +96,26 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		]!,
 	});
 
-	return json({
-		authData,
-		foundRecipe,
-		locale,
-		meta: {
-			title,
-			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/${slug}`,
-			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
-				foundRecipe.photo
-			)?.secure_url,
+	return json(
+		{
+			authData,
+			foundRecipe,
+			locale,
+			meta: {
+				title,
+				description,
+				url: `${PARSED_ENV.DOMAIN_URL}`,
+				path: `/recipes/${slug}`,
+				theme: (await getThemeSession(request)).getTheme(),
+				image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
+					foundRecipe.photo
+				)?.secure_url,
+			},
 		},
-	});
+		{
+			headers: { "Cache-Control": "private, max-age=10" },
+		}
+	);
 };
 
 const RecipeDetailRoute = () => {

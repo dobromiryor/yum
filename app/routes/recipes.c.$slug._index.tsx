@@ -31,6 +31,7 @@ import {
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
 import { recipesCategoryOverview } from "~/utils/recipe.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
@@ -87,16 +88,23 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 				: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
 	});
 
-	return json({
-		foundCategory,
-		foundRecipes,
-		locale,
-		meta: {
-			title,
-			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/recipes/c/${slug}`,
+	return json(
+		{
+			foundCategory,
+			foundRecipes,
+			locale,
+			meta: {
+				title,
+				description,
+				url: `${PARSED_ENV.DOMAIN_URL}`,
+				path: `/recipes/c/${slug}`,
+				theme: (await getThemeSession(request)).getTheme(),
+			},
 		},
-	});
+		{
+			headers: { "Cache-Control": "private, max-age=10" },
+		}
+	);
 };
 
 export default function RecipesCategoryRoute() {

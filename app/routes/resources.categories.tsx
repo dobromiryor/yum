@@ -57,6 +57,7 @@ export const CategoryMenu = () => {
 
 	return (
 		<MenuWrapper
+			aria-label={t("nav.categories")}
 			className={clsx(!categories.length && "pointer-events-none")}
 			customButton={
 				<NavigationLink

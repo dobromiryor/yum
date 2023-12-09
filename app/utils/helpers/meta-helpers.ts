@@ -1,3 +1,7 @@
+import imageFallback from "public/images/social/dark.png";
+import { DARK, LIGHT } from "~/consts/color.const";
+import { Theme } from "~/utils/providers/theme-provider";
+
 const MAX_TITLE_LENGTH = 70;
 const MAX_DESCRIPTION_LENGTH = 155;
 const ELLIPSIS = "...";
@@ -42,10 +46,12 @@ export const generateMetaDescription = ({
 };
 
 type GenerateMetaProps = {
+	url: string;
 	title?: string;
 	description?: string;
-	url?: string;
+	path?: string;
 	image?: string;
+	theme?: Theme | null;
 };
 
 export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
@@ -56,10 +62,12 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 	}
 
 	const {
+		url,
 		title,
 		description,
-		url,
-		image = "https://res.cloudinary.com/dsa9klpxl/image/upload/f_auto,q_auto/v1/resources/ys5n4wb4fidxpdb7b6an",
+		path = url,
+		image = `${url}${imageFallback}`,
+		theme,
 	} = props;
 
 	if (title) {
@@ -79,13 +87,18 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 		metaArr.push({ "twitter:image": image });
 	}
 
-	if (url) {
-		metaArr.push({ "og:url": url });
-		metaArr.push({ "twitter:url": url });
+	if (path) {
+		metaArr.push({ "og:url": `${url}${path}` });
+		metaArr.push({ "twitter:url": `${url}${path}` });
 	}
 
 	metaArr.push({ "og:type": "website" });
 	metaArr.push({ "twitter:card": image ? "summary_large_image" : "summary" });
+
+	metaArr.push({
+		name: "theme-color",
+		content: theme === Theme.LIGHT ? LIGHT : DARK,
+	});
 
 	return metaArr;
 };

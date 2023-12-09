@@ -44,6 +44,7 @@ import {
 } from "~/utils/helpers/meta-helpers";
 import { setPagination } from "~/utils/helpers/set-pagination.server";
 import { prisma } from "~/utils/prisma.server";
+import { getThemeSession } from "~/utils/theme.server";
 
 export const sitemap = () => ({
 	exclude: true,
@@ -81,7 +82,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		meta: {
 			title,
 			description,
-			url: `${PARSED_ENV.DOMAIN_URL}/admin/categories`,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/admin/categories`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
 	});
 };
