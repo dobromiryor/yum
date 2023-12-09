@@ -53,7 +53,7 @@ export const links: LinksFunction = () => {
 	return [
 		{
 			rel: "stylesheet",
-			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block",
+			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0",
 		},
 		{
 			rel: "stylesheet",
@@ -62,6 +62,10 @@ export const links: LinksFunction = () => {
 		{
 			rel: "stylesheet",
 			href: tailwind,
+		},
+		{
+			rel: "manifest",
+			href: "/manifest.webmanifest",
 		},
 	];
 };
@@ -76,6 +80,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	const t = await i18next.getFixedT(request);
 
+	const theme = themeSession.getTheme();
+
 	const title = generateMetaTitle({
 		title: PARSED_ENV.APP_NAME,
 	});
@@ -88,16 +94,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		{
 			authData,
 			locale,
-			theme: themeSession.getTheme(),
+			theme,
 			from,
 			ENV: {
 				APP_NAME: PARSED_ENV.APP_NAME,
 				CLOUDINARY_CLOUD_NAME: PARSED_ENV.CLOUDINARY_CLOUD_NAME,
 			},
 			meta: {
+				url: PARSED_ENV.DOMAIN_URL,
 				title,
 				description,
-				url: PARSED_ENV.DOMAIN_URL,
+				path: "",
+				theme,
 			},
 		} as const,
 		{
