@@ -223,7 +223,7 @@ export const TooltipWrapper = ({
 
 	return (
 		<div
-			className={clsx("relative", className)}
+			className={clsx("flex shrink", className)}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 		>
