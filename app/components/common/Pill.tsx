@@ -8,18 +8,38 @@ interface CardPillProps {
 	icon?: string;
 	label?: ReactNode | string | number | null;
 	tooltip?: string;
+	padding?: "none" | "default";
+	variant?: "normal" | "error";
 }
 
-export const Pill = ({ icon, label, tooltip }: CardPillProps) => {
+export const Pill = ({
+	icon,
+	label,
+	tooltip,
+	padding = "default",
+	variant = "normal",
+}: CardPillProps) => {
 	if (!label && !icon) {
 		return null;
 	}
+
+	const paddingStyles = {
+		default: "p-1.5",
+		none: "",
+	};
+
+	const variantStyles = {
+		normal: "bg-light dark:bg-dark",
+		error: "bg-red-700 text-light",
+	};
 
 	return (
 		<TooltipWrapper content={tooltip}>
 			<div
 				className={clsx(
-					"flex justify-center items-center gap-1.5 p-1.5 bg-light dark:bg-dark text-xs leading-[14px] h-min transition-colors select-none",
+					"flex justify-center items-center gap-1.5 text-xs leading-[14px] h-min transition-colors select-none",
+					paddingStyles[padding],
+					variantStyles[variant],
 					icon && !label ? "rounded-full" : "rounded-xl"
 				)}
 			>

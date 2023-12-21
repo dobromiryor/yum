@@ -24,6 +24,7 @@ import { StepList } from "~/components/recipes/detail/Step";
 import { SubRecipeCardList } from "~/components/recipes/detail/SubRecipeCardList";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
+import { RecipeReviews } from "~/routes/resources.recipes.$recipeId.reviews";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import {
 	LanguageSchema,
@@ -302,7 +303,7 @@ const RecipeDetailRoute = () => {
 						<Pill
 							icon="calendar_today"
 							label={new Date(updatedAt).toLocaleDateString(locale)}
-							tooltip={t("recipe.field.lastUpdate", {
+							tooltip={t("common.lastUpdate", {
 								date: new Date(updatedAt).toLocaleDateString(locale),
 								interpolation: { escapeValue: false },
 							})}
@@ -380,6 +381,7 @@ const RecipeDetailRoute = () => {
 						/>
 					</section>
 				)}
+				<RecipeReviews recipeId={id} />
 			</article>
 			<ScreenWakeLock />
 		</>

@@ -246,12 +246,14 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					value: name,
 				})),
 				note: note
-					? await nullishTranslatedContent({
-							request,
-							key: "note",
-							lang,
-							value: note,
-					  })
+					? (
+							await nullishTranslatedContent({
+								request,
+								key: "note",
+								lang,
+								value: note,
+							})
+					  )?.note
 					: Prisma.JsonNull,
 				quantity:
 					quantity === null

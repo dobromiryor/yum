@@ -34,7 +34,11 @@
 		"cookingMode": "Cooking mode",
 		"noData": "No data.",
 		"total": "Total",
-		"limit": "Limit"
+		"limit": "Limit",
+		"lastUpdate": "Last update {{date}}",
+		"hide": "Hide",
+		"show": "Show",
+		"error": "Error"
 	},
 	"email": {
 		"changeEmail": {
@@ -184,7 +188,6 @@
 			"subRecipeAction": "Sub recipe action",
 			"restTime": "Rest",
 			"totalTime": "Total",
-			"lastUpdate": "Last update {{date}}",
 			"photo": "Photo",
 			"recipe": "Recipe",
 			"ingredient": "Ingredient",
@@ -274,7 +277,41 @@
 			"ingredientsAndEquipment": "Ingredients and equipment",
 			"mainIngredients": "Main ingredients",
 			"steps": "Steps",
-			"subRecipes": "Sub recipes"
+			"subRecipes": "Sub recipes",
+			"reviews": {
+				"title": "Reviews",
+				"rating": {
+					"count_one": "{{count}} rating",
+					"count_other": "{{count}} ratings",
+					"description": [
+						"Terrible",
+						"Poor",
+						"Average",
+						"Very good",
+						"Excellent"
+					]
+				},
+				"comments": {
+					"comment": "Comment",
+					"commentTextareaPlaceholder": "Leave comment...",
+					"count_one": "{{count}} comment",
+					"count_other": "{{count}} comments",
+					"reply": "Reply",
+					"replyTextareaPlaceholder": "Reply...",
+					"hiddenComment": "Comment is hidden.",
+					"replyingTo": "Replying to: \"{{comment}}\"",
+					"deletedUser": {
+						"firstName": "Deleted",
+						"lastName": "User"
+					},
+					"deleteCommentPrompt": "Are you sure you want to delete this comment?",
+					"deleteCommentWithRepliesPrompt": "Are you sure you want to delete this comment and all of it's replies?",
+					"report": "Report",
+					"reported": "Reported",
+					"resolve": "Resolve"
+				},
+				"loginCTA": "Log in to leave a review"
+			}
 		},
 		"units": {
 			"mm": "mm",
@@ -421,6 +458,9 @@
 			},
 			"categories": {
 				"title": "Categories"
+			},
+			"comments": {
+				"title": "Comments"
 			}
 		}
 	},
@@ -447,7 +487,8 @@
 	"admin": {
 		"nav": {
 			"users": "Users",
-			"categories": "Categories"
+			"categories": "Categories",
+			"comments": "Comments"
 		},
 		"user": {
 			"table": {
@@ -482,7 +523,7 @@
 				"visitCount": "Visited",
 				"recipesCount": "Recipes",
 				"category_one": "Category",
-				"category_many": "Categories",
+				"category_other": "Categories",
 				"actions": "Actions",
 				"published": "Published",
 				"unpublished": "Unpublished"
@@ -501,6 +542,21 @@
 			},
 			"error": {
 				"descriptionRequired": "Please add a description in all languages, or delete the description."
+			}
+		},
+		"comments": {
+			"table": {
+				"content": "Content",
+				"user": "User",
+				"createdAt": "Created at",
+				"updatedAt": "Updated at",
+				"reported": "Reported",
+				"recipe": "Recipe",
+				"replies": "Replies"
+			},
+			"actions": {
+				"onlyReported": "Only reported",
+				"allComments": "All comments"
 			}
 		}
 	}

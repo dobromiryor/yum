@@ -11,10 +11,14 @@ export const useFilteredValues = <T extends FieldValues>(
 ) => {
 	const submit = useSubmit();
 
-	const onValid = (data: T) => {
-		const noUndefined = Object.fromEntries(
+	const filterUndefined = (data: T) => {
+		return Object.fromEntries(
 			Object.entries(data).filter(([, value]) => typeof value !== "undefined")
 		);
+	};
+
+	const onValid = (data: T) => {
+		const noUndefined = filterUndefined(data);
 
 		submit(
 			createFormData<Partial<FormData>>(noUndefined),
@@ -22,5 +26,5 @@ export const useFilteredValues = <T extends FieldValues>(
 		);
 	};
 
-	return { onValid };
+	return { onValid, filterUndefined };
 };

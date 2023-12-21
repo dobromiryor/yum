@@ -1,4 +1,3 @@
-import { loadServiceWorker } from "@remix-pwa/sw";
 import { RemixBrowser } from "@remix-run/react";
 import i18next from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
@@ -51,4 +50,10 @@ if (window.requestIdleCallback) {
 	window.setTimeout(hydrate, 1);
 }
 
-loadServiceWorker();
+// if the browser supports SW (all modern browsers do it)
+if ("serviceWorker" in navigator) {
+	window.addEventListener("load", () => {
+		// we will register it after the page complete the load
+		navigator.serviceWorker.register("/sw.js");
+	});
+}

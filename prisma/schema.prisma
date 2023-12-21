@@ -33,6 +33,8 @@ model User {
   recipes                 Recipe[]
   steps                   Step[]
   subRecipes              SubRecipe[]
+  rating                  Rating[]
+  commentReport           CommentReport[]
 }
 
 model EmailChangeToken {
@@ -46,27 +48,29 @@ model EmailChangeToken {
 }
 
 model Recipe {
-  id             String          @id @default(cuid())
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  visitCount     Int             @default(0)
-  slug           String          @unique
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  name           Json // { [lang]: string | null }
-  description    Json // { [lang]: string | null }
-  difficulty     Difficulty
-  servings       Int             @db.SmallInt
-  photo          Json? // Cloudinary UploadApiResponse
-  tags           String[]
-  languages      String[]
-  status         Status          @default(UNPUBLISHED)
-  categories     Category[]
-  steps          Step[]
-  ingredients    Ingredient[]
-  commentThreads CommentThread[]
-  subRecipes     SubRecipe[]
-  equipment      Equipment[]
+  id            String          @id @default(cuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  visitCount    Int             @default(0)
+  slug          String          @unique
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  name          Json // { [lang]: string | null }
+  description   Json // { [lang]: string | null }
+  difficulty    Difficulty
+  servings      Int             @db.SmallInt
+  photo         Json? // Cloudinary UploadApiResponse
+  tags          String[]
+  languages     String[]
+  status        Status          @default(UNPUBLISHED)
+  categories    Category[]
+  steps         Step[]
+  ingredients   Ingredient[]
+  subRecipes    SubRecipe[]
+  equipment     Equipment[]
+  rating        Rating[]
+  comment       Comment[]
+  commentReport CommentReport[]
 }
 
 model Category {
@@ -159,25 +163,44 @@ model Step {
   subRecipeAction  SubRecipeAction?
 }
 
-model CommentThread {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  content   String
-  recipe    Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+model Rating {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  value     Int      @db.SmallInt
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId  String
-  comments  Comment[]
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
 }
 
 model Comment {
-  id              String        @id @default(uuid())
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  user            User          @relation(fields: [userId], references: [id])
-  userId          String
-  commentThread   CommentThread @relation(fields: [commentThreadId], references: [id], onDelete: Cascade)
-  commentThreadId String
-  content         String
+  id             String          @id @default(uuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  content        String
+  isHidden       Boolean         @default(false)
+  recipe         Recipe          @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId       String
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId         String?
+  commentReports CommentReport[]
+
+  Children Comment[] @relation("Comment_Children")
+  parent   Comment?  @relation("Comment_Children", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String?
+}
+
+model CommentReport {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String
 }
 
 enum Role {

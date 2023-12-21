@@ -38,6 +38,9 @@ const AdminDashboardRoute = () => {
 					<NavigationLink to="categories">
 						{t("admin.nav.categories")}
 					</NavigationLink>
+					<NavigationLink to="comments">
+						{t("admin.nav.comments")}
+					</NavigationLink>
 				</nav>
 				<div id={ADMIN_DASHBOARD_BUTTON_PORTAL_KEY} />
 			</div>

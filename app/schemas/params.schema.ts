@@ -10,6 +10,10 @@ export const RecipeParamsSchema = z.object({
 	slug: z.string(),
 });
 
+export const RecipeReviewsParamsSchema = z.object({
+	recipeId: z.string(),
+});
+
 export const RecipeCategoryParamsSchema = z.object({
 	slug: z.string(),
 });

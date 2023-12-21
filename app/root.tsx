@@ -1,4 +1,3 @@
-import { LiveReload, useSWEffect } from "@remix-pwa/sw";
 import {
 	json,
 	type LinksFunction,
@@ -7,6 +6,7 @@ import {
 } from "@remix-run/node";
 import {
 	Links,
+	LiveReload,
 	Meta,
 	Outlet,
 	Scripts,
@@ -19,6 +19,7 @@ import { useChangeLanguage } from "remix-i18next";
 import { setErrorMap } from "zod";
 import { makeZodI18nMap } from "zod-i18n-map";
 
+import manifest from "public/manifest.webmanifest";
 import { Layout } from "~/components/common/Layout";
 import { Menu, MenuProvider } from "~/components/common/Menu/Menu";
 import { Tooltip, TooltipProvider } from "~/components/common/Tooltip";
@@ -65,7 +66,7 @@ export const links: LinksFunction = () => {
 		},
 		{
 			rel: "manifest",
-			href: "/manifest.webmanifest",
+			href: manifest,
 		},
 	];
 };
@@ -117,7 +118,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 function App() {
-	useSWEffect();
 	const { locale, theme: loaderTheme } = useLoaderData<typeof loader>();
 	const [theme] = useTheme();
 
@@ -148,7 +148,7 @@ function App() {
 				<Menu />
 				<ScrollRestoration />
 				<Scripts />
-				<LiveReload />
+				{process.env.NODE_ENV === "development" ? <LiveReload /> : null}
 			</body>
 		</html>
 	);

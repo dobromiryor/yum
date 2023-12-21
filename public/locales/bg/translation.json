@@ -34,7 +34,11 @@
 		"cookingMode": "Режим на готвене",
 		"noData": "Няма данни.",
 		"total": "Общо",
-		"limit": "Лимит"
+		"limit": "Лимит",
+		"lastUpdated": "Последно обновено {{date}}",
+		"hide": "Скрий",
+		"show": "Покажи",
+		"error": "Грешка"
 	},
 	"email": {
 		"changeEmail": {
@@ -66,8 +70,7 @@
 		"file-too-large": "Файла е прекалено голям.",
 		"file-too-small": "Файла е прекалено малък.",
 		"too-many-files": "Прекалено много файлове.",
-		"slugExists": "Псевдонима вече съществува.",
-		"slugRegex": "Само малки букви, цифри и тирета(-)."
+		"slugExists": "Псевдонима вече съществува."
 	},
 	"explanation": {
 		"slug": "Малки латински букви, цифри и \"-\"",
@@ -185,7 +188,6 @@
 			"subRecipeAction": "Действие свързано с подрецептата",
 			"restTime": "Почивка",
 			"totalTime": "Общо",
-			"lastUpdated": "Последно обновено {{date}}",
 			"photo": "Снимка",
 			"recipe": "Рецепта",
 			"ingredient": "Съставка",
@@ -273,9 +275,37 @@
 			"equipment": "Оборудване",
 			"ingredients": "Съставки",
 			"ingredientsAndEquipment": "Съставки и оборудване",
-			"steps": "Стъпки",
 			"mainIngredients": "Основни съставки",
-			"subRecipes": "Подрецепта"
+			"steps": "Стъпки",
+			"subRecipes": "Подрецепта",
+			"reviews": {
+				"title": "Отзиви",
+				"rating": {
+					"count_one": "{{count}} оценка",
+					"count_other": "{{count}} оценки",
+					"description": ["Ужасна", "Лоша", "Средна", "Много добра", "Отлична"]
+				},
+				"comments": {
+					"comment": "Коментар",
+					"commentTextareaPlaceholder": "Остави коментар...",
+					"count_one": "{{count}} коментар",
+					"count_other": "{{count}} коментари",
+					"reply": "Отговори",
+					"replyTextareaPlaceholder": "Отговори...",
+					"hiddenComment": "Коментара е скрит.",
+					"replyingTo": "В отговор на: \"{{comment}}\"",
+					"deletedUser": {
+						"firstName": "Изтрит",
+						"lastName": "Потребител"
+					},
+					"deleteCommentPrompt": "Сигурни ли сте, че искате да изтриете този коментар?",
+					"deleteCommentWithRepliesPrompt": "Сигурни ли сте, че искате да изтриете този коментар и всички негови отговори?",
+					"report": "Докладвай",
+					"reported": "Докладван",
+					"resolve": "Разреши"
+				},
+				"loginCTA": "Влезте, за да оставите отзив"
+			}
 		},
 		"units": {
 			"mm": "mm",
@@ -422,6 +452,9 @@
 			},
 			"categories": {
 				"title": "Категории"
+			},
+			"comments": {
+				"title": "Коментари"
 			}
 		}
 	},
@@ -448,7 +481,8 @@
 	"admin": {
 		"nav": {
 			"users": "Потребители",
-			"categories": "Категории"
+			"categories": "Категории",
+			"comments": "Коментари"
 		},
 		"user": {
 			"table": {
@@ -483,7 +517,7 @@
 				"visitCount": "Посетено",
 				"recipesCount": "Рецепти",
 				"category_one": "Категория",
-				"category_many": "Категории",
+				"category_other": "Категории",
 				"actions": "Действия",
 				"published": "Публикувано",
 				"unpublished": "Непубликувано"
@@ -502,6 +536,21 @@
 			},
 			"error": {
 				"descriptionRequired": "Моля добавете описание на всички езици, или изтрийте описанието."
+			}
+		},
+		"comments": {
+			"table": {
+				"content": "Съдържание",
+				"user": "Потребител",
+				"createdAt": "Създаден на",
+				"updatedAt": "Обновен на",
+				"reported": "Докладван",
+				"recipe": "Рецепта",
+				"replies": "Отговори"
+			},
+			"actions": {
+				"onlyReported": "Само докладвани",
+				"allComments": "Всички коментари"
 			}
 		}
 	}

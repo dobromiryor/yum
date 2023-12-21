@@ -1,43 +1,11 @@
-import tailwindColors from "tailwindcss/colors";
 import plugin from "tailwindcss/plugin";
 
 import type { Config } from "tailwindcss";
-
-const colorSafeList = [];
-const extendedColors: { [key: string]: string | { [key: string]: string } } =
-	{};
-const shades = [500, 600, 700, 800, 900];
-
-for (const color in tailwindColors) {
-	// exclude deprecated and unwanted colors
-	if (
-		![
-			"inherit",
-			"current",
-			"transparent",
-			"black",
-			"white",
-			"lightBlue",
-			"warmGray",
-			"trueGray",
-			"coolGray",
-			"blueGray",
-		].includes(color)
-	) {
-		extendedColors[color] =
-			tailwindColors[color as keyof typeof tailwindColors];
-		for (const shadeKey in shades) {
-			colorSafeList.push(`text-${color}-100`);
-			colorSafeList.push(`bg-${color}-${shades[shadeKey]}`);
-		}
-	}
-}
 
 /** @type {import('tailwindcss').Config} */
 
 export default {
 	content: ["./app/**/*.{js,jsx,ts,tsx}"],
-	safelist: colorSafeList,
 	theme: {
 		fontFamily: {
 			sans: ["Rubik", "sans-serif"],
@@ -73,7 +41,7 @@ export default {
 					950: "#1A1820",
 				},
 				secondary: {
-					DEFAULT: "#B9B4C7",
+					DEFAULT: "#B9B4C7", // maybe #C5B9D8
 					50: "#F0EEF3",
 					100: "#E5E3EA",
 					200: "#CFCBD8",
@@ -100,6 +68,9 @@ export default {
 					900: "#1A1005",
 					950: "#030201",
 				},
+			},
+			screens: {
+				xs: "384px",
 			},
 			minHeight: ({ theme }) => ({ ...theme("spacing") }),
 			minWidth: ({ theme }) => ({ ...theme("spacing") }),
