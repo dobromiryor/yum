@@ -135,6 +135,17 @@ function App() {
 			<head>
 				<meta charSet="utf-8" />
 				<meta content="width=device-width, initial-scale=1" name="viewport" />
+				<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+				<meta
+					content="#ffffff"
+					media="((prefers-color-scheme: light)"
+					name="theme-color"
+				/>
+				<meta
+					content="#000000"
+					media="((prefers-color-scheme: dark)"
+					name="theme-color"
+				/>
 				<Meta />
 				<Links />
 				<ThemeHead ssrTheme={Boolean(loaderTheme)} />

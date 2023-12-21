@@ -132,14 +132,12 @@ export const ThemeHead = ({ ssrTheme }: { ssrTheme: boolean }) => {
 
 	return (
 		<>
+			<meta
+				content={theme === "light" ? "light dark" : "dark light"}
+				name="color-scheme"
+			/>
 			{ssrTheme ? null : (
-				<>
-					<meta
-						content={theme === "light" ? "light dark" : "dark light"}
-						name="color-scheme"
-					/>
-					<script dangerouslySetInnerHTML={{ __html: clientThemeCode }} />
-				</>
+				<script dangerouslySetInnerHTML={{ __html: clientThemeCode }} />
 			)}
 		</>
 	);

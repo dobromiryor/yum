@@ -1,6 +1,5 @@
 import imageFallback from "public/images/social/dark.png";
-import { DARK, LIGHT } from "~/consts/color.const";
-import { Theme } from "~/utils/providers/theme-provider";
+import { type Theme } from "~/utils/providers/theme-provider";
 
 const MAX_TITLE_LENGTH = 70;
 const MAX_DESCRIPTION_LENGTH = 155;
@@ -67,7 +66,6 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 		description,
 		path = url,
 		image = `${url}${imageFallback}`,
-		theme,
 	} = props;
 
 	if (title) {
@@ -94,11 +92,6 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 
 	metaArr.push({ "og:type": "website" });
 	metaArr.push({ "twitter:card": image ? "summary_large_image" : "summary" });
-
-	metaArr.push({
-		name: "theme-color",
-		content: theme === Theme.LIGHT ? LIGHT : DARK,
-	});
 
 	return metaArr;
 };
