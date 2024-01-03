@@ -62,13 +62,6 @@ export const sitemap = () => ({
 	exclude: true,
 });
 
-const options = OptionsSchema.parse(
-	Object.values(Unit).map((item) => ({
-		label: item.replace("_", " "),
-		value: item,
-	}))
-);
-
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };
@@ -162,6 +155,13 @@ export const EditIngredientModal = () => {
 	const prevPath = pathname.split("/").slice(0, -3).join("/");
 
 	const { name, note, quantity, unit } = foundIngredient;
+
+	const options = OptionsSchema.parse(
+		Object.values(Unit).map((item) => ({
+			label: t(`recipe.units.${item}`, { count: 0 }),
+			value: item,
+		}))
+	);
 
 	const parsedName = TranslatedContentSchema.parse(name);
 	const parsedNote = OptionalTranslatedContentSchema.parse(note);
@@ -375,8 +375,8 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 					quantity === null
 						? null
 						: quantity === undefined
-						  ? undefined
-						  : new Prisma.Decimal(parseQuantity(quantity)),
+							? undefined
+							: new Prisma.Decimal(parseQuantity(quantity)),
 				unit,
 				subRecipeId,
 			},
