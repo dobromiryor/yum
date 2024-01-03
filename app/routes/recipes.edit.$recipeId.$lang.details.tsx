@@ -322,19 +322,6 @@ export const action = async ({
 
 	let success = true;
 
-	const foundRecipes = await prisma.recipe.findMany({
-		select: { slug: true },
-	});
-
-	if (foundRecipes.find((item) => item.slug === rest.slug)) {
-		const t = await i18next.getFixedT(request);
-
-		return json({
-			success: false,
-			message: t("error.slugExists"),
-		});
-	}
-
 	await prisma.recipe
 		.update({
 			data: {
