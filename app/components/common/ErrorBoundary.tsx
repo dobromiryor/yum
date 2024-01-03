@@ -4,7 +4,7 @@ import {
 	Meta,
 	Scripts,
 	isRouteErrorResponse,
-	useRouteError,
+	useRouteError
 } from "@remix-run/react";
 import { blurhashToGradientCssObject } from "@unpic/placeholder";
 import clsx from "clsx";
@@ -215,7 +215,10 @@ export const NotFound = ({ from }: { from?: string | null }) => {
 	return (
 		<>
 			<h1 className="text-2xl typography-bold text-center">
-				{t("errorPages.404.title")}
+				{typeof document !== "undefined" &&
+				document.location.href.includes("recipes")
+					? t("errorPages.404.recipes")
+					: t("errorPages.404.title")}
 			</h1>
 			<div className="flex gap-2">
 				{from && (

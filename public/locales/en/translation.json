@@ -477,7 +477,8 @@
 			"title": "Looks like you don't have access."
 		},
 		"404": {
-			"title": "Hmm, there's nothing here."
+			"title": "Hmm, there's nothing here.",
+			"recipes": "Hmm, the recipe is missing or it's unavailable in this language."
 		},
 		"500": {
 			"title": "Whoops! Looks like someone set the timer wrong.",
