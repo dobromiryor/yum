@@ -78,13 +78,6 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 404 });
 	}
 
-	foundRecipe.visitCount++;
-
-	await prisma.recipe.update({
-		data: { visitCount: foundRecipe.visitCount },
-		where: { id: foundRecipe.id },
-	});
-
 	const name = TranslatedContentSchema.parse(foundRecipe.name);
 
 	const title = generateMetaTitle({

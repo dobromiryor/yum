@@ -44,7 +44,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
 	const { slug } = RecipeCategoryParamsSchema.parse(params);
 
-	const foundCategory = await prisma.category.findUnique({ where: { slug } });
+	const foundCategory = await prisma.category.update({
+		data: { visitCount: { increment: 1 } },
+		where: { slug },
+	});
 
 	if (!foundCategory) {
 		throw new Response(null, { status: 404 });
@@ -53,13 +56,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 	if (foundCategory?.status !== Status.PUBLISHED) {
 		throw new Response(null, { status: 404 });
 	}
-
-	foundCategory.visitCount++;
-
-	await prisma.category.update({
-		data: { visitCount: foundCategory.visitCount },
-		where: { slug },
-	});
 
 	const categoryName = NonNullTranslatedContentSchema.parse(foundCategory.name);
 
