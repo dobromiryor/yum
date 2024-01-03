@@ -55,13 +55,6 @@ export const sitemap = () => ({
 	exclude: true,
 });
 
-const options = OptionsSchema.parse(
-	Object.values(Unit).map((item) => ({
-		label: item.replace("_", " "),
-		value: item,
-	}))
-);
-
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
 };
@@ -136,6 +129,13 @@ export const CreateIngredientModal = () => {
 	const { pathname } = useLocation();
 
 	const prevPath = pathname.split("/").slice(0, -1).join("/");
+
+	const options = OptionsSchema.parse(
+		Object.values(Unit).map((item) => ({
+			label: t(`recipe.units.${item}`, { count: 0 }),
+			value: item,
+		}))
+	);
 
 	const { onValid } = useFilteredValues<FormData>();
 	const form = useRemixForm<FormData>({
@@ -253,14 +253,14 @@ export const action = async ({ request, params: p }: ActionFunctionArgs) => {
 								lang,
 								value: note,
 							})
-					  )?.note
+						)?.note
 					: Prisma.JsonNull,
 				quantity:
 					quantity === null
 						? null
 						: quantity === undefined
-						  ? undefined
-						  : new Prisma.Decimal(parseQuantity(quantity)),
+							? undefined
+							: new Prisma.Decimal(parseQuantity(quantity)),
 				subRecipeId,
 				recipeId,
 				userId: authData.id,

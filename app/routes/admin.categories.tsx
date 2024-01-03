@@ -24,6 +24,7 @@ import { Button } from "~/components/common/UI/Button";
 import { FormError } from "~/components/common/UI/FormError";
 import { Icon } from "~/components/common/UI/Icon";
 import { Switch } from "~/components/common/UI/Switch";
+import { LIMIT_FALLBACK, PAGE_FALLBACK } from "~/consts/pagination.const";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useHydrated } from "~/hooks/useHydrated";
 import { usePagination } from "~/hooks/usePagination";
@@ -211,7 +212,7 @@ const AdminDashboardCategoriesRoute = () => {
 							<Link
 								preventScrollReset
 								tabIndex={-1}
-								to={`/recipes/c/${row.original.slug}`}
+								to={`/recipes/c/${row.original.slug}?page=${PAGE_FALLBACK}&limit=${LIMIT_FALLBACK}`}
 							>
 								<Button rounded="full">
 									<Icon name="arrow_outward" size="20" />
@@ -285,7 +286,7 @@ const AdminDashboardCategoriesRoute = () => {
 							</Button>
 						</Link>,
 						portal
-				  )
+					)
 				: null}
 		</>
 	);

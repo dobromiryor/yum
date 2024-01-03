@@ -333,10 +333,12 @@ export const action = async ({
 	}
 
 	const foundRecipes = await prisma.recipe.findMany({
-		select: { slug: true },
+		select: { id: true, slug: true },
 	});
 
-	if (foundRecipes.find((item) => item.slug === rest.slug)) {
+	if (
+		foundRecipes.find((item) => item.id !== recipeId && item.slug === rest.slug)
+	) {
 		return json({
 			success: false,
 			message: t("error.slugExists"),

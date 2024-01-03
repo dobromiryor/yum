@@ -336,9 +336,9 @@ export const RecipeReviews = ({ recipeId }: RecipeReviewsProps) => {
 	const avgRating = useMemo(
 		() =>
 			Number(
-				(ratings
+				(ratings && ratings.length > 0
 					? ratings?.reduce((prev, curr) => prev + curr.value, 0) /
-					  ratings?.length
+						ratings?.length
 					: 0
 				).toFixed(2)
 			),

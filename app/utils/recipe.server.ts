@@ -119,7 +119,10 @@ export const publishValidation = async (recipeId: string) => {
 };
 
 export const recipeDetails = async ({ slug, locale }: RecipeDetailProps) => {
-	const foundRecipe = await prisma.recipe.findFirst({
+	const foundRecipe = await prisma.recipe.update({
+		data: {
+			visitCount: { increment: 1 },
+		},
 		where: {
 			slug,
 			status: Status.PUBLISHED,

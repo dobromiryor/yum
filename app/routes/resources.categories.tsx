@@ -10,6 +10,7 @@ import { MenuWrapper, useMenu } from "~/components/common/Menu/Menu";
 import { Icon } from "~/components/common/UI/Icon";
 import { MobileNavigationLink } from "~/components/header/MobileNavigationLink";
 import { NavigationLink } from "~/components/header/NavigationLink";
+import { LIMIT_FALLBACK, PAGE_FALLBACK } from "~/consts/pagination.const";
 import {
 	LanguageSchema,
 	NonNullTranslatedContentSchema,
@@ -88,7 +89,7 @@ export const CategoryMenu = () => {
 						buttonClassName="flex-1"
 						buttonProps={{ align: "start" }}
 						tabIndex={-1}
-						to={`/recipes/c/${category.slug}`}
+						to={`/recipes/c/${category.slug}?page=${PAGE_FALLBACK}&limit=${LIMIT_FALLBACK}`}
 					>
 						{name[lang]}
 					</NavigationLink>
@@ -156,14 +157,14 @@ export const CategoryMenuMobile = () => {
 								display: "initial",
 								opacity: 1,
 								height: "auto",
-						  }
+							}
 						: {
 								opacity: 0,
 								height: 0,
 								transitionEnd: {
 									display: "none",
 								},
-						  }
+							}
 				}
 				className="pl-2"
 				style={{
@@ -180,7 +181,7 @@ export const CategoryMenuMobile = () => {
 							key={`Mobile__Category__Link__${category.id}`}
 							size="xl"
 							tabIndex={-1}
-							to={`/recipes/c/${category.slug}`}
+							to={`/recipes/c/${category.slug}?page=${PAGE_FALLBACK}&limit=${LIMIT_FALLBACK}`}
 						>
 							{name[lang]}
 						</MobileNavigationLink>
