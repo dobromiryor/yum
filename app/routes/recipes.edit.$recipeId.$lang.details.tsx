@@ -30,6 +30,7 @@ import { Input } from "~/components/common/UI/Input";
 import { Multiselect } from "~/components/common/UI/Multiselect";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
+import { FORBIDDEN_SLUGS } from "~/consts/forbidden-slugs.const";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
@@ -322,13 +323,20 @@ export const action = async ({
 
 	let success = true;
 
+	const t = await i18next.getFixedT(request);
+
+	if (FORBIDDEN_SLUGS.some((item) => item === rest.slug)) {
+		return json({
+			success: false,
+			message: t("error.slugExists"),
+		});
+	}
+
 	const foundRecipes = await prisma.recipe.findMany({
 		select: { slug: true },
 	});
 
 	if (foundRecipes.find((item) => item.slug === rest.slug)) {
-		const t = await i18next.getFixedT(request);
-
 		return json({
 			success: false,
 			message: t("error.slugExists"),

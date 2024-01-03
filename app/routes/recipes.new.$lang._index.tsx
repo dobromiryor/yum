@@ -25,6 +25,7 @@ import { Input } from "~/components/common/UI/Input";
 import { Select } from "~/components/common/UI/Select";
 import { Textarea } from "~/components/common/UI/Textarea";
 import { Section } from "~/components/recipes/crud/Section";
+import { FORBIDDEN_SLUGS } from "~/consts/forbidden-slugs.const";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { useFilteredValues } from "~/hooks/useFilteredValues";
 import { useIsLoading } from "~/hooks/useIsLoading";
@@ -219,13 +220,20 @@ export const action = async ({
 
 	const data = await parseFormData<FormData>(request.clone());
 
+	const t = await i18next.getFixedT(request);
+
+	if (FORBIDDEN_SLUGS.some((item) => item === data.slug)) {
+		return json({
+			success: false,
+			message: t("error.slugExists"),
+		});
+	}
+
 	const foundRecipes = await prisma.recipe.findMany({
 		select: { slug: true },
 	});
 
 	if (foundRecipes.find((item) => item.slug === data.slug)) {
-		const t = await i18next.getFixedT(request);
-
 		return json({
 			success: false,
 			message: t("error.slugExists"),
