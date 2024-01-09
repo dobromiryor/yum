@@ -23,6 +23,7 @@ import {
 	OptionalNonNullTranslatedContentSchema,
 } from "~/schemas/common";
 import { RecipeCategoryParamsSchema } from "~/schemas/params.schema";
+import { auth } from "~/utils/auth.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
@@ -38,14 +39,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+	const authData = await auth.isAuthenticated(request);
 	const locale = LanguageSchema.parse(await i18next.getLocale(request));
 
 	const pagination = setPagination(request);
 
 	const { slug } = RecipeCategoryParamsSchema.parse(params);
 
-	const foundCategory = await prisma.category.update({
-		data: { visitCount: { increment: 1 } },
+	const foundCategory = await prisma.category.findUnique({
 		where: { slug },
 	});
 
@@ -56,6 +57,13 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 	if (foundCategory?.status !== Status.PUBLISHED) {
 		throw new Response(null, { status: 404 });
 	}
+
+	await prisma.visit.create({
+		data: {
+			categoryId: foundCategory.id,
+			userId: authData?.id,
+		},
+	});
 
 	const categoryName = NonNullTranslatedContentSchema.parse(foundCategory.name);
 

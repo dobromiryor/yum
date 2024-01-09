@@ -72,7 +72,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const { slug } = RecipeParamsSchema.parse(p);
 	const locale = LanguageSchema.parse(await i18next.getLocale(request.clone()));
 
-	const foundRecipe = await recipeDetails({ slug, locale });
+	const foundRecipe = await recipeDetails({
+		slug,
+		locale,
+		userId: authData?.id,
+	});
 
 	if (!foundRecipe) {
 		throw new Response(null, { status: 404 });
