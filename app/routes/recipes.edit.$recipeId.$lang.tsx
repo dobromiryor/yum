@@ -558,8 +558,8 @@ export default function EditRecipeRoute() {
 						</Card>
 					) : (
 						<EmptyCard className="col-span-3 sm:col-span-1" to="photo">
-							<span>{t("recipe.card.emptyPhoto")}</span>
-							<span>
+							<span className="text-center">{t("recipe.card.emptyPhoto")}</span>
+							<span className="text-center">
 								{t("recipe.card.pressToAddSomething", {
 									something: t("recipe.field.photo").toLowerCase(),
 								})}
@@ -675,8 +675,10 @@ export default function EditRecipeRoute() {
 					})
 				) : (
 					<EmptyCard to="sub-recipe">
-						<span>{t("recipe.card.emptySubRecipes")}</span>
-						<span>
+						<span className="text-center">
+							{t("recipe.card.emptySubRecipes")}
+						</span>
+						<span className="text-center">
 							{t("recipe.card.pressToAddSomething", {
 								something: t("recipe.field.subRecipe").toLowerCase(),
 							})}
@@ -789,8 +791,10 @@ export default function EditRecipeRoute() {
 						})
 					) : (
 						<EmptyCard to="ingredient">
-							<span>{t("recipe.card.emptyIngredients")}</span>
-							<span>
+							<span className="text-center">
+								{t("recipe.card.emptyIngredients")}
+							</span>
+							<span className="text-center">
 								{t("recipe.card.pressToAddSomething", {
 									something: t("recipe.field.ingredient").toLowerCase(),
 								})}
@@ -848,8 +852,10 @@ export default function EditRecipeRoute() {
 					})
 				) : (
 					<EmptyCard to="equipment">
-						<span>{t("recipe.card.emptyEquipment")}</span>
-						<span>
+						<span className="text-center">
+							{t("recipe.card.emptyEquipment")}
+						</span>
+						<span className="text-center">
 							{t("recipe.card.pressToAddSomething", {
 								something: t("recipe.field.equipment").toLowerCase(),
 							})}
@@ -975,8 +981,8 @@ export default function EditRecipeRoute() {
 					</Reorder.Group>
 				) : (
 					<EmptyCard to="step">
-						<span>{t("recipe.card.emptySteps")}</span>
-						<span>
+						<span className="text-center">{t("recipe.card.emptySteps")}</span>
+						<span className="text-center">
 							{t("recipe.card.pressToAddSomething", {
 								something: t("recipe.field.step").toLowerCase(),
 							})}
