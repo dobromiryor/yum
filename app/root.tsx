@@ -71,6 +71,8 @@ export const links: LinksFunction = () => {
 	];
 };
 
+export const shouldRevalidate = () => false;
+
 export async function loader({ request }: LoaderFunctionArgs) {
 	const locale = (await i18next.getLocale(request)) ?? i18n.fallbackLng;
 	const themeSession = await getThemeSession(request);

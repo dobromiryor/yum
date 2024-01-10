@@ -1,11 +1,6 @@
 import { Status } from "@prisma/client";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import {
-	useLoaderData,
-	useRevalidator,
-	type MetaFunction,
-} from "@remix-run/react";
-import { useEffect } from "react";
+import { useLoaderData, type MetaFunction } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -92,28 +87,21 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 				: t("seo.home.description", { appName: PARSED_ENV.APP_NAME }),
 	});
 
-	return json(
-		{
-			foundCategory,
-			foundRecipes,
-			locale,
-			meta: {
-				title,
-				description,
-				url: `${PARSED_ENV.DOMAIN_URL}`,
-				path: `/recipes/c/${slug}`,
-				theme: (await getThemeSession(request)).getTheme(),
-			},
+	return json({
+		foundCategory,
+		foundRecipes,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/recipes/c/${slug}`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
-		{
-			headers: { "Cache-Control": "private, max-age=10" },
-		}
-	);
+	});
 };
 
 export default function RecipesCategoryRoute() {
-	const { foundCategory, foundRecipes, locale } =
-		useLoaderData<typeof loader>();
+	const { foundCategory, foundRecipes } = useLoaderData<typeof loader>();
 
 	const {
 		i18n: { language },
@@ -121,16 +109,9 @@ export default function RecipesCategoryRoute() {
 	const [pagination, setPaginationState] = usePagination(
 		foundRecipes.pagination
 	);
-	const revalidator = useRevalidator();
 
 	const name = NonNullTranslatedContentSchema.parse(foundCategory.name);
 	const lang = LanguageSchema.parse(language);
-
-	useEffect(() => {
-		if (locale !== lang) {
-			revalidator.revalidate();
-		}
-	}, [lang, locale, revalidator]);
 
 	return (
 		<div className="flex flex-col gap-6">

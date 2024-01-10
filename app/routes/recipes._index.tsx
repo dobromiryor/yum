@@ -1,10 +1,5 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import {
-	useLoaderData,
-	useRevalidator,
-	type MetaFunction,
-} from "@remix-run/react";
-import { useEffect } from "react";
+import { useLoaderData, type MetaFunction } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -36,7 +31,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const locale = LanguageSchema.parse(await i18next.getLocale(request));
+	const locale = LanguageSchema.parse(await i18next.getLocale(request.clone()));
 
 	const result = new URL(request.clone().url).searchParams.get("q");
 
@@ -55,26 +50,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	const foundRecipes = await recipesOverview({ pagination, request });
 
-	return json(
-		{
-			foundRecipes,
-			locale,
-			meta: {
-				title,
-				description,
-				url: `${PARSED_ENV.DOMAIN_URL}`,
-				path: `/recipes${result ? `?q=${result}` : ""}`,
-				theme: (await getThemeSession(request)).getTheme(),
-			},
+	return json({
+		foundRecipes,
+		locale,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/recipes${result ? `?q=${result}` : ""}`,
+			theme: (await getThemeSession(request)).getTheme(),
 		},
-		{
-			headers: { "Cache-Control": "private, max-age=10" },
-		}
-	);
+	});
 };
 
 export default function RecipesRoute() {
-	const { foundRecipes, locale } = useLoaderData<typeof loader>();
+	const { foundRecipes } = useLoaderData<typeof loader>();
 
 	const {
 		t,
@@ -84,15 +74,8 @@ export default function RecipesRoute() {
 		foundRecipes.pagination
 	);
 	const searchQuery = useSearch();
-	const revalidator = useRevalidator();
 
 	const lang = LanguageSchema.parse(language);
-
-	useEffect(() => {
-		if (locale !== lang) {
-			revalidator.revalidate();
-		}
-	}, [lang, locale, revalidator]);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -100,7 +83,7 @@ export default function RecipesRoute() {
 				{searchQuery
 					? t("recipe.heading.allRecipesThatContain", {
 							query: searchQuery,
-					  })
+						})
 					: t("recipe.heading.allRecipes")}
 			</h1>
 			{foundRecipes.items.length ? (

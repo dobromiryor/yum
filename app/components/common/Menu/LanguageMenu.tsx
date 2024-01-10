@@ -21,7 +21,7 @@ export const LanguageMenu = ({
 	isNotAuthenticated = false,
 }: LanguageMenuProps) => {
 	const submit = useSubmit();
-	const { pathname } = useLocation();
+	const { pathname, search } = useLocation();
 	const [isLoading] = useIsLoading({ formAction: ACTION_URL });
 	const { t, i18n } = useTranslation();
 	const langs = i18next.supportedLngs;
@@ -29,7 +29,7 @@ export const LanguageMenu = ({
 	const handleLanguageChange = (lang: Language) => {
 		i18n.changeLanguage(lang);
 		submit(
-			{ locale: lang, pathname },
+			{ locale: lang, pathname: pathname + search },
 			{ action: ACTION_URL, method: "post", replace: true }
 		);
 	};
