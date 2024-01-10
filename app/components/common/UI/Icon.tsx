@@ -55,7 +55,7 @@ export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 			aria-label={label}
 			className="flex justify-center items-center"
 		>
-			<AnimatePresence mode="popLayout">
+			<AnimatePresence>
 				{isLoaded && isHydrated ? (
 					<motion.span
 						aria-hidden

@@ -30,7 +30,7 @@ export const categoriesOverview = async ({
 	);
 
 	const foundCategories = await prisma.category.findMany({
-		include: { _count: { select: { recipes: true } } },
+		include: { _count: { select: { recipes: true, visit: true } } },
 		skip: (page - 1) * limit,
 		take: limit,
 	});

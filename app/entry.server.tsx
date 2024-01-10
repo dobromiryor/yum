@@ -5,7 +5,7 @@ import {
 import { RemixServer } from "@remix-run/react";
 import { createInstance, type i18n as I18N } from "i18next";
 import Backend from "i18next-fs-backend";
-import isbot from "isbot";
+import { isbot } from "isbot";
 import { StrictMode } from "react";
 import { renderToPipeableStream } from "react-dom/server";
 import { I18nextProvider, initReactI18next } from "react-i18next";

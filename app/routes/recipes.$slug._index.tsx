@@ -1,13 +1,8 @@
 import { Role } from "@prisma/client";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import {
-	Link,
-	useLoaderData,
-	useRevalidator,
-	type MetaFunction,
-} from "@remix-run/react";
+import { Link, useLoaderData, type MetaFunction } from "@remix-run/react";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type SitemapFunction } from "remix-sitemap";
 
@@ -72,7 +67,11 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	const { slug } = RecipeParamsSchema.parse(p);
 	const locale = LanguageSchema.parse(await i18next.getLocale(request.clone()));
 
-	const foundRecipe = await recipeDetails({ slug, locale });
+	const foundRecipe = await recipeDetails({
+		slug,
+		locale,
+		userId: authData?.id,
+	});
 
 	if (!foundRecipe) {
 		throw new Response(null, { status: 404 });
@@ -90,26 +89,21 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 		]!,
 	});
 
-	return json(
-		{
-			authData,
-			foundRecipe,
-			locale,
-			meta: {
-				title,
-				description,
-				url: `${PARSED_ENV.DOMAIN_URL}`,
-				path: `/recipes/${slug}`,
-				theme: (await getThemeSession(request)).getTheme(),
-				image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
-					foundRecipe.photo
-				)?.secure_url,
-			},
+	return json({
+		authData,
+		foundRecipe,
+		locale,
+		meta: {
+			title,
+			description,
+			url: `${PARSED_ENV.DOMAIN_URL}`,
+			path: `/recipes/${slug}`,
+			theme: (await getThemeSession(request)).getTheme(),
+			image: CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(
+				foundRecipe.photo
+			)?.secure_url,
 		},
-		{
-			headers: { "Cache-Control": "private, max-age=10" },
-		}
-	);
+	});
 };
 
 const RecipeDetailRoute = () => {
@@ -142,7 +136,6 @@ const RecipeDetailRoute = () => {
 		t,
 		i18n: { language },
 	} = useTranslation();
-	const revalidator = useRevalidator();
 
 	const [servingsCount, setServingsCount] = useState<number>(servings ?? 1);
 
@@ -152,12 +145,6 @@ const RecipeDetailRoute = () => {
 	const description = TranslatedContentSchema.parse(d);
 	const photo =
 		CloudinaryUploadApiResponseWithBlurHashSchema.nullable().parse(p);
-
-	useEffect(() => {
-		if (locale !== lang) {
-			revalidator.revalidate();
-		}
-	}, [lang, locale, revalidator]);
 
 	return (
 		<>

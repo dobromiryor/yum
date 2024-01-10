@@ -14,6 +14,7 @@ import { prisma } from "~/utils/prisma.server";
 interface RecipeDetailProps {
 	slug: string;
 	locale: Language;
+	userId?: string;
 }
 
 interface RecipeOverviewProps {
@@ -118,11 +119,12 @@ export const publishValidation = async (recipeId: string) => {
 	return true;
 };
 
-export const recipeDetails = async ({ slug, locale }: RecipeDetailProps) => {
-	const foundRecipe = await prisma.recipe.update({
-		data: {
-			visitCount: { increment: 1 },
-		},
+export const recipeDetails = async ({
+	slug,
+	locale,
+	userId,
+}: RecipeDetailProps) => {
+	const foundRecipe = await prisma.recipe.findUnique({
 		where: {
 			slug,
 			status: Status.PUBLISHED,
@@ -186,6 +188,8 @@ export const recipeDetails = async ({ slug, locale }: RecipeDetailProps) => {
 	if (!foundRecipe) {
 		return null;
 	}
+
+	await prisma.visit.create({ data: { userId, recipeId: foundRecipe.id } });
 
 	return computeTimes({ recipe: foundRecipe });
 };

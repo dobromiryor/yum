@@ -180,7 +180,7 @@ const AdminDashboardCategoriesRoute = () => {
 			{
 				header: t("admin.category.table.visitCount"),
 				cell: ({ renderValue }) => renderValue(),
-				accessorKey: "visitCount",
+				accessorKey: "_count.visit",
 			},
 			{
 				header: t("admin.category.table.createdAt"),

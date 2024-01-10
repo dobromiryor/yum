@@ -57,17 +57,14 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 		where: { recipeId },
 	});
 
-	return json(
-		{
-			authData,
-			foundRatings,
-			foundComments,
-			foundCommentsCount,
-			success: true,
-			intent: "",
-		},
-		{ headers: { "Cache-Control": "private, max-age=10" } }
-	);
+	return json({
+		authData,
+		foundRatings,
+		foundComments,
+		foundCommentsCount,
+		success: true,
+		intent: "",
+	});
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
