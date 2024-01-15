@@ -1,4 +1,4 @@
-import imageFallback from "public/images/social/dark.png";
+import imageFallback from "public/images/social/meta.png";
 import { type Theme } from "~/utils/providers/theme-provider";
 
 const MAX_TITLE_LENGTH = 70;
@@ -70,28 +70,31 @@ export const generateMetaProps = (props: GenerateMetaProps | undefined) => {
 
 	if (title) {
 		metaArr.push({ title });
-		metaArr.push({ "og:title": title });
-		metaArr.push({ "twitter:title": title });
+		metaArr.push({ property: "og:title", content: title });
+		metaArr.push({ property: "twitter:title", content: title });
 	}
 
 	if (description) {
 		metaArr.push({ name: "description", content: description });
-		metaArr.push({ "og:description": description });
-		metaArr.push({ "twitter:description": description });
+		metaArr.push({ property: "og:description", content: description });
+		metaArr.push({ property: "twitter:description", content: description });
 	}
 
 	if (image) {
-		metaArr.push({ "og:image": image });
-		metaArr.push({ "twitter:image": image });
+		metaArr.push({ property: "og:image", content: image });
+		metaArr.push({ property: "twitter:image", content: image });
 	}
 
 	if (path) {
-		metaArr.push({ "og:url": `${url}${path}` });
-		metaArr.push({ "twitter:url": `${url}${path}` });
+		metaArr.push({ property: "og:url", content: `${url}${path}` });
+		metaArr.push({ property: "twitter:url", content: `${url}${path}` });
 	}
 
-	metaArr.push({ "og:type": "website" });
-	metaArr.push({ "twitter:card": image ? "summary_large_image" : "summary" });
+	metaArr.push({ property: "og:type", content: "website" });
+	metaArr.push({
+		property: "twitter:card",
+		content: image ? "summary_large_image" : "summary",
+	});
 
 	return metaArr;
 };
