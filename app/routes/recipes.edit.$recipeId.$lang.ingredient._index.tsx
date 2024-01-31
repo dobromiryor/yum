@@ -110,6 +110,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 	return json({
 		authData,
 		subRecipeOptions,
+		lang,
 		meta: {
 			title,
 			description,
@@ -121,7 +122,7 @@ export const loader = async ({ request, params: p }: LoaderFunctionArgs) => {
 };
 
 export const CreateIngredientModal = () => {
-	const { subRecipeOptions } = useLoaderData<typeof loader>();
+	const { subRecipeOptions, lang } = useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 
 	const [isOpen, setIsOpen] = useState(true);
@@ -132,7 +133,7 @@ export const CreateIngredientModal = () => {
 
 	const options = OptionsSchema.parse(
 		Object.values(Unit).map((item) => ({
-			label: t(`recipe.units.${item}`, { count: 0 }),
+			label: t(`recipe.units.${item}`, { count: 0, lng: lang }),
 			value: item,
 		}))
 	);
