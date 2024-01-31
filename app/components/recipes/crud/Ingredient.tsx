@@ -45,7 +45,13 @@ export const Ingredient = ({ ingredient, as = "span" }: IngredientProps) => {
 	}
 
 	if (quantity && unit) {
-		string = `${quantity} ${unit.replace("_", " ")} ${string}`;
+		string = `${quantity} ${t(
+			`recipe.units.${unit.replace(
+				"_",
+				" "
+			)}` as unknown as TemplateStringsArray,
+			{ count: Number(quantity), lng: lang ?? language }
+		)} ${string}`;
 	}
 
 	if (quantity && !unit) {

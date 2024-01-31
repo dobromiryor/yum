@@ -158,7 +158,7 @@ export const EditIngredientModal = () => {
 
 	const options = OptionsSchema.parse(
 		Object.values(Unit).map((item) => ({
-			label: t(`recipe.units.${item}`, { count: 0 }),
+			label: t(`recipe.units.${item}`, { count: 0, lng: lang }),
 			value: item,
 		}))
 	);
