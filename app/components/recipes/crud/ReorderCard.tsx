@@ -23,12 +23,7 @@ export const ReorderCard = <T extends object>({
 	const controls = useDragControls();
 
 	return (
-		<Reorder.Item
-			dragControls={controls}
-			dragListener={false}
-			style={{ touchAction: "none" }}
-			value={item}
-		>
+		<Reorder.Item dragControls={controls} dragListener={false} value={item}>
 			<Card
 				buttons={buttons}
 				controls={controls}
