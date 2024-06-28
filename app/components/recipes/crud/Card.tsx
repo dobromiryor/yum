@@ -44,6 +44,7 @@ export const Card = ({
 							// TODO: accessibility
 							className="hover:cursor-grab active:cursor-grabbing"
 							size="small"
+							style={{ touchAction: "none" }}
 							onPointerDown={(e) => controls && controls.start(e)}
 						>
 							<Icon name="drag_handle" />

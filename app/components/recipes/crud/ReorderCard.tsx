@@ -1,10 +1,5 @@
 import { Reorder, useDragControls } from "framer-motion";
-import {
-	useEffect,
-	useRef,
-	type ReactNode,
-	type TouchEventHandler,
-} from "react";
+import { type ReactNode } from "react";
 
 import { Card } from "~/components/recipes/crud/Card";
 
@@ -27,47 +22,8 @@ export const ReorderCard = <T extends object>({
 }: CardProps<T>) => {
 	const controls = useDragControls();
 
-	/* ### */
-	// TODO: Check if fixed
-	// Reorder touch trigger fix
-	// https://github.com/framer/motion/issues/1597
-	/* eslint-disable @typescript-eslint/ban-ts-comment */
-	const iRef = useRef<HTMLElement | null>(null);
-
-	useEffect(() => {
-		if (isReordering) {
-			const touchHandler: TouchEventHandler<HTMLElement> = (e) =>
-				e.preventDefault();
-
-			const iTag = iRef.current;
-
-			if (iTag) {
-				//@ts-ignore
-				iTag.addEventListener("touchstart", touchHandler, {
-					passive: false,
-				});
-
-				return () => {
-					//@ts-ignore
-					iTag.removeEventListener("touchstart", touchHandler, {
-						passive: false,
-					});
-				};
-			}
-		}
-
-		return;
-	}, [iRef, isReordering]);
-	/* eslint-enable @typescript-eslint/ban-ts-comment */
-	/* ### */
-
 	return (
-		<Reorder.Item
-			ref={iRef}
-			dragControls={controls}
-			dragListener={false}
-			value={item}
-		>
+		<Reorder.Item dragControls={controls} dragListener={false} value={item}>
 			<Card
 				buttons={buttons}
 				controls={controls}

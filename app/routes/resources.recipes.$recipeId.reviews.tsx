@@ -35,6 +35,7 @@ import {
 	RecipeReviewsIntentSchema,
 	type RecipeReviewsSchema,
 } from "~/schemas/recipe-reviews.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
 import { recipeDetailComments } from "~/utils/comment.server";
 import { prisma } from "~/utils/prisma.server";
@@ -391,9 +392,9 @@ export const RecipeReviews = ({ recipeId }: RecipeReviewsProps) => {
 		},
 	});
 	const {
-		handleSubmit,
 		formState: { dirtyFields },
 		reset,
+		handleSubmit,
 	} = form;
 
 	const handleRating = (value: number) => {
@@ -504,7 +505,7 @@ export const RecipeReviews = ({ recipeId }: RecipeReviewsProps) => {
 				<div className="flex flex-col gap-3">
 					{authData && (
 						<RemixFormProvider {...form}>
-							<Form preventScrollReset autoComplete="off">
+							<Form preventScrollReset autoComplete="off" id="review-hook-form">
 								<Textarea
 									aria-label={t("recipe.section.reviews.comments.comment")}
 									className="rounded-xl"
@@ -542,7 +543,7 @@ export const RecipeReviews = ({ recipeId }: RecipeReviewsProps) => {
 								}
 								rounded="large"
 								variant="normal"
-								onClick={handleSubmit}
+								onClick={handleSubmit as RemixHookFormSubmit}
 							>
 								{t("common.submit")}
 							</Button>

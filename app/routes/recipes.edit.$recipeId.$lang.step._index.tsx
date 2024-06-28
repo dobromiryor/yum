@@ -34,6 +34,7 @@ import i18next from "~/modules/i18next.server";
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
 import { StepDTOSchema } from "~/schemas/step.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
 import {
@@ -206,7 +207,7 @@ export const CreateStepModal = () => {
 
 	return (
 		<Modal
-			CTAFn={handleSubmit}
+			CTAFn={handleSubmit as RemixHookFormSubmit}
 			dismissFn={reset}
 			isCTADisabled={!Object.keys(dirtyFields).length}
 			isOpen={isOpen}
@@ -220,7 +221,7 @@ export const CreateStepModal = () => {
 					preventScrollReset
 					autoComplete="off"
 					className="flex flex-col gap-2"
-					onSubmit={handleSubmit}
+					onSubmit={handleSubmit as RemixHookFormSubmit}
 				>
 					<Textarea
 						autoFocus

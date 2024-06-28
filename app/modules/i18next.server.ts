@@ -1,6 +1,6 @@
 import { createCookie } from "@remix-run/node";
 import Backend from "i18next-fs-backend";
-import { RemixI18Next } from "remix-i18next";
+import { RemixI18Next } from "remix-i18next/server";
 
 import i18n from "~/modules/i18n";
 

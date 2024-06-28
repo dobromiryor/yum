@@ -194,14 +194,14 @@ export const Multiselect = ({
 									transitionEnd: {
 										overflowY: "auto",
 									},
-							  }
+								}
 							: {
 									opacity: 0,
 									height: "0%",
 									maxHeight: 0,
 									overflowY: "hidden",
 									transitionEnd: { display: "none" },
-							  }
+								}
 					}
 					className={clsx(
 						"w-0 min-w-full -mt-1 pt-1 border border-t-0 rounded-b overflow-y-auto",
