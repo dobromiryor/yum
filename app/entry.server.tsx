@@ -44,7 +44,12 @@ export default async function handleRequest(
 	const ns = i18next.getRouteNamespaces(remixContext);
 
 	if (isSitemapUrl(request)) {
+		/* eslint-disable @typescript-eslint/ban-ts-comment */
+		// TODO: Check if issue is fixed
+		/* https://github.com/fedeya/remix-sitemap/issues/68 */
+		/* @ts-ignore */
 		return await sitemap(request, remixContext);
+		/* eslint-enable @typescript-eslint/ban-ts-comment */
 	}
 
 	await instance

@@ -15,7 +15,7 @@ import {
 } from "@remix-run/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { useChangeLanguage } from "remix-i18next";
+import { useChangeLanguage } from "remix-i18next/react";
 import { setErrorMap } from "zod";
 import { makeZodI18nMap } from "zod-i18n-map";
 
