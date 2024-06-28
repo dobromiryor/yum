@@ -42,6 +42,7 @@ import {
 import { OptionsSchema } from "~/schemas/option.schema";
 import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
 import { EditRecipeSchema } from "~/schemas/recipe.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
@@ -212,7 +213,7 @@ export const EditRecipeDetailsModal = () => {
 
 	return (
 		<Modal
-			CTAFn={handleSubmit}
+			CTAFn={handleSubmit as RemixHookFormSubmit}
 			dismissFn={reset}
 			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
@@ -227,7 +228,7 @@ export const EditRecipeDetailsModal = () => {
 					preventScrollReset
 					autoComplete="off"
 					className="flex flex-col gap-2"
-					onSubmit={handleSubmit}
+					onSubmit={handleSubmit as RemixHookFormSubmit}
 				>
 					<Input
 						autoFocus

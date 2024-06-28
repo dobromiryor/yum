@@ -33,6 +33,7 @@ import i18next from "~/modules/i18next.server";
 import { TranslatedContentSchema } from "~/schemas/common";
 import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
 import { EditRecipeEquipmentParamsSchema } from "~/schemas/params.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
 import { getDataSession } from "~/utils/dataStorage.server";
 import { getInvertedLang } from "~/utils/helpers/get-inverted-lang";
@@ -200,7 +201,7 @@ const EditEquipmentModal = () => {
 
 	return (
 		<Modal
-			CTAFn={handleSubmit}
+			CTAFn={handleSubmit as RemixHookFormSubmit}
 			dismissFn={reset}
 			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
@@ -215,7 +216,7 @@ const EditEquipmentModal = () => {
 					preventScrollReset
 					autoComplete="off"
 					className="flex flex-col gap-2"
-					onSubmit={handleSubmit}
+					onSubmit={handleSubmit as RemixHookFormSubmit}
 				>
 					<Input
 						autoFocus

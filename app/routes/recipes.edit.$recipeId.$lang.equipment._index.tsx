@@ -31,6 +31,7 @@ import { useFilteredValues } from "~/hooks/useFilteredValues";
 import i18next from "~/modules/i18next.server";
 import { EquipmentDTOSchema } from "~/schemas/equipment.schema";
 import { EditRecipeWithLangParamsSchema } from "~/schemas/params.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
 import {
 	generateMetaDescription,
@@ -151,7 +152,7 @@ const CreateEquipmentModal = () => {
 
 	return (
 		<Modal
-			CTAFn={handleSubmit}
+			CTAFn={handleSubmit as RemixHookFormSubmit}
 			dismissFn={reset}
 			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
@@ -166,7 +167,7 @@ const CreateEquipmentModal = () => {
 					preventScrollReset
 					autoComplete="off"
 					className="flex flex-col gap-2"
-					onSubmit={handleSubmit}
+					onSubmit={handleSubmit as RemixHookFormSubmit}
 				>
 					<Input
 						autoFocus

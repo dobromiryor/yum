@@ -37,6 +37,7 @@ import {
 	OptionalNonNullTranslatedContentSchema,
 } from "~/schemas/common";
 import { AdminDashboardCategoryParamsSchema } from "~/schemas/params.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
 import {
 	generateMetaDescription,
@@ -133,7 +134,7 @@ const AdminDashboardCategoryUpdateModal = () => {
 
 	return (
 		<Modal
-			CTAFn={handleSubmit}
+			CTAFn={handleSubmit as RemixHookFormSubmit}
 			dismissFn={reset}
 			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
@@ -148,7 +149,7 @@ const AdminDashboardCategoryUpdateModal = () => {
 					preventScrollReset
 					autoComplete="off"
 					className="flex flex-col gap-2"
-					onSubmit={handleSubmit}
+					onSubmit={handleSubmit as RemixHookFormSubmit}
 				>
 					{LANGUAGES.map((lang, index) => (
 						<Input

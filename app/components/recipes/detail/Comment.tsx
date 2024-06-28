@@ -16,6 +16,7 @@ import {
 	useRef,
 	useState,
 	type Dispatch,
+	type FormEvent,
 	type SetStateAction,
 } from "react";
 import { createPortal } from "react-dom";
@@ -41,6 +42,7 @@ import {
 	type RecipeReportCommentSchema,
 	type RecipeReviewsIntentSchema,
 } from "~/schemas/recipe-reviews.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { type RecipeCommentInclude } from "~/utils/comment.server";
 import { getCommentId } from "~/utils/helpers/get-comment-id";
 import { getDisplayName } from "~/utils/helpers/get-display-name";
@@ -120,7 +122,7 @@ export const Comment = ({
 		() =>
 			ratings && ratings.length > 0 && comment.user
 				? ratings.find((rating) => rating.userId === comment.user?.id)?.value ??
-				  0
+					0
 				: 0,
 		[comment.user, ratings]
 	);
@@ -157,13 +159,13 @@ export const Comment = ({
 		if (isEditing) {
 			setHasErrored(false);
 			setIsEditing((prev) => !prev);
-			editForm.handleSubmit();
+			editForm.handleSubmit({} as unknown as FormEvent<HTMLFormElement>);
 		}
 
 		if (isReplyingTo) {
 			setHasErrored(false);
 			setIsReplyingTo(null);
-			replyForm.handleSubmit();
+			replyForm.handleSubmit({} as unknown as FormEvent<HTMLFormElement>);
 			replyForm.reset();
 		}
 	};
@@ -188,7 +190,7 @@ export const Comment = ({
 							RecipeReviewsSchema.parse(Object.fromEntries(formData.entries()))
 								.data
 						)
-				  )
+					)
 				: undefined,
 		[formData, intent]
 	);
@@ -341,7 +343,7 @@ export const Comment = ({
 							rounded="full"
 							size="small"
 							variant="normal"
-							onClick={handleSubmit}
+							onClick={handleSubmit as RemixHookFormSubmit}
 						>
 							<Pill icon="save" label={t("common.save")} padding="none" />
 						</Button>
@@ -569,7 +571,7 @@ export const Comment = ({
 												rounded="full"
 												size="small"
 												variant="normal"
-												onClick={handleSubmit}
+												onClick={handleSubmit as RemixHookFormSubmit}
 											>
 												<Pill
 													icon="save"
@@ -583,7 +585,7 @@ export const Comment = ({
 							)}
 						</AnimatePresence>,
 						portal
-				  )
+					)
 				: null}
 		</div>
 	);

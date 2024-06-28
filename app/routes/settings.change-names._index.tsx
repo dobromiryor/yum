@@ -28,6 +28,7 @@ import { Input } from "~/components/common/UI/Input";
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import i18next from "~/modules/i18next.server";
 import { NamesSchema } from "~/schemas/settings.schema";
+import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
 import {
 	generateMetaDescription,
@@ -127,7 +128,7 @@ const EditUserNamesModal = () => {
 
 	return (
 		<Modal
-			CTAFn={handleSubmit}
+			CTAFn={handleSubmit as RemixHookFormSubmit}
 			dismissFn={reset}
 			isCTADisabled={!Object.keys(dirtyFields).length}
 			isLoading={state !== "idle"}
@@ -142,7 +143,7 @@ const EditUserNamesModal = () => {
 					preventScrollReset
 					autoComplete="off"
 					className="flex flex-col gap-2"
-					onSubmit={handleSubmit}
+					onSubmit={handleSubmit as RemixHookFormSubmit}
 				>
 					<Input
 						autoFocus
