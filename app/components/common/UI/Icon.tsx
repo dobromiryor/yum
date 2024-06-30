@@ -4,16 +4,23 @@ import { useEffect, useState } from "react";
 
 import { useHydrated } from "~/hooks/useHydrated";
 
-type IconSize = "14" | "16" | "20" | "24" | "36";
+type IconSize = "14" | "16" | "20" | "24" | "36" | "48";
 
 interface IconProps {
 	name: string;
 	label?: string;
 	className?: string;
 	size?: IconSize;
+	fallbackClassName?: string;
 }
 
-export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
+export const Icon = ({
+	name,
+	label,
+	className,
+	size = "14",
+	fallbackClassName,
+}: IconProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const isHydrated = useHydrated();
 	const placeholderStyles = {
@@ -22,6 +29,7 @@ export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 		"20": "h-2.5 w-2.5",
 		"24": "h-3 w-3",
 		"36": "h-[18px] w-[18px]",
+		"48": "h-[72px] w-[72px]",
 	};
 	const sizeStyles = {
 		"14": "text-sm leading-[14px] h-[14px] w-[14px]",
@@ -29,6 +37,7 @@ export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 		"20": "text-xl leading-5 h-5 w-5",
 		"24": "text-2xl leading-6 h-6 w-6",
 		"36": "text-4xl leading-9 h-9 w-9",
+		"48": "text-7xl leading-[72px] h-[72px] w-[72px]",
 	};
 
 	useEffect(() => {
@@ -84,8 +93,9 @@ export const Icon = ({ name, label, className, size = "14" }: IconProps) => {
 					>
 						<div
 							className={clsx(
-								"bg-dark dark:bg-light rounded-full ",
-								placeholderStyles[size]
+								"rounded-full",
+								placeholderStyles[size],
+								fallbackClassName ?? "bg-dark dark:bg-light"
 							)}
 						/>
 					</motion.div>

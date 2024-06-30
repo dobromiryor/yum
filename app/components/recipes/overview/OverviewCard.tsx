@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Pill } from "~/components/common/Pill";
 import { Image } from "~/components/common/UI/Image";
+import { ImageFallback } from "~/components/common/UI/ImageFallback";
 import { type Language } from "~/enums/language.enum";
 import { CloudinaryUploadApiResponseWithBlurHashSchema } from "~/schemas/cloudinary.schema";
 import { OptionalTranslatedContentSchema } from "~/schemas/common";
@@ -53,8 +54,10 @@ export const OverviewCard = ({
 			>
 				<div className="flex flex-col gap-3">
 					<div className="bg-light dark:bg-dark aspect-square rounded-xl overflow-hidden transition-colors">
-						{photo && (
+						{photo ? (
 							<Image className="rounded-xl overflow-hidden" photo={photo} />
+						) : (
+							<ImageFallback />
 						)}
 					</div>
 					<span className="text-xl typography-medium">
