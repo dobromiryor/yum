@@ -103,8 +103,8 @@ export const Switch = ({
 				labelPosition === "top"
 					? "flex-col"
 					: labelPosition === "left"
-					? "flex-row"
-					: null
+						? "flex-row"
+						: null
 			)}
 		>
 			{labelPosition !== "hidden" && (

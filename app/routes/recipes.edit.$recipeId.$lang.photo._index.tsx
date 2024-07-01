@@ -245,10 +245,10 @@ const AddPhotoModal = () => {
 						fileRejections.length > 0
 							? t(
 									`error.${fileRejections[0]?.errors[0]?.code}` as unknown as TemplateStringsArray
-							  )
+								)
 							: typeof actionData?.success === "boolean" && !actionData?.success
-							  ? t("error.somethingWentWrong")
-							  : undefined
+								? t("error.somethingWentWrong")
+								: undefined
 					}
 				/>
 			</div>

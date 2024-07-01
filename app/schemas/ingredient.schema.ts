@@ -36,8 +36,8 @@ export const IngredientDTOSchema = z
 				value === "" || value === "0"
 					? null
 					: value === undefined
-					  ? undefined
-					  : value,
+						? undefined
+						: value,
 			z
 				.string()
 				.regex(QUANTITY_REGEX, { message: t("recipe.errors.invalidQuantity") })

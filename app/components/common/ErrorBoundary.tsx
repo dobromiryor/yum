@@ -4,7 +4,7 @@ import {
 	Meta,
 	Scripts,
 	isRouteErrorResponse,
-	useRouteError
+	useRouteError,
 } from "@remix-run/react";
 import { blurhashToGradientCssObject } from "@unpic/placeholder";
 import clsx from "clsx";

@@ -142,15 +142,15 @@ export const Menu = () => {
 				: {
 						top: rect.top - rect.height / 2 + MENU_MARGIN,
 						translateY: "-100%",
-				  }),
+					}),
 			...(positionX === "left"
 				? { left: 8 }
 				: positionX === "right"
-				  ? { left: rect.left + rect.width, translateX: "-100%" }
-				  : {
+					? { left: rect.left + rect.width, translateX: "-100%" }
+					: {
 							left: rect.left + rect.width / 2,
 							translateX: "-50%",
-				    }),
+						}),
 		}),
 		[positionX, positionY, rect]
 	);

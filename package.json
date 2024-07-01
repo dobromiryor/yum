@@ -11,7 +11,8 @@
 		"deploy": "fly deploy",
 		"dev": "remix dev --manual",
 		"start": "remix-serve ./build/index.js",
-		"typecheck": "tsc"
+		"typecheck": "tsc",
+		"lint": "eslint --fix --ext .js,.jsx,.ts,.tsx ."
 	},
 	"dependencies": {
 		"@cloudinary/react": "^1.13.0",

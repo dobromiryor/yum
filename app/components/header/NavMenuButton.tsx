@@ -27,12 +27,12 @@ export const NavMenuButton = ({ isOpen, setIsOpen }: MenuButtonProps) => {
 								/* open */
 								rotate: -135,
 								translateY: 0,
-						  }
+							}
 						: {
 								/* close */
 								rotate: 0,
 								translateY: -4,
-						  }
+							}
 				}
 				className={clsx(lineStyles)}
 				initial={false}
@@ -44,12 +44,12 @@ export const NavMenuButton = ({ isOpen, setIsOpen }: MenuButtonProps) => {
 								/* open */
 								rotate: 135,
 								translateY: 0,
-						  }
+							}
 						: {
 								/* close */
 								rotate: 0,
 								translateY: 4,
-						  }
+							}
 				}
 				className={clsx(lineStyles)}
 				initial={false}
