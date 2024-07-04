@@ -59,10 +59,10 @@ export const MobileNavigation = ({
 			animate: isOpen
 				? {
 						translateY: 0,
-				  }
+					}
 				: {
 						translateY: "calc(-100% + 64px + 16px)",
-				  },
+					},
 			transition,
 		}),
 		[isOpen]

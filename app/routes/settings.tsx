@@ -112,7 +112,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 					headers: {
 						"Set-Cookie": await sessionStorage.commitSession(session),
 					},
-			  }
+				}
 			: {}
 	);
 };

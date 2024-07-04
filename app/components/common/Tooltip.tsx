@@ -133,7 +133,7 @@ export const Tooltip = () => {
 						overflowPosition === "left"
 							? `calc(${rect.left}px)`
 							: `calc(${rect.left}px + ${rect.width}px - ${tooltipWidth}px)`
-				  )
+					)
 				: setTranslateX(`calc(-50% + ${rect.left + rect.width / 2}px)`);
 			tooltipHeight > 0
 				? setTranslateY(rect.top - tooltipHeight - TOOLTIP_MARGIN)

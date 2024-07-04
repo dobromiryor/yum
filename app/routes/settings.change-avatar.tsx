@@ -283,10 +283,10 @@ const EditAvatarModal = () => {
 					fileRejections.length > 0
 						? t(
 								`error.${fileRejections[0]?.errors[0]?.code}` as unknown as TemplateStringsArray
-						  )
+							)
 						: typeof actionData?.success === "boolean" && !actionData?.success
-						  ? t("error.somethingWentWrong")
-						  : undefined
+							? t("error.somethingWentWrong")
+							: undefined
 				}
 			/>
 		</Modal>
@@ -398,7 +398,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 						headers: {
 							"Set-Cookie": await sessionStorage.commitSession(session),
 						},
-				  }
+					}
 				: undefined),
 		}
 	);

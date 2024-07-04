@@ -267,7 +267,7 @@ const AdminDashboardCommentsRoute = () => {
 							)}
 						</Button>,
 						portal
-				  )
+					)
 				: null}
 		</>
 	);

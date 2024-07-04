@@ -68,8 +68,8 @@ export const languageValidation = ({
 				note: !ingredient.note
 					? true
 					: ingredient.note[lang as keyof typeof ingredient.note]
-					? true
-					: false,
+						? true
+						: false,
 			};
 
 			const count = Object.values(result).filter(
@@ -185,8 +185,8 @@ export const ingredientLanguageValidation = (
 			note: !foundIngredient.note
 				? true
 				: foundIngredient.note[lang as keyof typeof foundIngredient.note]
-				? true
-				: false,
+					? true
+					: false,
 		};
 
 		Object.assign(result, { [lang]: { ...ingredientValidation } });

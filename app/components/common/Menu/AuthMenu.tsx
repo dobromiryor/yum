@@ -39,7 +39,7 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 							>
 								{t("nav.authMenu.adminDashboard")}
 							</NavigationLink>,
-					  ]
+						]
 					: []),
 				...(authData?.isVerified
 					? [
@@ -50,7 +50,7 @@ export const AuthMenu = ({ isMobile }: AuthMenuProps) => {
 							>
 								{t("nav.authMenu.myRecipes")}
 							</NavigationLink>,
-					  ]
+						]
 					: []),
 				<NavigationLink
 					key="Settings__Link"
