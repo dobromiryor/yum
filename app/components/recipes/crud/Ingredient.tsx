@@ -59,7 +59,7 @@ export const Ingredient = ({ ingredient, as = "span" }: IngredientProps) => {
 	}
 
 	if (!quantity && unit === "to_taste") {
-		string = `${string} ${unit.replace("_", " ")}`;
+		string = `${string} ${t(`recipe.units.${unit}` as unknown as TemplateStringsArray)}`;
 	}
 
 	const ElementType = as as keyof JSX.IntrinsicElements;
