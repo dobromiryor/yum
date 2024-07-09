@@ -8,6 +8,7 @@ import { type z } from "zod";
 import { Error } from "~/components/common/UI/Error";
 import { Label } from "~/components/common/UI/Label";
 import { type OptionSchema, type OptionsSchema } from "~/schemas/option.schema";
+import { getLabelId } from "~/utils/helpers/get-label-id";
 
 type Option = z.infer<typeof OptionSchema>;
 type Options = z.infer<typeof OptionsSchema>;
@@ -125,12 +126,14 @@ export const Multiselect = ({
 					)}
 				>
 					<div
+						aria-required={isRequired}
 						className={clsx(
 							"absolute inset-0 flex justify-center items-center"
 						)}
 						{...getToggleButtonProps(
 							getDropdownProps({
 								preventKeyAction: isOpen,
+								"aria-labelledby": getLabelId(name, label),
 							})
 						)}
 					/>

@@ -200,7 +200,7 @@ const RecipeDetailRoute = () => {
 									variant="normal"
 									onClick={() => setServingsCount((prev) => prev - 1)}
 								>
-									<Icon label="-" name="remove" />
+									<Icon label={t("recipe.field.lessServings")} name="remove" />
 								</Button>
 								<Pill
 									icon="group"
@@ -213,7 +213,7 @@ const RecipeDetailRoute = () => {
 									variant="normal"
 									onClick={() => setServingsCount((prev) => prev + 1)}
 								>
-									<Icon label="+" name="add" />
+									<Icon label={t("recipe.field.moreServings")} name="add" />
 								</Button>
 							</div>
 						)}

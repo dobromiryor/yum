@@ -311,6 +311,7 @@ export const Comment = ({
 				) : (
 					<>
 						<span
+							aria-hidden={comment.isHidden}
 							className={clsx(
 								comment.isHidden && "blur-sm pointer-events-none select-none"
 							)}

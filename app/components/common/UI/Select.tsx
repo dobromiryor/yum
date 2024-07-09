@@ -8,6 +8,7 @@ import { type z } from "zod";
 import { Error } from "~/components/common/UI/Error";
 import { Label } from "~/components/common/UI/Label";
 import { type OptionsSchema } from "~/schemas/option.schema";
+import { getLabelId } from "~/utils/helpers/get-label-id";
 
 type Options = z.infer<typeof OptionsSchema>;
 
@@ -87,6 +88,7 @@ export const Select = ({
 					{...getLabelProps({ name })}
 				/>
 				<div
+					aria-required={isRequired}
 					className={clsx(
 						"flex justify-between items-center gap-1 border rounded h-12 p-1 z-10",
 						"bg-light text-dark border-secondary",
@@ -105,6 +107,7 @@ export const Select = ({
 								handleClear();
 							}
 						},
+						"aria-labelledby": getLabelId(name, label),
 					})}
 				>
 					<span className="ml-2">

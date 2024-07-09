@@ -152,6 +152,8 @@
 			"cookTime": "Готвене",
 			"countServings_one": "{{count}} порция",
 			"countServings_other": "{{count}} порции",
+			"moreServings": "Повече порции",
+			"lessServings": "По-малко порции",
 			"description": "Описание",
 			"difficulty": "Трудност",
 			"dimensions": "Размери",
@@ -554,5 +556,9 @@
 				"allComments": "Всички коментари"
 			}
 		}
+	},
+	"screenWakeLock": {
+		"enable": "Дръж екрана пуснат",
+		"disable": "Не дръж екрана пуснат"
 	}
 }

@@ -69,7 +69,7 @@ export const Switch = ({
 			/>
 			<div
 				aria-checked={value}
-				aria-label={labelPosition === "hidden" ? label : undefined}
+				aria-label={label}
 				className={clsx(
 					trackVariantStyles[variant],
 					"relative h-6 w-12 rounded-full cursor-pointer transition-colors duration-500",
