@@ -168,6 +168,9 @@ export const ScreenWakeLock = () => {
 		isSupported && (
 			<motion.button
 				animate={{ opacity: 1, translateY: 0 }}
+				aria-label={
+					isEnabled ? t("screenWakeLock.disable") : t("screenWakeLock.enable")
+				}
 				className={clsx(
 					"fixed bottom-8 right-8 aspect-square w-12 rounded-full shadow-lg"
 				)}

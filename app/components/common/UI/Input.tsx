@@ -49,6 +49,7 @@ export const Input = ({
 				/>
 			</TranslationHelper>
 			<input
+				aria-labelledby={`${name}-${label}`}
 				className={clsx(
 					"bg-light dark:bg-dark text-dark dark:text-light border px-2 py-1 rounded transition-colors w-full",
 					errors[name]?.message || translationValidation === false

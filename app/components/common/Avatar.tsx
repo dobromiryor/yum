@@ -118,6 +118,7 @@ export const Avatar = ({
 				variantStyles[variant],
 				className
 			)}
+			role="figure"
 			style={{ backgroundColor: getAvatarColors(user) }}
 		>
 			<span aria-hidden className="typography-bold text-light drop-shadow-md">

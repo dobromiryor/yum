@@ -93,7 +93,8 @@ export const Modal = ({
 					{isOpen && (
 						<motion.div
 							animate={{ opacity: 1, translateY: 0 }}
-							aria-modal={true}
+							aria-label={title}
+							aria-modal={isOpen}
 							className="flex flex-col gap-6 basis-[768px] h-fit max-h-screen min-w-80 max-w-3xl bg-light dark:bg-dark rounded-2xl py-6 m-4 shadow-xl"
 							exit={{ opacity: 0, translateY: 20 }}
 							initial={{ opacity: 0, translateY: -20 }}

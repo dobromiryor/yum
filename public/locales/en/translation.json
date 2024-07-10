@@ -152,6 +152,8 @@
 			"cookTime": "Cook",
 			"countServings_one": "{{count}} serving",
 			"countServings_other": "{{count}} servings",
+			"moreServings": "More servings",
+			"lessServings": "Less servings",
 			"description": "Description",
 			"difficulty": "Difficulty",
 			"dimensions": "Dimensions",
@@ -560,5 +562,9 @@
 				"allComments": "All comments"
 			}
 		}
+	},
+	"screenWakeLock": {
+		"enable": "Keep screen on",
+		"disable": "Don't keep screen on"
 	}
 }

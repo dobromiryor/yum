@@ -2,6 +2,7 @@ import clsx from "clsx";
 
 import { TooltipWrapper } from "~/components/common/Tooltip";
 import { Icon } from "~/components/common/UI/Icon";
+import { getLabelId } from "~/utils/helpers/get-label-id";
 
 export type LabelWeight = "normal" | "medium";
 
@@ -35,6 +36,7 @@ export const Label = ({
 		<label
 			className={clsx("inline-flex items-center gap-1", weightStyles[weight])}
 			htmlFor={name}
+			id={getLabelId(name, label)}
 		>
 			{label}
 			{isRequired && (

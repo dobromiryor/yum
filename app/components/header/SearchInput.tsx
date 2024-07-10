@@ -145,6 +145,7 @@ export const SearchInput = ({ isMobile = true }: SearchInputProps) => {
 				}}
 			>
 				<Button
+					aria-labelledby="search-clear-button"
 					className="focus-visible:-outline-offset-2"
 					rounded="full"
 					size="mediumSquare"
@@ -152,6 +153,7 @@ export const SearchInput = ({ isMobile = true }: SearchInputProps) => {
 					onClick={() => setSearch("")}
 				>
 					<Icon
+						id="search-clear-button"
 						label={t("common.clear")}
 						name="close"
 						size={isMobile ? "16" : "14"}
@@ -159,6 +161,7 @@ export const SearchInput = ({ isMobile = true }: SearchInputProps) => {
 				</Button>
 
 				<Button
+					aria-labelledby="search-submit-button"
 					className="focus-visible:-outline-offset-2"
 					isDisabled={!search.trim().length}
 					rounded="full"
@@ -167,6 +170,7 @@ export const SearchInput = ({ isMobile = true }: SearchInputProps) => {
 					onClick={handleSearch}
 				>
 					<Icon
+						id="search-submit-button"
 						label={t("common.search")}
 						name="search"
 						size={isMobile ? "16" : "14"}

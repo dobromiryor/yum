@@ -1,15 +1,14 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { type HTMLAttributes, useEffect, useState } from "react";
 
 import { useHydrated } from "~/hooks/useHydrated";
 
 type IconSize = "14" | "16" | "20" | "24" | "36" | "48";
 
-interface IconProps {
+interface IconProps extends HTMLAttributes<HTMLDivElement> {
 	name: string;
 	label?: string;
-	className?: string;
 	size?: IconSize;
 	fallbackClassName?: string;
 }
@@ -20,6 +19,7 @@ export const Icon = ({
 	className,
 	size = "14",
 	fallbackClassName,
+	...props
 }: IconProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const isHydrated = useHydrated();
@@ -59,19 +59,16 @@ export const Icon = ({
 	}, []);
 
 	return (
-		<div
-			aria-hidden={!label}
-			aria-label={label}
-			className="flex justify-center items-center"
-		>
+		<div className="flex justify-center items-center" {...props}>
 			<AnimatePresence>
 				{isLoaded && isHydrated ? (
 					<motion.span
-						aria-hidden
 						animate={{
 							opacity: 1,
 							filter: "blur(0px)",
 						}}
+						aria-hidden={!label}
+						aria-label={label}
 						className={clsx(
 							sizeStyles[size],
 							"material-symbols-rounded select-none transition-opacity duration-500",
@@ -90,6 +87,7 @@ export const Icon = ({
 						)}
 						exit={{ opacity: 0 }}
 						initial={{ opacity: 1 }}
+						role="presentation"
 					>
 						<div
 							className={clsx(
