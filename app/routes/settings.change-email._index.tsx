@@ -38,15 +38,13 @@ import {
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
-import { sendChangeEmail } from "~/utils/sendgrid.server";
+import { sendChangeEmail } from "~/utils/resend.server";
 import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof EmailSchema>;
 const resolver = zodResolver(EmailSchema);
 
-export const sitemap = () => ({
-	exclude: true,
-});
+export const sitemap = () => ({ exclude: true });
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return generateMetaProps(data?.meta);
@@ -61,9 +59,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		throw new Response(null, { status: 401 });
 	}
 
-	const foundUser = await prisma.user.findFirst({
-		where: { id: authData.id },
-	});
+	const foundUser = await prisma.user.findFirst({ where: { id: authData.id } });
 
 	if (!foundUser) {
 		throw new Response(null, { status: 404 });
@@ -115,12 +111,8 @@ const EditUsernameModal = () => {
 
 	const form = useRemixForm<FormData>({
 		resolver,
-		defaultValues: {
-			email: email ?? undefined,
-		},
-		submitConfig: {
-			method: "patch",
-		},
+		defaultValues: { email: email ?? undefined },
+		submitConfig: { method: "patch" },
 	});
 
 	const {
@@ -184,9 +176,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 	const { email } = data;
 
-	const existingUser = await prisma.user.findUnique({
-		where: { email },
-	});
+	const existingUser = await prisma.user.findUnique({ where: { email } });
 
 	if (existingUser) {
 		return json({
@@ -196,11 +186,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	}
 
 	const createdToken = await prisma.emailChangeToken.create({
-		data: {
-			newEmail: email,
-			oldEmail: authData.email,
-			userId: authData.id,
-		},
+		data: { newEmail: email, oldEmail: authData.email, userId: authData.id },
 	});
 
 	let success = true;
