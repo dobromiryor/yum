@@ -32,13 +32,13 @@ import i18next from "~/modules/i18next.server";
 import { EmailSchema } from "~/schemas/settings.schema";
 import { type RemixHookFormSubmit } from "~/types/remix-hook-form-submit.type";
 import { auth } from "~/utils/auth.server";
+import { sendChangeEmail } from "~/utils/brevo.server";
 import {
 	generateMetaDescription,
 	generateMetaProps,
 	generateMetaTitle,
 } from "~/utils/helpers/meta-helpers";
 import { prisma } from "~/utils/prisma.server";
-import { sendChangeEmail } from "~/utils/resend.server";
 import { getThemeSession } from "~/utils/theme.server";
 
 type FormData = z.infer<typeof EmailSchema>;

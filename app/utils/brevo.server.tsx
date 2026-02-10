@@ -1,7 +1,7 @@
+import { SendSmtpEmail, TransactionalEmailsApi } from "@getbrevo/brevo";
 import { type User } from "@prisma/client";
 import { render } from "@react-email/render";
 import { type SendEmailFunction } from "remix-auth-email-link";
-import { Resend } from "resend";
 
 import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { ChangeEmail } from "~/emails/change-email";
@@ -11,7 +11,9 @@ import { Message } from "~/enums/message.enum";
 import i18next from "~/modules/i18next.server";
 import { LanguageSchema } from "~/schemas/common";
 
-const resend = new Resend(PARSED_ENV.RESEND_API_KEY);
+const brevoApi = new TransactionalEmailsApi();
+
+brevoApi.setApiKey(0, PARSED_ENV.MAIL_API_KEY);
 
 export const sendEmail = async (
 	to: string,
@@ -19,17 +21,17 @@ export const sendEmail = async (
 	react: React.ReactElement
 ) => {
 	try {
-		const { data, error } = await resend.emails.send({
-			from: PARSED_ENV.RESEND_FROM,
-			to,
-			subject,
-			html: await render(react),
-		});
+		const sendSmtpEmail = new SendSmtpEmail();
 
-		if (error) {
-			console.error(error);
-			throw new Error(Message.EMAIL_NOT_SENT);
-		}
+		sendSmtpEmail.to = [{ email: to }];
+		sendSmtpEmail.sender = {
+			email: PARSED_ENV.MAIL_FROM,
+			name: PARSED_ENV.APP_NAME,
+		};
+		sendSmtpEmail.subject = subject;
+		sendSmtpEmail.htmlContent = await render(react);
+
+		const data = await brevoApi.sendTransacEmail(sendSmtpEmail);
 
 		return data;
 	} catch (error) {
