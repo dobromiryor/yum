@@ -6,7 +6,7 @@ import { PARSED_ENV } from "~/consts/parsed-env.const";
 import { prisma } from "~/utils/prisma.server";
 import { sessionStorage } from "~/utils/session.server";
 
-import { sendAuthEmail } from "./resend.server";
+import { sendAuthEmail } from "./brevo.server";
 
 export const auth = new Authenticator<User>(sessionStorage);
 
