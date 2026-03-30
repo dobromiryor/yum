@@ -35,7 +35,24 @@ export const sendEmail = async (
 
 		return data;
 	} catch (error) {
-		console.error(error);
+		console.error(" Error sending email via Brevo:", error);
+
+		// Sanitize error to prevent API key exposure
+		const sanitizedError = JSON.parse(
+			JSON.stringify(error, (key, value) => {
+				if (
+					key === "api-key" ||
+					key === "apiKey" ||
+					(typeof value === "string" && value.startsWith("xkeysib-"))
+				) {
+					return "[REDACTED_API_KEY]";
+				}
+
+				return value;
+			})
+		);
+
+		console.error(" Error details (sanitized):", sanitizedError);
 		throw new Error(Message.EMAIL_NOT_SENT);
 	}
 };
